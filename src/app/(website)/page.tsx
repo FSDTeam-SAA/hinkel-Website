@@ -1,15 +1,9 @@
-import FAQ from "@/components/ReusableSection/FAQ";
-import Gallery from "@/components/ReusableSection/Gallery";
-import Review from "@/components/ReusableSection/Review";
-import Banner from "@/components/website/PageSections/HomePage/Banner";
+import HomePage from "@/components/website/home-page";
 
 export default function page() {
   return (
-    <div>
-      <Banner />
-      <FAQ />
-      <Review />
-      <Gallery />
-    </div>
+    <>
+     <HomePage/>
+    </>
   );
 }
