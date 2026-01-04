@@ -106,7 +106,7 @@ export function CategoryGrid() {
               <div className="aspect-[4/5] relative bg-gray-50">
                 {category.isSplit ? (
                   <div className="grid grid-cols-2 h-full">
-                    <div className="relative h-full overflow-hidden border-r-2 border-white">
+                    <div className="relative h-full overflow-hidden border-r border-white">
                       <Image
                         src={category.image || "/placeholder.svg"}
                         alt={`${category.name} Sketch`}
