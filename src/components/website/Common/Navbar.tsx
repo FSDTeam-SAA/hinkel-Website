@@ -32,7 +32,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isActive = (href) => {
+  const isActive = (href:string) => {
     if (href === "/") {
       return pathname === href;
     }

@@ -10,7 +10,7 @@ const CATEGORIES = [
   { id: "pets", name: "Pets", image: "/images/golden-retriever.png", isSplit: true },
   { id: "seniors", name: "Seniors", image: "/images/thoughtful-senior-woman.png", isSplit: true },
   { id: "adults", name: "Adults", image: "/images/heroImage.png", isSplit: true },
-  { id: "nature", name: "Nature", image: "/images/kids-playing.png", isSplit: true },
+  { id: "family", name: "Family", image: "/images/kids-playing.png", isSplit: true },
   { id: "travel", name: "Travel", image: "/images/thoughtful-senior-woman.png", isSplit: true },
 ]
 
@@ -63,7 +63,7 @@ export function CategoryGrid() {
 
   return (
     <section
-      className="py-24 px-6 bg-[#FAF7F2]"
+      className="py-24 px-6 bg-secondary"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
