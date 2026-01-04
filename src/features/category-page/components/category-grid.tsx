@@ -4,20 +4,17 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-
-const CATEGORIES = [
-  { id: "kids", name: "Kids", image: "/images/kids-playing.png", isSplit: true },
-  { id: "pets", name: "Pets", image: "/images/golden-retriever.png", isSplit: true },
-  { id: "seniors", name: "Seniors", image: "/images/thoughtful-senior-woman.png", isSplit: true },
-  { id: "adults", name: "Adults", image: "/images/heroImage.png", isSplit: true },
-  { id: "family", name: "Family", image: "/images/kids-playing.png", isSplit: true },
-  { id: "travel", name: "Travel", image: "/images/thoughtful-senior-woman.png", isSplit: true },
-]
+import { useContent } from "@/features/category-page/hooks/use-content"
+import CategoryGridSkeleton from "./category-grid.skeleton"
+import { CategoryContent } from "@/features/category-page/types"
 
 export function CategoryGrid() {
+  const { data: contentData, isLoading, error } = useContent({ limit: 10 })
   const [isHovered, setIsHovered] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const [showArrows, setShowArrows] = useState(false)
+
+  const categories = contentData?.data || []
 
   // Check if we need arrows/carousel behavior
   useEffect(() => {
@@ -26,10 +23,14 @@ export function CategoryGrid() {
         setShowArrows(containerRef.current.scrollWidth > containerRef.current.clientWidth)
       }
     }
-    checkScroll()
+    // Check after data loads
+    if (!isLoading) {
+        // Small timeout to allow DOM to update
+        setTimeout(checkScroll, 100);
+    }
     window.addEventListener("resize", checkScroll)
     return () => window.removeEventListener("resize", checkScroll)
-  }, [])
+  }, [isLoading, categories.length])
 
   const scroll = useCallback((direction: "left" | "right") => {
     if (!containerRef.current) return
@@ -61,6 +62,22 @@ export function CategoryGrid() {
     return () => clearInterval(interval)
   }, [showArrows, isHovered, scroll])
 
+  if (isLoading) {
+    return <CategoryGridSkeleton />
+  }
+
+  if (error) {
+    return (
+      <section className="py-24 px-6 bg-secondary flex justify-center items-center">
+        <div className="text-red-500">Failed to load categories. Please try again later.</div>
+      </section>
+    )
+  }
+
+  if (categories.length === 0) {
+      return null // Or specific empty state
+  }
+
   return (
     <section
       className="py-24 px-6 bg-secondary"
@@ -68,7 +85,7 @@ export function CategoryGrid() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="container mx-auto relative">
-        <h2 className="text-5xl font-bold text-center mb-20 text-gray-900">Category</h2>
+          
 
         {showArrows && (
           <>
@@ -97,45 +114,35 @@ export function CategoryGrid() {
             msOverflowStyle: "none",
           }}
         >
-          {CATEGORIES.map((category) => (
+          {categories.map((category: CategoryContent) => (
             <Link
-              key={category.id}
-              href={`/category/${category.id}`}
-              className="group relative rounded-[2rem] overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-500 flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[calc(25%-1.5rem)] snap-start border-4 border-transparent hover:border-primary/20"
+              key={category._id}
+              href={`/${category.type}`}
+              className="group relative rounded-4xl overflow-hidden bg-white shadow-lg  transition-all duration-500 shrink-0 w-[85%] sm:w-[45%] lg:w-[calc(25%-1.5rem)] snap-start border border-transparent hover:border-primary"
             >
-              <div className="aspect-[4/5] relative bg-gray-50">
+              <div className="aspect-4/5 relative bg-accent">
                 {category.isSplit ? (
-                  <div className="grid grid-cols-2 h-full">
-                    <div className="relative h-full overflow-hidden border-r border-white">
-                      <Image
-                        src={category.image || "/placeholder.svg"}
-                        alt={`${category.name} Sketch`}
-                        fill
-                        className="object-cover grayscale contrast-125"
-                      />
-                    </div>
                     <div className="relative h-full overflow-hidden">
                       <Image
-                        src={category.image || "/placeholder.svg"}
-                        alt={`${category.name} Original`}
+                        src={category.image || "/no-image.jpg"}
+                        alt={`${category.title} Original`}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     </div>
-                  </div>
                 ) : (
                   <Image
-                    src={category.image || "/placeholder.svg"}
-                    alt={category.name}
+                    src={category.image || "/no-image.jpg"}
+                    alt={category.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 )}
                 {/* Decorative overlay for better "book" feel */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/5 to-transparent pointer-events-none" />
               </div>
               <div className="bg-primary py-5 text-center transition-colors duration-300 group-hover:bg-[#e66a33]">
-                <span className="text-white font-extrabold text-2xl tracking-tight uppercase">{category.name}</span>
+                <span className="text-white font-medium text-2xl tracking-tight uppercase">{category.type}</span>
               </div>
             </Link>
           ))}
