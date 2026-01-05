@@ -7,7 +7,6 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-
 // Get reviews all with pagination and dynamic params
 export async function getAllReview(page = 1, limit = 10) {
   try {
@@ -18,4 +17,3 @@ export async function getAllReview(page = 1, limit = 10) {
     throw new Error("Failed to fetch all reviews with pagination");
   }
 }
-
