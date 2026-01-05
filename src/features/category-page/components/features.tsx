@@ -1,3 +1,4 @@
+import HeaderTitle from "@/components/website/Common/head-title"
 import Image from "next/image"
 
 const FEATURES = [
@@ -33,13 +34,11 @@ const FEATURES = [
 
 export function Features() {
   return (
-    <section className="py-24 px-6 bg-[#FAF7F2]">
+    <section className="py-24 px-6 bg-secondary">
       <div className="container mx-auto">
         <div className="text-center space-y-6 max-w-3xl mx-auto mb-32">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight">
-            Custom Coloring Books Made From Your Photos
-          </h2>
-          <p className="text-gray-500 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+         <HeaderTitle title="Custom Coloring Books Made From Your Photos"/>
+          <p className="text-gray-500 text-lg md:text-lg font-medium max-w-2xl mx-auto leading-relaxed">
             Turn your favorite memories into beautiful black-and-white coloring pages. Upload photos, let AI do the
             magic, and receive a print-ready coloring book perfect for all ages.
           </p>
@@ -51,7 +50,7 @@ export function Features() {
               key={index}
               className={`flex flex-col ${feature.imageLeft ? "md:flex-row" : "md:flex-row-reverse"} gap-16 lg:gap-24 items-center`}
             >
-              <div className="w-full md:w-1/2 rounded-[2.5rem] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.08)] bg-white aspect-[1.8/1] relative border-4 border-white group">
+              <div className="w-full md:w-1/2 rounded-lg overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.08)] bg-white aspect-[1.8/1] relative border border-primary group">
                 <Image
                   src={feature.image || "/placeholder.svg"}
                   alt={feature.title}

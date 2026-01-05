@@ -1,81 +1,88 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useCallback, useRef } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useContent } from "@/features/category-page/hooks/use-content"
-import CategoryGridSkeleton from "./category-grid.skeleton"
-import { CategoryContent } from "@/features/category-page/types"
+import { useEffect, useState, useCallback, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useContent } from "@/features/category-page/hooks/use-content";
+import CategoryGridSkeleton from "./category-grid.skeleton";
+import { CategoryContent } from "@/features/category-page/types";
+import HeaderTitle from "@/components/website/Common/head-title";
 
 export function CategoryGrid() {
-  const { data: contentData, isLoading, error } = useContent({ limit: 10 })
-  const [isHovered, setIsHovered] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [showArrows, setShowArrows] = useState(false)
+  const { data: contentData, isLoading, error } = useContent({ limit: 10 });
+  const [isHovered, setIsHovered] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showArrows, setShowArrows] = useState(false);
 
-  const categories = contentData?.data || []
+  const categories = contentData?.data || [];
 
   // Check if we need arrows/carousel behavior
   useEffect(() => {
     const checkScroll = () => {
       if (containerRef.current) {
-        setShowArrows(containerRef.current.scrollWidth > containerRef.current.clientWidth)
+        setShowArrows(
+          containerRef.current.scrollWidth > containerRef.current.clientWidth,
+        );
       }
-    }
+    };
     // Check after data loads
     if (!isLoading) {
-        // Small timeout to allow DOM to update
-        setTimeout(checkScroll, 100);
+      // Small timeout to allow DOM to update
+      setTimeout(checkScroll, 100);
     }
-    window.addEventListener("resize", checkScroll)
-    return () => window.removeEventListener("resize", checkScroll)
-  }, [isLoading, categories.length])
+    window.addEventListener("resize", checkScroll);
+    return () => window.removeEventListener("resize", checkScroll);
+  }, [isLoading, categories.length]);
 
   const scroll = useCallback((direction: "left" | "right") => {
-    if (!containerRef.current) return
-    const container = containerRef.current
-    const scrollAmount = container.clientWidth * 0.8
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+    const scrollAmount = container.clientWidth * 0.8;
     const targetScroll =
-      direction === "left" ? container.scrollLeft - scrollAmount : container.scrollLeft + scrollAmount
+      direction === "left"
+        ? container.scrollLeft - scrollAmount
+        : container.scrollLeft + scrollAmount;
 
     container.scrollTo({
       left: targetScroll,
       behavior: "smooth",
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
-    if (!showArrows || isHovered) return
+    if (!showArrows || isHovered) return;
 
     const interval = setInterval(() => {
-      if (!containerRef.current) return
-      const { scrollLeft, scrollWidth, clientWidth } = containerRef.current
+      if (!containerRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
 
       if (scrollLeft + clientWidth >= scrollWidth - 10) {
-        containerRef.current.scrollTo({ left: 0, behavior: "smooth" })
+        containerRef.current.scrollTo({ left: 0, behavior: "smooth" });
       } else {
-        scroll("right")
+        scroll("right");
       }
-    }, 3500)
+    }, 3500);
 
-    return () => clearInterval(interval)
-  }, [showArrows, isHovered, scroll])
+    return () => clearInterval(interval);
+  }, [showArrows, isHovered, scroll]);
 
   if (isLoading) {
-    return <CategoryGridSkeleton />
+    return <CategoryGridSkeleton />;
   }
 
   if (error) {
     return (
       <section className="py-24 px-6 bg-secondary flex justify-center items-center">
-        <div className="text-red-500">Failed to load categories. Please try again later.</div>
+        <div className="text-red-500">
+          Failed to load categories. Please try again later.
+        </div>
       </section>
-    )
+    );
   }
 
   if (categories.length === 0) {
-      return null // Or specific empty state
+    return null; // Or specific empty state
   }
 
   return (
@@ -84,9 +91,8 @@ export function CategoryGrid() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="container mx-auto relative">
-          
-
+      <div className="container mx-auto relative space-y-6">
+        <HeaderTitle title="Explore Categories" />
         {showArrows && (
           <>
             <button
@@ -122,14 +128,14 @@ export function CategoryGrid() {
             >
               <div className="aspect-4/5 relative bg-accent">
                 {category.isSplit ? (
-                    <div className="relative h-full overflow-hidden">
-                      <Image
-                        src={category.image || "/no-image.jpg"}
-                        alt={`${category.title} Original`}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    </div>
+                  <div className="relative h-full overflow-hidden">
+                    <Image
+                      src={category.image || "/no-image.jpg"}
+                      alt={`${category.title} Original`}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
                 ) : (
                   <Image
                     src={category.image || "/no-image.jpg"}
@@ -142,12 +148,14 @@ export function CategoryGrid() {
                 <div className="absolute inset-0 bg-linear-to-t from-black/5 to-transparent pointer-events-none" />
               </div>
               <div className="bg-primary py-5 text-center transition-colors duration-300 group-hover:bg-[#e66a33]">
-                <span className="text-white font-medium text-2xl tracking-tight uppercase">{category.type}</span>
+                <span className="text-white font-medium text-2xl tracking-tight uppercase">
+                  {category.type}
+                </span>
               </div>
             </Link>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
