@@ -1,139 +1,151 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
+import { cn } from "@/lib/utils";
+
+const menuItems = [
+  { href: "/", label: "Home" },
+  { href: "/products", label: "Products" },
+  { href: "/services", label: "Services" },
+  { href: "/about-us", label: "About" },
+  { href: "/contact-us", label: "Contact Us" },
+];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { status } = useSession();
+  const pathname = usePathname();
 
-  // Detect scroll position
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const menuItems = [
-    { href: "/", label: "Home" },
-    { href: "/products", label: "Products" },
-    { href: "/services", label: "Services" },
-    { href: "/about-us", label: "About" },
-    { href: "/contact-us", label: "Contact Us" },
-  ];
+  const isActive = (href:string) => {
+    if (href === "/") {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
+  };
+
+  const handleMobileMenuClick = () => {
+    setOpen(false);
+  };
 
   return (
-    <nav
-      className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-md ${scrolled
-        ? "bg-primary/80 backdrop-opacity-90 shadow-md"
-        : "bg-transparent backdrop-grayscale"
-        }`}
-    >
-      <div className="container mx-auto px-8 flex justify-between items-center py-4">
+    <nav className="sticky top-0 z-50 transition-all duration-300 backdrop-blur-md bg-accent border-b border-gray-100">
+      <div className="container mx-auto px-4 sm:px-8 flex justify-between items-center py-4">
         {/* Logo */}
-        <div className="flex items-center">
-          <Link href="/">
-            <Image
-              src="/images/logo.png"
-              alt="logo"
-              width={120}
-              height={120}
-              className="cursor-pointer"
-            />
-          </Link>
-        </div>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/images/Group 1.svg"
+            alt="Company Logo"
+            width={120}
+            height={120}
+            className="cursor-pointer"
+            priority
+          />
+        </Link>
 
         {/* Desktop Menu Items */}
-        <div
-          className={`hidden md:flex space-x-8 font-medium transition-colors duration-300 ${scrolled ? "text-white" : "text-primary"
-            }`}
-        >
+        <ul className="hidden md:flex space-x-8 font-medium">
           {menuItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`transition-all duration-200 hover:text-[#FF8B36] ${item.label === "Home" ? "text-[#FF8B36] font-semibold" : scrolled ? "text-white" : "text-primary"
-                }`}
-            >
-              {item.label}
-            </Link>
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className={cn(
+                  "transition-all duration-200 hover:text-primary relative pb-1",
+                  isActive(item.href)
+                    ? "text-primary font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
+                    : "text-primary-foreground"
+                )}
+              >
+                {item.label}
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
 
-        <div className="flex items-center space-x-4">
+        {/* Desktop Auth Buttons */}
+        <div className="hidden md:flex items-center space-x-4">
           {status === "unauthenticated" ? (
             <>
-              <Link href="/register">
-                <Button
-                  className="cursor-pointer bg-[#FF8B36] text-white hover:bg-[#e67a2e] px-8 rounded-lg font-semibold transition-all duration-300"
-                >
-                  Sign Up
-                </Button>
-              </Link>
               <Link href="/login">
                 <Button
                   variant="outline"
-                  className="border-[#FF8B36] text-[#FF8B36] hover:cursor-pointer bg-[#FF8B36]/10 px-8 rounded-lg font-semibold transition-all duration-300"
+                  className="border-primary text-primary-foreground hover:bg-primary/10 px-8 rounded-lg font-semibold transition-all duration-300"
                 >
                   Log In
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button className="bg-primary text-white hover:bg-primary/90 px-8 rounded-lg font-semibold transition-all duration-300">
+                  Sign Up
                 </Button>
               </Link>
             </>
           ) : (
             <Link href="/contact-us">
-              <Button
-                className="cursor-pointer bg-[#FF8B36] text-white hover:bg-[#e67a2e] px-8 rounded-lg font-semibold transition-all duration-300"
-              >
+              <Button className="bg-primary text-white hover:bg-primary/90 px-8 rounded-lg font-semibold transition-all duration-300">
                 Contact Us
               </Button>
             </Link>
           )}
         </div>
 
-        {/* Mobile Hamburger Menu */}
+        {/* Mobile Menu */}
         <div className="md:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button
-                className="text-gray-500 bg-white hover:text-white transition-colors"
+                variant="ghost"
+                size="icon"
+                className="text-gray-500 hover:text-primary"
                 aria-label="Toggle menu"
               >
                 {open ? <X size={28} /> : <Menu size={28} />}
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <nav className="flex flex-col space-y-6 mt-8">
+              <nav className="flex flex-col space-y-2 mt-8">
                 {menuItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="text-gray-700 px-5 hover:text-[#FF8B36] font-medium text-lg transition-all duration-200 py-2"
+                    onClick={handleMobileMenuClick}
+                    className={cn(
+                      "px-5 py-3 rounded-lg font-medium text-lg transition-all duration-200",
+                      isActive(item.href)
+                        ? "text-primary bg-primary/10 font-semibold"
+                        : "text-gray-700 hover:text-primary hover:bg-gray-50"
+                    )}
                   >
                     {item.label}
                   </Link>
                 ))}
                 {status === "unauthenticated" && (
-                  <div className="flex flex-col space-y-4 px-5 pt-4 border-t">
-                    <Link href="/login" onClick={() => setOpen(false)}>
-                      <Button variant="outline" className="w-full cursor-pointer border-[#FF8B36] text-[#FF8B36]">
+                  <div className="flex flex-col space-y-3 px-5 pt-6 mt-4 border-t">
+                    <Link href="/login" onClick={handleMobileMenuClick}>
+                      <Button
+                        variant="outline"
+                        className="w-full border-primary text-primary hover:bg-primary/10"
+                      >
                         Log In
                       </Button>
                     </Link>
-                    <Link href="/register" onClick={() => setOpen(false)}>
-                      <Button className="w-full cursor-pointer bg-[#FF8B36] text-white">
+                    <Link href="/register" onClick={handleMobileMenuClick}>
+                      <Button className="w-full bg-primary text-white hover:bg-primary/90">
                         Sign Up
                       </Button>
                     </Link>
@@ -147,4 +159,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

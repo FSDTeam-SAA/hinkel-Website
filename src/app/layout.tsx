@@ -22,7 +22,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Hierro A Medida",
+  title: "sktch Labs",
   description:
     "Design amazing digital experiences that create more happy in the world.",
 };
