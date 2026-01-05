@@ -1,12 +1,10 @@
-import ContactInformation from "@/components/ReusableSection/ContactInformation";
-import GetInTouch from "@/components/ReusableSection/GetInTouch";
-import React from "react";
+import { ContactForm } from "@/features/contact/components/ContactForm";
 
 export default function page() {
   return (
     <div>
-      <GetInTouch />
-      <ContactInformation />
+      <ContactForm />
+      {/* <ContactInformation /> */}
     </div>
   );
 }

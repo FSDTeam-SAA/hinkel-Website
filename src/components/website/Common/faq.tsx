@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import HeaderTitle from "./head-title";
 
 const FAQS = [
   {
@@ -43,9 +44,8 @@ export function FAQ() {
     <section className=" py-24 px-6 bg-secondary">
       <div className="  mx-auto max-w-4xl ">
         <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900">
-            Frequently asked questions
-          </h2>
+          <HeaderTitle title="Frequently asked questions" />
+
           <p className="text-gray-600 text-lg">
             Everything you need to know about the product and billing.
           </p>
