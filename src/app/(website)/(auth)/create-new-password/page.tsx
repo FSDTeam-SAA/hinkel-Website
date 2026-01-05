@@ -1,9 +1,11 @@
-import CreateNewPassword from "@/components/website/Auth/CreateNewPassword";
+// import CreateNewPassword from "@/components/website/Auth/CreateNewPassword";
 
 export default function page() {
   return (
     <div>
-      <CreateNewPassword />
+      {/* <CreateNewPassword /> */}
+
+    <h1>create new password</h1>
     </div>
   );
 }
