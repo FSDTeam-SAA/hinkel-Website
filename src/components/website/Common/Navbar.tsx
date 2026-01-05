@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 const menuItems = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
-  { href: "/services", label: "Services" },
+  // { href: "/services", label: "Services" },
   { href: "/about-us", label: "About" },
   { href: "/contact-us", label: "Contact Us" },
 ];
@@ -32,7 +32,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isActive = (href:string) => {
+  const isActive = (href: string) => {
     if (href === "/") {
       return pathname === href;
     }
@@ -44,7 +44,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 transition-all duration-300 backdrop-blur-md bg-accent border-b border-gray-100">
+    <nav className="sticky top-0 z-50 transition-all duration-300 backdrop-blur-md bg-blue-100 border-b border-gray-100">
       <div className="container mx-auto px-4 sm:px-8 flex justify-between items-center py-4">
         {/* Logo */}
         <Link href="/" className="flex items-center">
@@ -68,7 +68,7 @@ export default function Navbar() {
                   "transition-all duration-200 hover:text-primary relative pb-1",
                   isActive(item.href)
                     ? "text-primary font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
-                    : "text-primary-foreground"
+                    : "text-primary-foreground",
                 )}
               >
                 {item.label}
@@ -128,7 +128,7 @@ export default function Navbar() {
                       "px-5 py-3 rounded-lg font-medium text-lg transition-all duration-200",
                       isActive(item.href)
                         ? "text-primary bg-primary/10 font-semibold"
-                        : "text-gray-700 hover:text-primary hover:bg-gray-50"
+                        : "text-gray-700 hover:text-primary hover:bg-gray-50",
                     )}
                   >
                     {item.label}
