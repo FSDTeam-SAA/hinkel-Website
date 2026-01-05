@@ -1,223 +1,175 @@
+"use client";
 import { Button } from "@/components/ui/button";
-import {
-  CalendarDays,
-  Facebook,
-  Instagram,
-  Mail,
-  MapPin,
-  Phone,
-  Twitter,
-  Youtube,
-} from "lucide-react";
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import Link from "next/link";
-import { FaTiktok } from "react-icons/fa";
+import { memo, useState } from "react";
+
+// Extract link data to reduce repetition and improve maintainability
+const FOOTER_LINKS = {
+  product: [
+    { label: "Kids", href: "/kids" },
+    { label: "Seniors", href: "/seniors" },
+    { label: "Adults", href: "/adults" },
+    { label: "Pets", href: "/pets" },
+  ],
+  resources: [
+    { label: "Contact", href: "/contact" },
+    { label: "About", href: "/about" },
+  ],
+  legal: [
+    { label: "Terms", href: "/terms" },
+    { label: "Privacy", href: "/privacy" },
+    { label: "Cookies", href: "/cookies" },
+  ],
+} as const;
+
+// Extracted sub-components for better code splitting and reusability
+const FooterLinkSection = memo(
+  ({
+    title,
+    links,
+  }: {
+    title: string;
+    links: readonly { label: string; href: string }[];
+  }) => (
+    <div className="md:col-span-2">
+      <h3 className="text-primary-foreground font-semibold mb-6">{title}</h3>
+      <nav aria-label={`${title} links`}>
+        <ul className="space-y-4">
+          {links.map(({ label, href }) => (
+            <li key={href}>
+              <Link
+                href={href}
+                className="text-primary-foreground hover:text-primary hover:underline transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  ),
+);
+
+FooterLinkSection.displayName = "FooterLinkSection";
+
+const NewsletterSection = memo(() => {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = () => {
+    if (email && email.includes("@")) {
+      console.log("Subscribe:", email);
+      // Add your subscription logic here
+      setEmail("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSubscribe();
+    }
+  };
+
+  return (
+    <div className="md:col-span-4 lg:col-span-3">
+      <h3 className="text-gray-900 font-semibold mb-6">Stay up to date</h3>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <label htmlFor="footer-email" className="sr-only">
+          Email address
+        </label>
+        <Input
+          id="footer-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Enter your email"
+          className="bg-white border-gray-300 focus:border-primary focus:ring-primary h-11"
+          aria-label="Email address for newsletter"
+        />
+        <Button
+          onClick={handleSubscribe}
+          className="bg-primary hover:bg-[#e67a2e] text-white px-6 h-11 font-semibold transition-all duration-300 focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        >
+          Subscribe
+        </Button>
+      </div>
+    </div>
+  );
+});
+
+NewsletterSection.displayName = "NewsletterSection";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="relative w-full text-white py-12 overflow-hidden">
-      {/* 🔹 Background Layer (blurred & darkened) */}
-      <div className="absolute inset-0 bg-cover bg-gray-700 bg-center bg-no-repeat blur-sm brightness-50"></div>
-      <div className="absolute inset-0 bg-white/40"></div>
+    <footer
+      className="w-full bg-accent pt-16 pb-8 border-t border-gray-100"
+      role="contentinfo"
+    >
+      <div className="container mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+          {/* Logo and Description */}
+          <div className="md:col-span-4 lg:col-span-5">
+            <Link
+              href="/"
+              className="inline-block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            >
+              <Image
+                src="/images/logo.png"
+                alt="Company Logo"
+                width={150}
+                height={40}
+                className="mb-8"
+                priority={false}
+                loading="lazy"
+              />
+            </Link>
+            <p className="text-gray-500 text-lg leading-relaxed max-w-sm">
+              Design amazing digital experiences that create more happy in the
+              world.
+            </p>
+          </div>
 
-      {/* 🔹 Optional dark overlay for extra contrast */}
-      <div className="absolute inset-0 bg-black/40"></div>
+          {/* Product Links */}
+          <FooterLinkSection title="Product" links={FOOTER_LINKS.product} />
 
-      {/* 🔹 Content Layer */}
-      <div className="relative container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
-        {/* Left Section */}
-        <div>
-          <Link href="/" className="w-24 h-20">
-            <Image
-              src="/images/logo.png"
-              alt="Footer Logo"
-              width={90}
-              height={80}
-              className="mb-2 w-24 h-20  object-cover"
-            />
-          </Link>
-          <p className="text-gray-200">
-            Design amazing digital experiences that create more happy in the
-            world.
+          {/* Resources Links */}
+          <FooterLinkSection
+            title="Quick Links"
+            links={FOOTER_LINKS.resources}
+          />
+
+          {/* Subscribe Section */}
+          <NewsletterSection />
+        </div>
+
+        {/* Bottom Section */}
+        <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-400 text-sm">
+            © {currentYear} Untitled UI. All rights reserved.
           </p>
-          <div className="flex gap-4 mt-6">
-            <Link href="https://x.com/GalindoMasonry" target="_blank">
-              <Button
-                variant="outline"
-                className="w-10  text-white bg-[#CA9520] rounded-lg font-medium
-                             transition-all duration-300
-                             group-hover:bg-[#CA9520] cursor-pointer group-hover:text-black "
-              >
-                <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-            </Link>
-            <Link
-              href="https://www.facebook.com/galindosmasonryllc/"
-              target="_blank"
-            >
-              <Button
-                variant="outline"
-                className="w-10  text-white bg-[#CA9520] rounded-lg font-medium
-                             transition-all duration-300
-                             group-hover:bg-[#CA9520] cursor-pointer group-hover:text-black "
-              >
-                <Facebook className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer" />
-              </Button>
-            </Link>
-            <Link
-              href="https://www.tiktok.com/@galindos.masonry.llc"
-              target="_blank"
-            >
-              <Button
-                variant="outline"
-                className="w-10  text-white bg-[#CA9520] rounded-lg font-medium
-                             transition-all duration-300
-                             group-hover:bg-[#CA9520] cursor-pointer group-hover:text-black "
-              >
-                <FaTiktok className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-            </Link>
-            <Link
-              href="https://www.youtube.com/@GalindosMasonryLLC"
-              target="_blank"
-            >
-              <Button
-                variant="outline"
-                className="w-10  text-white bg-[#CA9520] rounded-lg font-medium
-                             transition-all duration-300
-                             group-hover:bg-[#CA9520] cursor-pointer group-hover:text-black "
-              >
-                <Youtube className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-            </Link>
-            <Link
-              href="www.https://www.instagram.com/galindosmasonryllc/"
-              target="_blank"
-            >
-              <Button
-                variant="outline"
-                className="w-10  text-white bg-[#CA9520] rounded-lg font-medium
-                             transition-all duration-300
-                             group-hover:bg-[#CA9520] cursor-pointer group-hover:text-black "
-              >
-                <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-            </Link>
-          </div>
+          <nav aria-label="Legal links">
+            <ul className="flex gap-8">
+              {FOOTER_LINKS.legal.map(({ label, href }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="text-gray-400 hover:text-gray-600 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
-
-        {/* Middle Section */}
-        <div>
-          <h3 className="text-white text-3xl font-semibold mb-4">Company</h3>
-          <ul className="space-y-2 text-gray-200">
-            <li>
-              <Link
-                href="/"
-                className="hover:text-white hover:underline transition"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/services"
-                className="hover:text-white hover:underline transition"
-              >
-                Services
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/about-us"
-                className="hover:text-white hover:underline transition"
-              >
-                About Us
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/gallery"
-                className="hover:text-white hover:underline transition"
-              >
-                Gallery
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact-us"
-                className="hover:text-white hover:underline transition"
-              >
-                Contact Us
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Right Section */}
-        <div>
-          <h3 className="font-semibold text-3xl text-white mb-4">Contact Us</h3>
-          <ul className="space-y-4 text-gray-200">
-            {/* Phone */}
-            <li className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-[#CA9520]" />
-              <a
-                href="tel:480-432-9579"
-                className="hover:underline text-[10px] sm:text-xs md:text-sm transition-colors"
-              >
-                480-432-9579
-              </a>
-            </li>
-
-            {/* Email */}
-            <li className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-[#CA9520]" />
-              <a
-                href="mailto:example@example.com"
-                className="hover:underline text-[10px] sm:text-xs md:text-sm transition-colors"
-              >
-                example@example.com
-              </a>
-            </li>
-
-            {/* Location */}
-            <li className="flex items-start gap-2">
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-[#CA9520]" />
-              <span className="text-[10px] sm:text-xs md:text-sm">
-                Mesa, AZ
-              </span>
-            </li>
-          </ul>
-        </div>
-        <div className="">
-          <h3 className="font-semibold text-3xl text-white mb-4">Hours</h3>
-
-          <div className="flex items-center gap-4 mt-2">
-            <div className="">
-              <Button
-                variant="outline"
-                className="w-8  text-white bg-[#CA9520] rounded-lg font-medium
-                             transition-all duration-300
-                              "
-              >
-                <CalendarDays className="w-10 h-10 sm:w-5 sm:h-5" />
-              </Button>
-            </div>
-            <div className="">
-              <div className="">
-                <p>Monday - Friday</p>
-                <p>6:00 AM - 6:00 PM</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Copyright */}
-      <div className="relative mt-12 border-t container mx-auto border-gray-600 pt-6 text-center text-gray-300 text-sm">
-        © 2025 HIERRO A MEDIDA. All rights reserved.
       </div>
     </footer>
   );
 };
 
-export default Footer;
+export default memo(Footer);

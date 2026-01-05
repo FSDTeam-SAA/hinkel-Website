@@ -2,10 +2,11 @@ import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
 });
+
 
 // Get reviews all with pagination and dynamic params
 export async function getAllReview(page = 1, limit = 10) {
@@ -17,3 +18,4 @@ export async function getAllReview(page = 1, limit = 10) {
     throw new Error("Failed to fetch all reviews with pagination");
   }
 }
+
