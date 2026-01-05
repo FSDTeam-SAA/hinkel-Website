@@ -1,9 +1,7 @@
-import ResetYourPassword from "@/components/website/Auth/ResetYourPassword";
-
 export default function page() {
   return (
     <div>
-      <ResetYourPassword />
+      <h1>reset password</h1>
     </div>
   );
 }

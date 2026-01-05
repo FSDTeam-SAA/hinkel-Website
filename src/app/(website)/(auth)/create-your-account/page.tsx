@@ -1,9 +1,8 @@
-import CreateYourAccount from "@/components/website/Auth/CreateYourAccount";
 
 export default function page() {
   return (
     <div>
-      <CreateYourAccount />
+      <h1>Create account</h1>
     </div>
   );
 }
