@@ -74,8 +74,8 @@ export const ContactForm = memo(() => {
   }
 
   return (
-    <div className="bg-white py-16 md:py-24">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <div className="bg-white py-16 md:py-24 ">
+      <div className="container mx-auto px-4 max-w-4xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
           {/* Left side: Form */}
           <div className="order-2 lg:order-1">
@@ -165,9 +165,9 @@ export const ContactForm = memo(() => {
                       <FormLabel className="text-slate-700 font-medium">
                         Phone number
                       </FormLabel>
-                      <div className="flex gap-0 h-11">
+                      <div className="flex gap-0">
                         <Select defaultValue="US">
-                          <SelectTrigger className="w-24 h-full rounded-r-none border-r-0 border-slate-200 bg-white">
+                          <SelectTrigger className="w-24 rounded-r-none border-r-0 border-slate-200 bg-white focus:ring-0 focus:ring-offset-0">
                             <SelectValue placeholder="US" />
                           </SelectTrigger>
                           <SelectContent>
@@ -180,7 +180,7 @@ export const ContactForm = memo(() => {
                           <Input
                             placeholder="+1 (555) 000-0000"
                             {...field}
-                            className="flex-1 h-full rounded-l-none border-slate-200 focus:ring-orange-500 focus:border-orange-500"
+                            className="flex-1 rounded-l-none border-slate-200 focus:ring-orange-500 focus:border-orange-500"
                           />
                         </FormControl>
                       </div>

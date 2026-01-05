@@ -10,7 +10,7 @@ export interface ContactFormData {
 
 export async function submitContactForm(data: ContactFormData) {
   try {
-    const res = await api.post("/api/v1/contact/submit", data);
+    const res = await api.post("/contact/submit", data);
     return res.data;
   } catch (err) {
     console.error("Error submitting contact form:", err);
