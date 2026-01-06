@@ -7,12 +7,8 @@ import HeroSkeleton from "@/features/category-page/components/hero.skeleton";
 import { MoveRightIcon } from "lucide-react";
 import { useDashboardStats } from "@/features/category-page/hooks/use-stats";
 
-export function Hero() {
-  const {
-    data,
-    isLoading: isContentLoading,
-    error,
-  } = useContent({ type: "seniors" });
+export function Hero({ type }: { type?: string }) {
+  const { data, isLoading: isContentLoading, error } = useContent({ type });
   const { data: statsData, isLoading: isStatsLoading } = useDashboardStats();
   console.log(statsData);
   const heroContent = data?.data?.[0];
