@@ -1,7 +1,24 @@
+// features/auth/component/login.tsx
+"use client";
 import Image from 'next/image'
-import React from 'react'
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react'
+import { useLogin } from '../hooks/uselogin'
 
 const Login = () => {
+    const { loading, error, handleLogin } = useLogin();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const router = useRouter();
+
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const res = await handleLogin(email, password);
+        if (res && !res.error) {
+            router.push('/');
+        }
+    };
+
     return (
 
         <div className="min-h-screen flex items-center justify-center">
@@ -21,7 +38,12 @@ const Login = () => {
                 </p>
 
                 {/* Form */}
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={onSubmit}>
+                    {error && (
+                        <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm text-center">
+                            {error}
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm text-gray-700 mb-1">
                             Email Address
@@ -30,6 +52,9 @@ const Login = () => {
                             type="email"
                             placeholder="hello@example.com"
                             className="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:bg-primary/5 focus:ring-primary"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -41,6 +66,9 @@ const Login = () => {
                             type="password"
                             placeholder="********"
                             className="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -51,7 +79,7 @@ const Login = () => {
                             Remember me
                         </label>
 
-                        <a href="#" className="text-primary-foreground hover:underline">
+                        <a href="/reset-your-password" className="text-primary hover:text-primary/80">
                             Forgot password?
                         </a>
                     </div>
@@ -59,9 +87,10 @@ const Login = () => {
                     {/* Button */}
                     <button
                         type="submit"
-                        className="w-full mt-6 bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-md transition"
+                        className="w-full mt-6 bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={loading}
                     >
-                        Log In
+                        {loading ? 'Logging in...' : 'Log In'}
                     </button>
                 </form>
             </div>
