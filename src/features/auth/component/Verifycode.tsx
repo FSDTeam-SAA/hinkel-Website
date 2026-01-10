@@ -73,7 +73,7 @@ const Verifycode = () => {
 
     useEffect(() => {
         if (success) {
-            router.push(`/reset-your-password?email=${encodeURIComponent(email)}`);
+            router.push(`/newpassworpassword?email=${encodeURIComponent(email)}`);
         }
     }, [success, router, email]);
     return (
