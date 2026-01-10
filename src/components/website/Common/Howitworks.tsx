@@ -5,7 +5,7 @@ import WhyLearn from "./WhyLearn";
 const Howitworks = () => {
     return (
         <div className="bg-secondary">
-            <div className="mt-[60px] lg:mt-[80px] mx-auto container py-12">
+            <div className=" mx-auto container py-12">
                 <div className="mb-[30px]  text-center">
                     <h2 className="text-[#252F3F] text-5xl font-bold  leading-[120%] pb-2">
                         How it works
