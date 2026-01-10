@@ -13,9 +13,9 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (success) {
-      router.push('/verify-otp')
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}`)
     }
-  }, [success, router])
+  }, [success, router, email])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,7 +41,7 @@ const ResetPassword = () => {
         <h2 className="text-center text-2xl font-semibold text-orange-500 mb-1">
           Reset Password
         </h2>
-        <p className="text-center text-sm text-gray-500 mb-8">
+        <p className="text-center text-base text-gray-500 mb-8">
           Enter your email address and we&apos;ll send you a code to reset your password.
         </p>
 

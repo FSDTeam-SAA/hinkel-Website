@@ -1,7 +1,7 @@
-import ResetPassword from "@/features/auth/component/ResetPassword";
+import NewPassword from "@/features/auth/component/NewPassword";
 
 export default function page() {
   return (
-    <ResetPassword />
+    <NewPassword />
   );
 }

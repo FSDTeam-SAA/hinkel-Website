@@ -89,19 +89,19 @@ export default function Navbar() {
                   Log In
                 </Button>
               </Link>
-              <Link href="/register">
+              {/* <Link href="/register">
                 <Button className="bg-primary text-white hover:bg-primary/90 px-8 rounded-lg font-semibold transition-all duration-300">
                   Sign Up
                 </Button>
-              </Link>
+              </Link> */}
             </>
           ) : (
             <div className="flex items-center space-x-4">
-              <Link href="/contact-us">
+              {/* <Link href="/contact-us">
                 <Button className="bg-primary text-white hover:bg-primary/90 px-8 rounded-lg font-semibold transition-all duration-300">
                   Contact Us
                 </Button>
-              </Link>
+              </Link> */}
               <Button
                 variant="outline"
                 onClick={() => signOut({ callbackUrl: "/" })}
@@ -153,11 +153,11 @@ export default function Navbar() {
                         Log In
                       </Button>
                     </Link>
-                    <Link href="/register" onClick={handleMobileMenuClick}>
+                    {/* <Link href="/register" onClick={handleMobileMenuClick}>
                       <Button className="w-full bg-primary text-white hover:bg-primary/90">
                         Sign Up
                       </Button>
-                    </Link>
+                    </Link> */}
                   </div>
                 ) : (
                   <div className="flex flex-col space-y-3 px-5 pt-6 mt-4 border-t">

@@ -1,19 +1,21 @@
 // features/auth/component/Verifycode.tsx
 "use client";
 import Image from 'next/image'
-import React, { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react';
+import React, { useState, useEffect, useMemo } from 'react'
 import { useVerifyCode } from '../hooks/useverifycode';
 import { useForgotPassword } from '../hooks/useforgotpassword';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { TimerIcon } from 'lucide-react';
 
 const Verifycode = () => {
-    const { data: session } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
     const [timer, setTimer] = useState(60);
     const canResend = timer === 0;
+
+    // Get email from URL query parameters using useMemo to avoid cascading renders
+    const email = useMemo(() => searchParams.get('email') || '', [searchParams]);
 
     const { verifyCode, loading, error, success } = useVerifyCode();
     const {
@@ -56,27 +58,24 @@ const Verifycode = () => {
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         const code = otp.join("");
-        if (code.length === 6 && session?.user?.email) {
-            await verifyCode(code, session.user.email);
+        if (code.length === 6 && email) {
+            await verifyCode(code, email);
         }
     };
 
     const handleResend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!session?.user?.email) return;
+        if (!email) return;
 
-        await forgotPassword(session.user.email);
+        await forgotPassword(email);
         setTimer(60);
     };
 
-    // Redirect or show success (optional handling could be added here or in UI)
     useEffect(() => {
         if (success) {
-            // Should probably reset password or redirect to reset page? 
-            // The prompt implies this is part of a password reset flow.
-            router.push('/login'); // Assuming login for now, or maybe dashboard
+            router.push(`/reset-your-password?email=${encodeURIComponent(email)}`);
         }
-    }, [success, router]);
+    }, [success, router, email]);
     return (
         <div className="min-h-screen flex items-center justify-center  px-4">
             <div className=" max-w-3xl bg-white rounded-xl shadow-md px-10 py-12">
@@ -141,6 +140,7 @@ const Verifycode = () => {
                                 </span>
 
                                 <button
+                                    type="button"
                                     onClick={handleResend}
                                     disabled={!canResend}
                                     className={`font-medium ${canResend

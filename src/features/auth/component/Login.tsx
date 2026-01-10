@@ -79,7 +79,7 @@ const Login = () => {
                             Remember me
                         </label>
 
-                        <a href="/reset-your-password" className="text-primary hover:text-primary/80">
+                        <a href="/reset-password" className="text-primary hover:text-primary/80">
                             Forgot password?
                         </a>
                     </div>

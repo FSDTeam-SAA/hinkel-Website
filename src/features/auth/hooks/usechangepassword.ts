@@ -1,6 +1,6 @@
 // features/auth/hooks/usechangepassword.ts
 import { useState } from "react";
-import { changePassword } from "../api/changepassword.api";
+import { changePassword } from "../api/resetpassword.api";
 import { useSession } from "next-auth/react";
 
 export const useChangePassword = () => {
