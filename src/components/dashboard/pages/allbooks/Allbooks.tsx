@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button'
+import { CategoryGrid } from '@/features/category-page/components/category-grid'
 import React from 'react'
+import { CategoryShow } from './CategoryShow'
 
 const Allbooks = () => {
     return (
@@ -24,8 +26,8 @@ const Allbooks = () => {
 
                     </div>
                 </div>
-
-
+                
+            <CategoryShow />
             </div>
         </div>
     )

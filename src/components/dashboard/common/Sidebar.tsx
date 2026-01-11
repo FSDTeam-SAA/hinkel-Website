@@ -16,6 +16,7 @@ import {
   Users,
   Send,
   Book,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -34,9 +35,9 @@ import { Button } from "@/components/ui/button";
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { name: "AllBooks", href: "/dashboard/allbooks", icon: Book },
-  { name: "AddBook", href: "/dashboard/addbook", icon: Ship },
-  { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
+  { name: "AllBooks", href: "/dashboard/allbooks", icon: BookOpen },
+  { name: "AddBook", href: "/dashboard/addbook", icon: Book },
+  // { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
   { name: "Delivary Method", href: "/dashboard/delivarymethod", icon: NotebookText },
   // { name: "Orders", href: "/order", icon: ShoppingBag },
   // { name: "Messaging", href: "/messaging", icon: MessageCircleMore },
