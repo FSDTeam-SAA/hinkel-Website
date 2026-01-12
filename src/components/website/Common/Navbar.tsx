@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import { ChevronDown } from "lucide-react";
@@ -22,7 +22,7 @@ const menuItems = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  // const [scrolled, setScrolled] = useState(false);
   const { status } = useSession();
   const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -45,14 +45,14 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     setScrolled(window.scrollY > 50);
+  //   };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -71,7 +71,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src="/images/Group 1.svg"
+            src="/images/logo.png"
             alt="Company Logo"
             width={120}
             height={120}
@@ -169,18 +169,27 @@ export default function Navbar() {
                   Log In
                 </Button>
               </Link>
-              <Link href="/register">
+              {/* <Link href="/register">
                 <Button className="bg-primary text-white hover:bg-primary/90 px-8 rounded-lg font-semibold transition-all duration-300">
                   Sign Up
                 </Button>
-              </Link>
+              </Link> */}
             </>
           ) : (
-            <Link href="/contact-us">
-              <Button className="bg-primary text-white hover:bg-primary/90 px-8 rounded-lg font-semibold transition-all duration-300">
-                Contact Us
+            <div className="flex items-center space-x-4">
+              {/* <Link href="/contact-us">
+                <Button className="bg-primary text-white hover:bg-primary/90 px-8 rounded-lg font-semibold transition-all duration-300">
+                  Contact Us
+                </Button>
+              </Link> */}
+              <Button
+                variant="outline"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="border-primary text-primary-foreground hover:bg-primary/10 px-8 rounded-lg font-semibold transition-all duration-300"
+              >
+                Log Out
               </Button>
-            </Link>
+            </div>
           )}
         </div>
 
@@ -214,7 +223,7 @@ export default function Navbar() {
                     {item.label}
                   </Link>
                 ))}
-                {status === "unauthenticated" && (
+                {status === "unauthenticated" ? (
                   <div className="flex flex-col space-y-3 px-5 pt-6 mt-4 border-t">
                     <Link href="/login" onClick={handleMobileMenuClick}>
                       <Button
@@ -224,11 +233,24 @@ export default function Navbar() {
                         Log In
                       </Button>
                     </Link>
-                    <Link href="/register" onClick={handleMobileMenuClick}>
+                    {/* <Link href="/register" onClick={handleMobileMenuClick}>
                       <Button className="w-full bg-primary text-white hover:bg-primary/90">
                         Sign Up
                       </Button>
-                    </Link>
+                    </Link> */}
+                  </div>
+                ) : (
+                  <div className="flex flex-col space-y-3 px-5 pt-6 mt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleMobileMenuClick();
+                        signOut({ callbackUrl: "/" });
+                      }}
+                      className="w-full border-primary text-primary hover:bg-primary/10"
+                    >
+                      Log Out
+                    </Button>
                   </div>
                 )}
               </nav>

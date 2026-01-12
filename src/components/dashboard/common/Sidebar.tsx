@@ -1,0 +1,152 @@
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import {
+  LayoutDashboard,
+  Calendar,
+  NotebookText,
+  CircleDollarSign,
+  Ship,
+  LogOut,
+  HardDrive,
+  MessageCircleMore,
+  ShoppingBag,
+  ShoppingBasket,
+  Users,
+  Send,
+  Book,
+  BookOpen,
+} from "lucide-react";
+import { useState } from "react";
+
+import { signOut } from "next-auth/react";
+import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+const navigation = [
+  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "AllBooks", href: "/dashboard/allbooks", icon: BookOpen },
+  { name: "AddBook", href: "/dashboard/addbook", icon: Book },
+  // { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
+  { name: "Delivary Method", href: "/dashboard/delivarymethod", icon: NotebookText },
+  // { name: "Orders", href: "/order", icon: ShoppingBag },
+  // { name: "Messaging", href: "/messaging", icon: MessageCircleMore },
+  // { name: "Email", href: "/send-email", icon: Send },
+  // { name: "Calendar", href: "/calendar", icon: Calendar },
+  // { name: "Payments", href: "/payments", icon: CircleDollarSign },
+  // { name: "About Us", href: "/abouts", icon: BadgeInfo },
+  // { name: "Divers", href: "/users", icon: Users },
+  // { name: "Social", href: "/social", icon: ExternalLink },
+  // { name: "Reviews", href: "/review", icon: SquareStar },
+];
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  const handleLogout = () => {
+    // NextAuth signOut with redirect to login page
+    signOut({ callbackUrl: "/login" });
+    setOpen(false);
+  };
+
+  return (
+    <div className="flex h-screen w-64 flex-col bg-white border-r border-gray-200 fixed">
+      {/* Logo */}
+      <div className="flex  items-center py-5 justify-center px-6">
+        <Link href="/dashboard" className="flex items-center ">
+          <Image
+            src="/images/logo.png"
+            alt="Company Logo"
+            width={150}
+            height={150}
+            className="cursor-pointer"
+            priority
+          />
+        </Link>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        {navigation.map((item) => {
+          // Active logic
+          // const isActive =
+          //   item.href === "/"
+          //     ? pathname === "/"
+          //     : pathname?.startsWith(item.href);
+
+          const isActive =
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname === item.href || pathname.startsWith(item.href + "/");
+
+
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg p-3 text-base leading-[150%] tracking-[0%] font-semibold transition-colors",
+                isActive
+                  ? "bg-primary text-white"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              {item.name}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Logout */}
+      <div className="border-t border-gray-200 p-3">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-12 px-4 cursor-pointer rounded-lg font-medium text-[#e5102e] hover:bg-[#feecee] hover:text-[#e5102e] transition-all duration-200"
+            >
+              <LogOut className="h-5 w-5" />
+              Log Out
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Confirm Logout</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to log out?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex justify-end gap-2">
+              <Button
+                className="cursor-pointer"
+                variant="outline"
+                onClick={() => setOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="cursor-pointer"
+                variant="destructive"
+                onClick={handleLogout}
+              >
+                Log Out
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+}
