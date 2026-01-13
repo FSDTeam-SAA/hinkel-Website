@@ -13,6 +13,7 @@ declare module "next-auth" {
       role: string;
     };
     accessToken: string;
+    refreshToken: string;
   }
 
   interface User {
@@ -20,6 +21,7 @@ declare module "next-auth" {
     email: string;
     role: string;
     token: string;
+    refreshToken: string;
   }
 }
 
@@ -29,6 +31,7 @@ declare module "next-auth/jwt" {
     email: string;
     role: string;
     accessToken: string;
+    refreshToken: string;
   }
 }
 
@@ -56,22 +59,29 @@ const handler = NextAuth({
           });
 
           const data = await res.json();
-          // console.log("API Login Response:", data);
+          console.log("API Login Response:", JSON.stringify(data, null, 2));
 
           if (!res.ok) {
             throw new Error(data.message || "Login failed");
           }
 
           const user = data.data?.user;
-          const token = data.data?.accessToken;
+          const accessToken = data.data?.accessToken;
 
-          // console.log("API Login Response:", );
+          console.log("User details:", user);
+          console.log("Token:", accessToken);
 
+          if (!user || !accessToken) {
+            throw new Error("Invalid response from server");
+          }
+
+          // Return the object that NextAuth will use as 'user' in the jwt callback
           return {
-            id: user?.id || user?._id || "unknown",
-            email: user?.email || credentials.email,
-            role: user?.role || "",
-            token, // accessToken from backend
+            id: user._id || user.id, // Ensure we get the ID
+            email: user.email,
+            role: user.role,
+            token: accessToken, // We attach the token here as a property of the user
+            refreshToken: user.refreshToken,
           };
         } catch (error) {
           console.error("Authorize error:", error);
@@ -86,24 +96,36 @@ const handler = NextAuth({
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // Initial sign in
       if (user) {
+        console.log("JWT callback - Initial Sign In - User:", user);
         token.id = user.id;
         token.email = user.email;
-        token.role = user?.role as string;
-        token.accessToken = user?.token as string;
+        token.role = user.role;
+        token.accessToken = user.token;
+        token.refreshToken = user.refreshToken;
       }
+
+      // Update session trigger
+      if (trigger === "update" && session) {
+        return { ...token, ...session.user };
+      }
+
       return token;
     },
 
     async session({ session, token }) {
       if (token) {
+        console.log("Session callback - Token:", token);
         session.user = {
+          ...session.user,
           id: token.id as string,
           email: token.email as string,
           role: token.role as string,
         };
         session.accessToken = token.accessToken as string;
+        session.refreshToken = token.refreshToken as string;
       }
       return session;
     },
