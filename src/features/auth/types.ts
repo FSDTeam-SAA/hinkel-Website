@@ -27,3 +27,9 @@ export interface VerifyCodeFormData {
     email: string;
     otp: string;
 }
+
+export interface RegisterFormData {
+    name: string;
+    email: string;
+    password: string;
+}
