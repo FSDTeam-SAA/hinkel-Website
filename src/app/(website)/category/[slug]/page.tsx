@@ -1,10 +1,15 @@
 import { Hero } from "@/features/category-page/components/hero";
 
-export default function page({ params }: { params: { slug: string } }) {
-  console.log(params.slug);
+export default async function page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  console.log(slug);
   return (
     <div>
-      <Hero type={params.slug} />
+      <Hero type={slug} />
     </div>
   );
 }

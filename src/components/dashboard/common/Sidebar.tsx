@@ -4,17 +4,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Calendar,
   NotebookText,
-  CircleDollarSign,
-  Ship,
   LogOut,
-  HardDrive,
-  MessageCircleMore,
-  ShoppingBag,
-  ShoppingBasket,
-  Users,
-  Send,
   Book,
   BookOpen,
 } from "lucide-react";
@@ -38,7 +29,11 @@ const navigation = [
   { name: "AllBooks", href: "/dashboard/allbooks", icon: BookOpen },
   { name: "AddBook", href: "/dashboard/addbook", icon: Book },
   // { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
-  { name: "Delivary Method", href: "/dashboard/delivarymethod", icon: NotebookText },
+  {
+    name: "Delivary Method",
+    href: "/dashboard/delivarymethod",
+    icon: NotebookText,
+  },
   // { name: "Orders", href: "/order", icon: ShoppingBag },
   // { name: "Messaging", href: "/messaging", icon: MessageCircleMore },
   // { name: "Email", href: "/send-email", icon: Send },
@@ -89,7 +84,6 @@ export default function Sidebar() {
             item.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname === item.href || pathname.startsWith(item.href + "/");
-
 
           return (
             <Link

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import { CategoryContent } from "@/features/category-page/types";
-import HeaderTitle from "@/components/website/Common/head-title";
 
 export function CategoryShow() {
   const { data: contentData, isLoading, error } = useContent({ limit: 50 });
@@ -12,7 +11,6 @@ export function CategoryShow() {
   const categories = contentData?.data || [];
 
   if (isLoading) {
-    
   }
 
   if (error) {
@@ -28,7 +26,7 @@ export function CategoryShow() {
   if (categories.length === 0) return null;
 
   return (
-    <section className="py-24 px-6 bg-secondary/90 rounded-2xl" >
+    <section className="py-24 px-6 bg-secondary/90 rounded-2xl">
       <div className="container mx-auto space-y-8">
         {/* <HeaderTitle title="Explore Categories" /> */}
 

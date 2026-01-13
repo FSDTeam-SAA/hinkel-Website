@@ -6,6 +6,7 @@ import { useContent } from "@/features/category-page/hooks/use-content";
 import HeroSkeleton from "@/features/category-page/components/hero.skeleton";
 import { MoveRightIcon } from "lucide-react";
 import { useDashboardStats } from "@/features/category-page/hooks/use-stats";
+import Link from "next/link";
 
 export function Hero({ type }: { type?: string }) {
   const { data, isLoading: isContentLoading, error } = useContent({ type });
@@ -37,12 +38,14 @@ export function Hero({ type }: { type?: string }) {
             {heroContent?.subtitle ||
               "Turn any photo or drawing into a clean coloring page with powerful AI technology, designed to capture every detail you love and transform it into creative outlines, ready for coloring, sharing, or printing instantly."}
           </p>
-          <Button
-            size="lg"
-            className="bg-primary text-white  px-8 h-12 text-base font-bold shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98]"
-          >
-            Create Your Coloring Book <MoveRightIcon />
-          </Button>
+          <Link href="/create-book">
+            <Button
+              size="lg"
+              className="bg-primary text-white  px-8 h-12 text-base font-bold shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98]"
+            >
+              Create Your Coloring Book <MoveRightIcon />
+            </Button>
+          </Link>
 
           <div className="flex flex-wrap gap-8 pt-2">
             <div className="flex gap-3 items-center">
