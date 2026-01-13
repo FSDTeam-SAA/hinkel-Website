@@ -16,14 +16,14 @@ const Dashboardpage = () => {
             </p>
           </div>
 
-          <div className="relative w-full max-w-[320px]">
+          {/* <div className="relative w-full max-w-[320px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search"
               className="w-full pl-10 pr-4 py-2 bg-white border border-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary shadow-sm text-sm"
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Main Content Sections */}
