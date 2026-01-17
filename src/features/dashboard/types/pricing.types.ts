@@ -1,6 +1,6 @@
 // src/features/dashboard/types/pricing.types.ts
 
-export type DeliveryType = "digital" | "print" | "both";
+export type DeliveryType = "digital" | "print" | "print&digital";
 
 export interface PricingPayload {
     deliveryType: DeliveryType;

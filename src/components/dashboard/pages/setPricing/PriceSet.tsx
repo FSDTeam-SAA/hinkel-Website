@@ -94,7 +94,7 @@ const PriceSet: React.FC = () => {
             border: "focus-within:border-orange-500/50"
         },
         {
-            type: "both" as DeliveryType,
+            type: "print&digital" as DeliveryType,
             name: "both" as keyof PricingFormState,
             title: "Hybrid Protocol",
             tag: "Maximum Value",
