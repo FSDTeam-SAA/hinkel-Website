@@ -1,9 +1,10 @@
+import OrderListPage from '@/components/account/pages/OrderRegistry'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-        <h1>Delivary Method</h1>
+        <OrderListPage />
     </div>
   )
 }

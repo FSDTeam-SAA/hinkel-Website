@@ -26,23 +26,10 @@ import { Button } from "@/components/ui/button";
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { name: "AllBooks", href: "/dashboard/allbooks", icon: BookOpen },
   { name: "AddBook", href: "/dashboard/addbook", icon: Book },
+  { name: "AllBooks", href: "/dashboard/allbooks", icon: BookOpen },
   // { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
-  {
-    name: "Delivary Method",
-    href: "/dashboard/delivarymethod",
-    icon: NotebookText,
-  },
-  // { name: "Orders", href: "/order", icon: ShoppingBag },
-  // { name: "Messaging", href: "/messaging", icon: MessageCircleMore },
-  // { name: "Email", href: "/send-email", icon: Send },
-  // { name: "Calendar", href: "/calendar", icon: Calendar },
-  // { name: "Payments", href: "/payments", icon: CircleDollarSign },
-  // { name: "About Us", href: "/abouts", icon: BadgeInfo },
-  // { name: "Divers", href: "/users", icon: Users },
-  // { name: "Social", href: "/social", icon: ExternalLink },
-  // { name: "Reviews", href: "/review", icon: SquareStar },
+  { name: "Set Pricing", href: "/dashboard/setPricing", icon: NotebookText },
 ];
 
 export default function Sidebar() {

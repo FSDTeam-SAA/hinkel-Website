@@ -1,33 +1,31 @@
-// features/auth/hooks/useresetpassword.ts
 "use client";
 import { useState } from "react";
 import { isAxiosError } from "axios";
-import { resetPassword as resetPasswordApi } from "../api/resetpassword.api";
+import { registeruser } from "../api/register.api";
 
-export function useResetPassword() {
+
+export function useRegister() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<boolean>(false);
 
-    const handleResetPassword = async (data: { email: string; newPassword: string }) => {
+    const handleRegister = async (name: string, email: string, password: string) => {
         setLoading(true);
         setError(null);
-        setSuccess(false);
         try {
-            const response = await resetPasswordApi(data);
-            setSuccess(true);
-            return response;
+            const result = await registeruser({ name, email, password });
+
+            return result;
         } catch (err: unknown) {
             if (isAxiosError(err)) {
                 setError(err.response?.data?.message || "Something went wrong");
             } else {
                 setError("An unexpected error occurred");
             }
-            return null;
+            return undefined;
         } finally {
             setLoading(false);
         }
-    }
+    };
 
-    return { handleResetPassword, loading, error, success };
+    return { loading, error, handleRegister };
 }
