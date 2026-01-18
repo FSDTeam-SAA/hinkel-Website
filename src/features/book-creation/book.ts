@@ -46,6 +46,7 @@ export interface BookState {
   // Page content
   pageImages: PageImages;
   uploadedPageImages: Record<number, string[]>;
+  convertedPageImages: Record<number, string[]>;
 
   // Order details
   outputFormat: OutputFormat | null;
@@ -66,7 +67,7 @@ export interface BookActions {
   setDedicationText: (text: string) => void;
 
   // Cover management
-  setCoverImage: (image: string) => void;
+  setCoverImage: (image: string | null) => void;
   setCoverImageVariants: (variants: string[]) => void;
   setSelectedCoverVariant: (index: number) => void;
 
@@ -78,6 +79,10 @@ export interface BookActions {
   setUploadedPageImages: (uploadedPageImages: Record<number, string[]>) => void;
   addUploadedPageImage: (pageNum: number, image: string) => void;
   removeUploadedPageImage: (pageNum: number, index: number) => void;
+
+  // Converted images management
+  addConvertedPageImage: (pageNum: number, image: string) => void;
+  removeConvertedPageImage: (pageNum: number, index: number) => void;
 
   // Order details
   setOutputFormat: (format: OutputFormat) => void;

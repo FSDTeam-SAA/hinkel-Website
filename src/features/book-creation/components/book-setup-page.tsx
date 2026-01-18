@@ -5,6 +5,7 @@ import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/book";
+import OutputFormatPage from "./output-format-page";
 
 export default function BookSetupPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -96,6 +97,8 @@ export default function BookSetupPage() {
               ))}
             </div>
           </div>
+
+          <OutputFormatPage />
 
           <div className="mb-12">
             <label className="flex items-center gap-3 cursor-pointer">

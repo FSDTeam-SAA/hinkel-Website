@@ -92,7 +92,11 @@ export function CategoryGrid() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="container mx-auto relative space-y-6">
-        <HeaderTitle title="Explore Categories" />
+        <HeaderTitle
+          title="Explore Categories"
+          description="Discover a world of art and inspiration. Generate your own unique artwork and download as a book with our AI-powered tools."
+        />
+
         {showArrows && (
           <>
             <button

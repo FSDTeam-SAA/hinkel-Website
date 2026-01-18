@@ -21,6 +21,7 @@ const initialState: BookState = {
   selectedCoverVariantIndex: null,
   pageImages: {},
   uploadedPageImages: {},
+  convertedPageImages: {},
   dedicationText: "",
   hasPaid: false,
 };
@@ -65,6 +66,28 @@ export const useBookStore = create<BookStore>((set) => ({
       return {
         uploadedPageImages: {
           ...state.uploadedPageImages,
+          [pageNum]: newImages,
+        },
+      };
+    }),
+  addConvertedPageImage: (pageNum, image) =>
+    set((state) => {
+      const currentImages = state.convertedPageImages[pageNum] || [];
+      return {
+        convertedPageImages: {
+          ...state.convertedPageImages,
+          [pageNum]: [...currentImages, image],
+        },
+      };
+    }),
+  removeConvertedPageImage: (pageNum, index) =>
+    set((state) => {
+      const currentImages = state.convertedPageImages[pageNum] || [];
+      const newImages = [...currentImages];
+      newImages.splice(index, 1);
+      return {
+        convertedPageImages: {
+          ...state.convertedPageImages,
           [pageNum]: newImages,
         },
       };

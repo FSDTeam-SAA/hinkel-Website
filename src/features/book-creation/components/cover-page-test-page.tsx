@@ -3,10 +3,9 @@
 import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, RefreshCw } from "lucide-react";
+import { ArrowLeft, Eye, ArrowRight } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/book";
-import StepIndicator from "@/components/step-indicator";
 import Image from "next/image";
 
 export default function CoverPageTestPage() {
@@ -22,155 +21,128 @@ export default function CoverPageTestPage() {
   const { coverImage, coverImageVariants, selectedCoverVariantIndex } =
     useBookStore();
 
-  const [attemptsRemaining, setAttemptsRemaining] = useState(2);
-
-  const steps = [
-    "Book Setup",
-    "Cover & Preview",
-    "Checkout",
-    "Complete Book",
-    "Review",
-  ];
-  const currentStep = 1;
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageData = event.target?.result as string;
-        setCoverImage(imageData);
-        setTimeout(() => {
-          setCoverImageVariants([imageData, imageData, imageData]);
-        }, 1000);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleTryAgain = () => {
-    if (attemptsRemaining > 0) {
-      setAttemptsRemaining(attemptsRemaining - 1);
-    }
-  };
+  // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = (event) => {
+  //       const imageData = event.target?.result as string;
+  //       setCoverImage(imageData);
+  //       setTimeout(() => {
+  //         setCoverImageVariants([imageData, imageData, imageData]);
+  //       }, 1000);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleContinue = () => {
     setHasPaid(true);
-    setStep("images");
+    setStep("setup");
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <StepIndicator steps={steps} currentStep={currentStep} />
+    <div className="min-h-screen bg-[#fbf4ea] flex flex-col items-center justify-start py-[36.637px] px-[300.537px]">
+      {/* Main Container */}
+      <div className="flex flex-col gap-[36.637px] w-full max-w-6xl">
+        {/* Header Container */}
+        <div className="flex h-[41.216px] items-center justify-between w-full">
+          {/* Back Button */}
+          <button
+            onClick={() => setStep("format")}
+            className="flex items-center gap-2 text-[#4a5565] font-Arial text-[18.318px] leading-[27.478px] hover:opacity-80 transition-opacity"
+          >
+            <ArrowLeft />
+            <span>Back</span>
+          </button>
 
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-sm p-8 md:p-12">
-          <h1 className="text-3xl font-bold mb-2">Preview Your Sketch</h1>
-          <p className="text-gray-600 mb-8">
-            Upload your cover image and see how it looks as a sketch. If
-            you&apos;re happy with the result, proceed to payment.
-          </p>
+          {/* Heading */}
+          <h1 className="font-semibold font-Inter text-[34.347px] leading-[41.216px] text-[#0a0a0a]">
+            Preview Your Sketch
+          </h1>
 
-          {!coverImage ? (
-            <div className="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center mb-12">
-              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Upload Cover Image</h3>
-              <p className="text-gray-600 mb-6">
-                Accepted: JPG, PNG (min 1024x1024, max 20MB)
-              </p>
-              <label className="inline-block">
-                <input
-                  type="file"
-                  accept="image/jpeg, image/png"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <Button className="bg-orange-500 hover:bg-orange-600">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Image
-                </Button>
-              </label>
-            </div>
-          ) : (
-            <div className="space-y-8 mb-12">
-              <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <h3 className="font-semibold mb-4">Original Image</h3>
-                  <div className="bg-gray-100 rounded-lg aspect-square overflow-hidden">
-                    <Image
-                      height={500}
-                      width={500}
-                      src={coverImage || "/placeholder.svg"}
-                      alt="Original"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
+          {/* Spacer */}
+          <div className="w-[91.592px]" />
+        </div>
 
-                {coverImageVariants.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-4">Sketch Variants</h3>
-                    <div className="space-y-4">
-                      {coverImageVariants.map(
-                        (variant: string, index: number) => (
-                          <div
-                            key={index}
-                            onClick={() => setSelectedCoverVariant(index)}
-                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                              selectedCoverVariantIndex === index
-                                ? "border-orange-500 bg-orange-50"
-                                : "border-gray-200"
-                            }`}
-                          >
-                            <Image
-                              height={500}
-                              width={500}
-                              src={variant || "/placeholder.svg"}
-                              alt={`Variant ${index + 1}`}
-                              className="w-full h-32 object-cover rounded"
-                            />
-                            <p className="text-sm text-gray-600 mt-2 text-center">
-                              Variant {index + 1}
-                            </p>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                  </div>
+        {/* Content Container */}
+        <div className="bg-white rounded-[27.478px] shadow-[0px_7px_25px_-13.739px_rgba(0,0,0,0.07)] flex flex-col gap-[27.478px] py-[36.637px] px-[36.637px]">
+          {/* Description Paragraph */}
+          <div className="w-full text-center font-Arial text-[18.318px] leading-[27.478px] text-[#4a5565]">
+            Here&apos;s how your image looks as a sketch. If you&apos;re happy
+            with the result, proceed to create your book!
+          </div>
+
+          {/* Images Grid */}
+          <div className="grid grid-cols-2 gap-[36.6368522644043px] w-full">
+            {/* Original Image Column */}
+            <div className="flex flex-col gap-[13.739px]">
+              {/* Original Image Heading */}
+              <h3 className="font-semibold font-Inter text-[20.608px] leading-[30.912px] text-[#0a0a0a] text-center">
+                Original Image
+              </h3>
+              {/* Original Image Container */}
+              <div className="bg-[#f3f4f6] rounded-[18.318px] h-[604.508px] w-full overflow-hidden">
+                {coverImage ? (
+                  <Image
+                    height={604}
+                    width={604}
+                    src={coverImage}
+                    alt="Original"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#f3f4f6]" />
                 )}
               </div>
-
-              <div className="text-sm text-gray-600">
-                <p>Attempts Remaining: {attemptsRemaining}</p>
-              </div>
-
-              {attemptsRemaining > 0 && (
-                <Button
-                  onClick={handleTryAgain}
-                  variant="outline"
-                  className="w-full bg-transparent"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Try Again
-                </Button>
-              )}
             </div>
-          )}
 
-          <div className="flex gap-4 justify-between">
+            {/* Sketch Version Column */}
+            <div className="flex flex-col gap-[13.739px]">
+              {/* Sketch Version Heading */}
+              <h3 className="font-semibold font-Inter text-[18.318px] leading-[27.478px] text-[#0a0a0a] text-center">
+                Sketch Version
+              </h3>
+              {/* Sketch Version Container with Orange Border */}
+              <div className="relative bg-[#f3f4f6] rounded-[18.318px] h-[604.508px] w-full overflow-hidden border-[4.58px] border-[#ff8b36]">
+                {coverImageVariants && coverImageVariants.length > 0 ? (
+                  <Image
+                    height={595}
+                    width={595}
+                    src={coverImageVariants[selectedCoverVariantIndex || 0]}
+                    alt="Sketch"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#f3f4f6]" />
+                )}
+                {/* Preview Badge */}
+                <div className="absolute top-[18.32px] left-[472.18px] bg-[#ff8b36] rounded-full px-[10px] py-[2px] flex items-center gap-[5px]">
+                  <Eye />
+                  <span className="font-Arial text-[16.029px] leading-[22.898px] text-white">
+                    Preview
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-[18.318px] w-full pt-[27.478px]">
+            {/* Try Different Image Button */}
             <Button
-              variant="outline"
-              onClick={() => setStep("format")}
-              className="w-32 bg-transparent"
+              onClick={() => setCoverImage(null)}
+              className="flex-1 bg-[#e5e7eb] rounded-[16.029px] h-[64.114px] font-Arial text-[18.318px] leading-[27.478px] text-[#364153] font-normal hover:bg-[#d1d5db] transition-colors flex items-center justify-center"
             >
-              ← Back
+              Try Different Image
             </Button>
+            {/* Continue to Book Creation Button */}
             <Button
               onClick={handleContinue}
-              // disabled={!coverImage || selectedCoverVariantIndex === null}
-              className="w-60 bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
+              className="flex-1 bg-[#ff8b36] rounded-[16.029px] h-[64.114px] font-Arial text-[18.318px] leading-[27.478px] text-white font-normal hover:bg-[#ff7a1f] transition-colors flex items-center justify-center gap-2 relative"
             >
-              Continue to Payment →
+              <span>Continue to Book Creation</span>
+              <ArrowRight />
             </Button>
           </div>
         </div>
