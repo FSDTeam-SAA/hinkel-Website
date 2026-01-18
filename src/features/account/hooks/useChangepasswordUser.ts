@@ -17,16 +17,13 @@ export const useChangePassword = () => {
     const [error, setError] = useState<string | null>(null);
     const { data: session } = useSession();
 
-    const handleChangePassword = async (data: { userId: string; oldPassword: string; newPassword: string }) => {
+    const handleChangePassword = async (data: { oldPassword: string; newPassword: string }) => {
         setLoading(true);
         setError(null);
 
         if (!session?.accessToken) {
-            // Try to use session user token if accessToken is not at root
-            // Based on next-auth route, it seems it is at root of session, but let's be safe?
-            // Actually, the type defs in route.ts say session.accessToken is string.
-            // If implicit session is missing, we can't do much.
             setError("You must be logged in to change your password.");
+            setLoading(false);
             return;
         }
 

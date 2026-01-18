@@ -41,7 +41,6 @@ const ChangePassword = () => {
     }
 
     const res = await handleChangePassword({
-      userId: session.user.id,
       oldPassword: formData.oldPassword,
       newPassword: formData.newPassword,
     });
