@@ -1,9 +1,10 @@
+import OrderListPage from '@/components/account/pages/OrderRegistry'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-        user profile page
+        <OrderListPage />
     </div>
   )
 }

@@ -1,9 +1,10 @@
+import ChangePassword from '@/components/account/pages/ChangePassword'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-        user profile page
+        <ChangePassword />
     </div>
   )
 }
