@@ -3,15 +3,19 @@
 import { useState } from "react";
 import { ArrowUpFromLine } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import type { BookStore } from "@/features/book-creation/book";
 import { useGeneratePreview } from "@/features/book-creation/hooks/useGeneratePreview";
 import ImagePreviewModal from "./image-preview-modal";
+import { BookStore } from "../types";
 
 export default function LandingPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
   const setCoverImage = useBookStore((state: BookStore) => state.setCoverImage);
-
-  // Modal and pending image state
+  const setCoverImageVariants = useBookStore(
+    (state: BookStore) => state.setCoverImageVariants,
+  );
+  const setSelectedCoverVariant = useBookStore(
+    (state: BookStore) => state.setSelectedCoverVariant,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
 
@@ -38,7 +42,7 @@ export default function LandingPage() {
     setPendingImage(null);
     setStep("cover");
     //TODO:Turn off reset() for Testing purpose
-    // reset();
+    reset();
   };
 
   const handleConfirmGeneration = async () => {
@@ -47,8 +51,14 @@ export default function LandingPage() {
     const previewResult = await generatePreview(pendingImage);
 
     if (previewResult) {
-      // Successfully generated - use the preview image
-      setCoverImage(previewResult);
+      // Successfully generated
+      // 1. Store original image
+      setCoverImage(pendingImage);
+      // 2. Store preview result in variants
+      setCoverImageVariants([previewResult]);
+      // 3. Set selected variant to the newly generated one
+      setSelectedCoverVariant(0);
+
       setIsModalOpen(false);
       setPendingImage(null);
       setStep("cover");

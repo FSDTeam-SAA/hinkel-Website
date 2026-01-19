@@ -6,7 +6,7 @@ import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Loader2, Wand2 } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import type { BookStore } from "@/features/book-creation/book";
+import type { BookStore } from "@/features/book-creation/types";
 import Image from "next/image";
 import { isValidFile, fileToDataURL } from "../utils/file-validation";
 import { toast } from "sonner";

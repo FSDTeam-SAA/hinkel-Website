@@ -1,4 +1,61 @@
 /**
+ * Generate Preview API Types
+ */
+
+export interface GeneratePreviewRequest {
+  image: string; // Base64 encoded image
+}
+
+export interface GeneratePreviewResponse {
+  previewUrl: string; // Base64 or URL of generated preview
+}
+
+export type DeliveryType = "digital" | "print" | "print&digital";
+
+export interface PricingData {
+  _id: string;
+  deliveryType: DeliveryType;
+  currency: string;
+  pricePerPage: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PricingResponse {
+  success: boolean;
+  data: PricingData[];
+}
+
+export interface calculatePriceRequest {
+  pageCount: number;
+  deliveryType: DeliveryType;
+}
+
+export interface calculatePriceResponse {
+  success: boolean;
+  data: {
+    pageCount: number;
+    pricePerPage: number;
+    deliveryType: DeliveryType;
+    price: number;
+    totalPrice: number;
+    currency: string;
+  };
+}
+
+export interface ConfirmPaymentRequest {
+  userId: string;
+  pageCount: number;
+  deliveryType: DeliveryType;
+}
+
+export interface ConfirmPaymentResponse {
+  success: boolean;
+  sessionUrl: string;
+  orderId: string;
+}
+
+/**
  * Book Creation Flow Types
  * Defines all interfaces and types for the book creation process
  */
@@ -18,7 +75,7 @@ export type BookStep =
 /**
  * Supported output formats for the book
  */
-export type OutputFormat = "pdf" | "printed" | "both";
+export type OutputFormat = "pdf" | "printed" | "pdf&printed";
 
 /**
  * Page number to image URL mapping
@@ -51,6 +108,7 @@ export interface BookState {
   // Order details
   outputFormat: OutputFormat | null;
   hasPaid: boolean;
+  orderId: string | null;
 }
 
 /**
@@ -87,6 +145,7 @@ export interface BookActions {
   // Order details
   setOutputFormat: (format: OutputFormat) => void;
   setHasPaid: (paid: boolean) => void;
+  setOrderId: (orderId: string | null) => void;
 
   // Reset state
   resetBook: () => void;
@@ -117,5 +176,17 @@ export const PAGE_COUNT_OPTIONS = [10, 20, 30, 40] as const;
 export const PRICING = {
   pdf: 24.22,
   printed: 24.22,
-  both: 24.22,
+  "pdf&printed": 24.22,
 } as const;
+
+export interface DeliveryMethodCardProps {
+  method: {
+    id: OutputFormat;
+    apiType: DeliveryType;
+    title: string;
+    subtitle: string;
+  };
+  selectedPages: number;
+  selectedFormat: OutputFormat;
+  onSelect: (id: OutputFormat) => void;
+}

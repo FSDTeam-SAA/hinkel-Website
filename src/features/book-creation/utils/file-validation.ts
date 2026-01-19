@@ -1,4 +1,4 @@
-import { FILE_VALIDATION } from "../book";
+import { FILE_VALIDATION } from "../types";
 
 /**
  * Validates if file is allowed for upload

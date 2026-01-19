@@ -1,39 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import StepIndicator from "@/components/step-indicator";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import type { BookStore } from "@/features/book-creation/book";
-
-interface Icon {
-  width: number;
-  height: number;
-}
-
-const DownloadIcon = ({ width = 42, height = 42 }: Icon) => (
-  <svg
-    width={width}
-    height={height}
-    viewBox="0 0 42 42"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M21 0.75C10.1875 0.75 1.5 9.4375 1.5 20.25C1.5 31.0625 10.1875 39.75 21 39.75C31.8125 39.75 40.5 31.0625 40.5 20.25C40.5 9.4375 31.8125 0.75 21 0.75ZM21 36.75C12.0625 36.75 4.5 29.1875 4.5 20.25C4.5 11.3125 12.0625 3.75 21 3.75C29.9375 3.75 37.5 11.3125 37.5 20.25C37.5 29.1875 29.9375 36.75 21 36.75Z"
-      fill="white"
-    />
-    <path d="M20.25 11.25H21.75V24.75H20.25V11.25Z" fill="white" />
-    <path
-      d="M26.4375 19.3125L25.6875 20.0625L21 14.625L16.3125 20.0625L15.5625 19.3125L21 12.5625L26.4375 19.3125Z"
-      fill="white"
-    />
-    <path
-      d="M28.5 27.75H13.5C13.0625 27.75 12.75 27.4375 12.75 27C12.75 26.5625 13.0625 26.25 13.5 26.25H28.5C28.9375 26.25 29.25 26.5625 29.25 27C29.25 27.4375 28.9375 27.75 28.5 27.75Z"
-      fill="white"
-    />
-  </svg>
-);
+import { usePricing } from "@/features/book-creation/hooks/usePricing";
+import { useConfirmPayment } from "@/features/book-creation/hooks/usePayment";
+import { DeliveryMethodCard } from "./delivery-mothod-card";
+import { BookStore, OutputFormat, DeliveryType } from "../types";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function BookSetupFormatPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -42,13 +19,19 @@ export default function BookSetupFormatPage() {
     (state: BookStore) => state.setOutputFormat,
   );
   const setBookTitle = useBookStore((state: BookStore) => state.setBookTitle);
-  const { pageCount, outputFormat } = useBookStore();
+  const setOrderId = useBookStore((state: BookStore) => state.setOrderId);
+  const { bookTitle, pageCount, outputFormat } = useBookStore();
+  const { data: session } = useSession();
+  const router = useRouter();
 
-  const [title, setTitle] = useState("");
+  const { loading: pricingLoading } = usePricing();
+  const { confirmPayment, isLoading: isConfirming } = useConfirmPayment();
+
+  const [title, setTitle] = useState(bookTitle || "");
   const [selectedPages, setSelectedPages] = useState(pageCount || 20);
-  const [selectedFormat, setSelectedFormat] = useState<
-    "pdf" | "printed" | "both"
-  >(outputFormat || "pdf");
+  const [selectedFormat, setSelectedFormat] = useState<OutputFormat>(
+    outputFormat || "pdf",
+  );
   const [errors, setErrors] = useState<{ title?: string }>({});
 
   const steps = [
@@ -66,28 +49,30 @@ export default function BookSetupFormatPage() {
     { count: 40, label: "40" },
   ];
 
-  const deliveryMethods = [
-    {
-      id: "pdf",
-      title: "Digital PDF",
-      subtitle: "Instant download",
-      price: "$24.22",
-    },
-    {
-      id: "printed",
-      title: "Printed Book",
-      subtitle: "Instant download",
-      price: "$24.22",
-    },
-    {
-      id: "both",
-      title: "Digital PDF & Printed Book",
-      subtitle: "Delivered to you",
-      price: "$24.22",
-    },
-  ];
+  const deliveryMethods = useMemo(() => {
+    return [
+      {
+        id: "pdf" as OutputFormat,
+        apiType: "digital" as const,
+        title: "Digital PDF",
+        subtitle: "Instant download",
+      },
+      {
+        id: "printed" as OutputFormat,
+        apiType: "print" as const,
+        title: "Printed Book",
+        subtitle: "Shipped to you",
+      },
+      {
+        id: "pdf&printed" as OutputFormat,
+        apiType: "print&digital" as const,
+        title: "Digital PDF & Printed Book",
+        subtitle: "Delivered & Instant",
+      },
+    ];
+  }, []);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const newErrors: { title?: string } = {};
     if (!title.trim()) {
       newErrors.title = "Book title is required";
@@ -98,10 +83,44 @@ export default function BookSetupFormatPage() {
       return;
     }
 
-    setBookTitle(title);
-    setPageCount(selectedPages);
-    setOutputFormat(selectedFormat);
-    setStep("images");
+    if (!session?.user?.id) {
+      toast.error("Please login to continue");
+      router.push("/login");
+      return;
+    }
+
+    // Map output format to API delivery type
+    const deliveryTypeMap: Record<OutputFormat, DeliveryType> = {
+      pdf: "digital",
+      printed: "print",
+      "pdf&printed": "print&digital",
+    };
+
+    try {
+      const response = await confirmPayment({
+        userId: session.user.id,
+        pageCount: selectedPages,
+        deliveryType: deliveryTypeMap[selectedFormat],
+      });
+
+      if (response.success && response.sessionUrl) {
+        setBookTitle(title);
+        setPageCount(selectedPages);
+        setOutputFormat(selectedFormat);
+        setOrderId(response.orderId);
+
+        // Redirect to Stripe
+        router.push(response.sessionUrl);
+      } else {
+        toast.error("Failed to create payment session");
+      }
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong during payment confirmation";
+      toast.error(errorMessage);
+    }
   };
 
   const handleBack = () => {
@@ -178,52 +197,28 @@ export default function BookSetupFormatPage() {
           </div>
 
           {/* Delivery Method Section */}
-          <div className="mt-[80px] pt-[40px]">
+          <div className="mt-[80px] pt-[40px] relative">
             <h4 className="text-[32px] font-normal font-inter text-black mb-[23px]">
               Delivery Method
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-[22px]">
-              {deliveryMethods.map((method) => (
-                <button
-                  key={method.id}
-                  onClick={() =>
-                    setSelectedFormat(method.id as "pdf" | "printed" | "both")
-                  }
-                  className={`relative h-[424px] rounded-[24px] flex flex-col items-center justify-center py-[78px] px-[196px] transition-all ${
-                    selectedFormat === method.id
-                      ? "border-2 border-[#ff8b36] bg-[#fff6eb]"
-                      : "border-2 border-[#ff8b36] bg-[#fff6eb]"
-                  }`}
-                >
-                  <div className="flex flex-col gap-[21px] items-center w-[339px]">
-                    {/* Icon Container */}
-                    <div className="bg-[#ff8b36] rounded-[50px] p-[8px] flex items-center justify-center">
-                      <div className="w-[42px] h-[42px] flex items-center justify-center">
-                        <DownloadIcon width={42} height={42} />
-                      </div>
-                    </div>
 
-                    {/* Text Content */}
-                    <div className="flex flex-col gap-[5.073px] items-center text-center">
-                      <h5 className="text-[30px] font-semibold font-inter text-[#ff8b36]">
-                        {method.title}
-                      </h5>
-                      <p className="text-[18px] font-normal font-inter text-[#ff8b36]">
-                        {method.subtitle}
-                      </p>
-                      <p className="text-[30px] font-semibold font-inter text-[#ff8b36]">
-                        {method.price}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Selection Indicator */}
-                  {selectedFormat === method.id && (
-                    <div className="absolute inset-0 rounded-[24px] border-2 border-[#ff8b36] pointer-events-none" />
-                  )}
-                </button>
-              ))}
-            </div>
+            {pricingLoading ? (
+              <div className="flex justify-center items-center h-[424px]">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-[22px]">
+                {deliveryMethods.map((method) => (
+                  <DeliveryMethodCard
+                    key={method.id}
+                    method={method}
+                    selectedPages={selectedPages}
+                    selectedFormat={selectedFormat}
+                    onSelect={setSelectedFormat}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -231,7 +226,7 @@ export default function BookSetupFormatPage() {
         <div className="flex gap-6 justify-between mt-[29px]">
           <button
             onClick={handleBack}
-            className="flex items-center gap-[14.3px] bg-[#ff8b36] text-white px-[32px] py-[17px] rounded-[14.3px] font-inter font-semibold text-[29px] leading-[42px] hover:bg-orange-600 transition-colors h-[78px] min-w-[182px]"
+            className="flex items-center gap-[14.3px] bg-[#e5e7eb] text-[#364153] px-[32px] py-[17px] rounded-[14.3px] font-inter font-semibold text-[24px] leading-[42px] hover:bg-gray-300 transition-colors h-[78px] min-w-[150px]"
           >
             <ArrowLeft size={32} />
             <span>Back</span>
@@ -239,10 +234,20 @@ export default function BookSetupFormatPage() {
 
           <button
             onClick={handleContinue}
-            className="flex items-center gap-[14.3px] bg-[#ff8b36] text-white px-[32px] py-[17px] rounded-[14.3px] font-inter font-semibold text-[29px] leading-[42px] hover:bg-orange-600 transition-colors h-[78px] min-w-[242px]"
+            disabled={isConfirming}
+            className="flex items-center gap-[14.3px] bg-[#ff8b36] text-white px-[32px] py-[17px] rounded-[14.3px] font-inter font-semibold text-[24px] leading-[42px] hover:bg-orange-600 transition-colors h-[78px] min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>Continue</span>
-            <ArrowLeft size={32} className="rotate-180" />
+            {isConfirming ? (
+              <>
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <span>Continue</span>
+                <ArrowLeft size={32} className="rotate-180" />
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -5,7 +5,7 @@ import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
 import { Download, Package, Gift } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import type { BookStore } from "@/features/book-creation/book";
+import type { BookStore, OutputFormat } from "@/features/book-creation/types";
 
 export default function OutputFormatPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -14,7 +14,7 @@ export default function OutputFormatPage() {
   );
   const outputFormat = useBookStore((state: BookStore) => state.outputFormat);
 
-  const [selected, setSelected] = useState(outputFormat || "both");
+  const [selected, setSelected] = useState(outputFormat || "pdf&printed");
 
   const formats = [
     {
@@ -30,7 +30,7 @@ export default function OutputFormatPage() {
       icon: Package,
     },
     {
-      id: "both",
+      id: "pdf&printed",
       title: "Digital PDF & Printed Book",
       description: "Get both versions",
       icon: Gift,
@@ -47,7 +47,7 @@ export default function OutputFormatPage() {
   const currentStep = 1;
 
   const handleContinue = () => {
-    setOutputFormat(selected as "pdf" | "printed" | "both");
+    setOutputFormat(selected as OutputFormat);
     setStep("cover");
   };
 
@@ -68,9 +68,7 @@ export default function OutputFormatPage() {
               return (
                 <button
                   key={format.id}
-                  onClick={() =>
-                    setSelected(format.id as "pdf" | "printed" | "both")
-                  }
+                  onClick={() => setSelected(format.id as OutputFormat)}
                   className={`w-full p-6 rounded-lg border-2 transition-all text-left ${
                     selected === format.id
                       ? "border-orange-500 bg-orange-50"

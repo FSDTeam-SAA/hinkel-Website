@@ -8,7 +8,7 @@ interface PricingPageProps {
   onContinue: (
     title: string,
     pages: number,
-    method: "pdf" | "printed" | "both",
+    method: "pdf" | "printed" | "pdf&printed",
   ) => void;
   onBack: () => void;
 }
@@ -17,8 +17,8 @@ export default function PricingPage({ onContinue, onBack }: PricingPageProps) {
   const [title, setTitle] = useState("My Amazing Coloring Book");
   const [pageCount, setPageCount] = useState(20);
   const [deliveryMethod, setDeliveryMethod] = useState<
-    "pdf" | "printed" | "both"
-  >("both");
+    "pdf" | "printed" | "pdf&printed"
+  >("pdf&printed");
 
   const steps = [
     "Book Setup",
@@ -51,7 +51,7 @@ export default function PricingPage({ onContinue, onBack }: PricingPageProps) {
       icon: Package,
     },
     {
-      id: "both",
+      id: "pdf&printed",
       title: "Digital PDF & Printed Book",
       subtitle: "Delivered to you",
       price: "$24.22",
@@ -130,7 +130,7 @@ export default function PricingPage({ onContinue, onBack }: PricingPageProps) {
                       key={method.id}
                       onClick={() =>
                         setDeliveryMethod(
-                          method.id as "pdf" | "printed" | "both",
+                          method.id as "pdf" | "printed" | "pdf&printed",
                         )
                       }
                       className={`p-6 rounded-lg border-2 transition-colors text-center ${

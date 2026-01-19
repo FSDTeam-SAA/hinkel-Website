@@ -2,7 +2,7 @@
 
 import { CheckCircle, Home } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import type { BookStore } from "@/features/book-creation/book";
+import type { BookStore } from "@/features/book-creation/types";
 
 export default function SuccessPage() {
   const resetBook = useBookStore((state: BookStore) => state.resetBook);

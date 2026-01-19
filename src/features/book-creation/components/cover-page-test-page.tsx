@@ -1,12 +1,10 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, ArrowRight } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import type { BookStore } from "@/features/book-creation/book";
 import Image from "next/image";
+import { BookStore } from "../types";
 
 export default function CoverPageTestPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -14,9 +12,10 @@ export default function CoverPageTestPage() {
   const setCoverImageVariants = useBookStore(
     (state: BookStore) => state.setCoverImageVariants,
   );
-  const setSelectedCoverVariant = useBookStore(
-    (state: BookStore) => state.setSelectedCoverVariant,
-  );
+  // const setSelectedCoverVariant = useBookStore(
+  //   (state: BookStore) => state.setSelectedCoverVariant,
+  // );
+
   const setHasPaid = useBookStore((state: BookStore) => state.setHasPaid);
   const { coverImage, coverImageVariants, selectedCoverVariantIndex } =
     useBookStore();
@@ -131,7 +130,11 @@ export default function CoverPageTestPage() {
           <div className="flex gap-[18.318px] w-full pt-[27.478px]">
             {/* Try Different Image Button */}
             <Button
-              onClick={() => setCoverImage(null)}
+              onClick={() => {
+                setCoverImage(null);
+                setCoverImageVariants([]);
+                setStep("landing");
+              }}
               className="flex-1 bg-[#e5e7eb] rounded-[16.029px] h-[64.114px] font-Arial text-[18.318px] leading-[27.478px] text-[#364153] font-normal hover:bg-[#d1d5db] transition-colors flex items-center justify-center"
             >
               Try Different Image

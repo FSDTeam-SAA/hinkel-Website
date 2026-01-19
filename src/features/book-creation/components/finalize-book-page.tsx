@@ -3,7 +3,7 @@
 import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import type { BookStore } from "@/features/book-creation/book";
+import { BookStore } from "../types";
 
 export default function FinalizeBookPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);

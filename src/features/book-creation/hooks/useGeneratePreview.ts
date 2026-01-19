@@ -16,8 +16,8 @@ export function useGeneratePreview() {
     setError(null);
     try {
       const response = await generatePreviewApi({ image: imageBase64 });
-      setPreviewImage(response.data.previewImage);
-      return response.data.previewImage;
+      setPreviewImage(response.previewUrl);
+      return response.previewUrl;
     } catch (err) {
       const error = err as {
         response?: { data?: { message?: string } };
