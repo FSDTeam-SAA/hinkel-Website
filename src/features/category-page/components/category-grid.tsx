@@ -8,6 +8,7 @@ import { useContent } from "@/features/category-page/hooks/use-content";
 import CategoryGridSkeleton from "./category-grid.skeleton";
 import { CategoryContent } from "@/features/category-page/types";
 import HeaderTitle from "@/components/website/Common/head-title";
+import SubtitleCategory from "@/components/website/Common/SubtitleCategory";
 
 export function CategoryGrid() {
   const { data: contentData, isLoading, error } = useContent({ limit: 10 });
@@ -93,6 +94,7 @@ export function CategoryGrid() {
     >
       <div className="container mx-auto relative space-y-6">
         <HeaderTitle title="Explore Categories" />
+        <SubtitleCategory subtitle="Browse our collection of books and other reading materials." />
         {showArrows && (
           <>
             <button
