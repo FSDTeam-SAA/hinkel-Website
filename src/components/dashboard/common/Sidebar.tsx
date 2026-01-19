@@ -15,6 +15,8 @@ import {
   ShoppingBasket,
   Users,
   Send,
+  Book,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -32,20 +34,11 @@ import {
 import { Button } from "@/components/ui/button";
 
 const navigation = [
-  { name: "Overview", href: "/", icon: LayoutDashboard },
-  { name: "Users", href: "/users", icon: HardDrive },
-  { name: "Trips", href: "/trips", icon: Ship },
-  { name: "Products", href: "/products", icon: ShoppingBasket },
-  { name: "Bookings", href: "/bookings", icon: NotebookText },
-  { name: "Orders", href: "/order", icon: ShoppingBag },
-  { name: "Messaging", href: "/messaging", icon: MessageCircleMore },
-  { name: "Email", href: "/send-email", icon: Send },
-  { name: "Calendar", href: "/calendar", icon: Calendar },
-  { name: "Payments", href: "/payments", icon: CircleDollarSign },
-  // { name: "About Us", href: "/abouts", icon: BadgeInfo },
-  { name: "Divers", href: "/users", icon: Users },
-  // { name: "Social", href: "/social", icon: ExternalLink },
-  // { name: "Reviews", href: "/review", icon: SquareStar },
+  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "All Categories", href: "/dashboard/AllCategories", icon: Book },
+  { name: "All Books", href: "/dashboard/allbooks", icon: BookOpen },
+  // { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
+  { name: "Set Pricing", href: "/dashboard/setPricing", icon: NotebookText },
 ];
 
 export default function Sidebar() {
@@ -62,14 +55,14 @@ export default function Sidebar() {
     <div className="flex h-screen w-64 flex-col bg-white border-r border-gray-200 fixed">
       {/* Logo */}
       <div className="flex  items-center py-5 justify-center px-6">
-        <Link href="/" className="flex items-center ">
+        <Link href="/dashboard" className="flex items-center ">
           <Image
-            src={
-              "https://res.cloudinary.com/dzov2ohym/image/upload/v1763488041/logo_asawsp.jpg"
-            }
-            alt="This is Stevenarr Logo"
-            width={68}
-            height={68}
+            src="/images/logo.png"
+            alt="Company Logo"
+            width={150}
+            height={150}
+            className="cursor-pointer"
+            priority
           />
         </Link>
       </div>
@@ -78,10 +71,16 @@ export default function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         {navigation.map((item) => {
           // Active logic
+          // const isActive =
+          //   item.href === "/"
+          //     ? pathname === "/"
+          //     : pathname?.startsWith(item.href);
+
           const isActive =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname?.startsWith(item.href);
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname === item.href || pathname.startsWith(item.href + "/");
+
 
           return (
             <Link

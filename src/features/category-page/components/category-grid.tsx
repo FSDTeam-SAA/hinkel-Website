@@ -5,12 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useContent } from "@/features/category-page/hooks/use-content";
+import { useCategoryHeader } from "@/features/category-page/hooks/use-categoryheader";
 import CategoryGridSkeleton from "./category-grid.skeleton";
 import { CategoryContent } from "@/features/category-page/types";
 import HeaderTitle from "@/components/website/Common/head-title";
+import SubtitleCategory from "@/components/website/Common/SubtitleCategory";
 
 export function CategoryGrid() {
   const { data: contentData, isLoading, error } = useContent({ limit: 10 });
+  const { data: headerData, isLoading: isHeaderLoading } = useCategoryHeader();
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showArrows, setShowArrows] = useState(false);
@@ -85,6 +88,8 @@ export function CategoryGrid() {
     return null; // Or specific empty state
   }
 
+  console.log("headerdata",headerData);
+
   return (
     <section
       className="py-24 px-6 bg-secondary"
@@ -92,7 +97,8 @@ export function CategoryGrid() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="container mx-auto relative space-y-6">
-        <HeaderTitle title="Explore Categories" />
+        <HeaderTitle title={headerData?.data?.data?.title || "Explore Categories"} />
+        <SubtitleCategory subtitle={headerData?.data?.data?.subtitle || "Browse our collection of books and other reading materials."} />
         {showArrows && (
           <>
             <button

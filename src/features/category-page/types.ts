@@ -21,3 +21,9 @@ export interface ContentResponse {
   success: boolean;
   data: CategoryContent[];
 }
+
+export interface CategoryHeader {
+    title: string;
+    subtitle: string;
+}
+
