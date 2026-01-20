@@ -1,7 +1,8 @@
 "use client";
 import { useAllOrders, Order } from "@/features/dashboard/hooks/useAllOrders";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2, Package } from "lucide-react";
+import Image from "next/image";
 import React, { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -188,6 +189,30 @@ const RecentOrdersTable = () => {
                   </p>
                 </div>
               </div>
+
+              {(selectedOrder.book || selectedOrder.title) && (
+                <div className="flex gap-4 p-4 bg-orange-50/50 rounded-xl border border-orange-100">
+                  <div className="relative h-20 w-16 flex-shrink-0 bg-white rounded-lg overflow-hidden border border-orange-200 flex items-center justify-center text-orange-200">
+                    {selectedOrder.book ? (
+                      <Image
+                        src={selectedOrder.book}
+                        alt={selectedOrder.title || "Book cover"}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <Package size={32} />
+                    )}
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <p className="text-xs text-orange-600 uppercase font-bold tracking-wider mb-1">Purchased Book</p>
+                    <p className="text-sm font-bold text-gray-900 line-clamp-2">
+                      {selectedOrder.title || "Untitled Book"}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 italic">{selectedOrder.deliveryType}</p>
+                  </div>
+                </div>
+              )}
 
               <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Product Details</p>

@@ -11,14 +11,10 @@ const Allbooks = () => {
             <h1 className="text-3xl font-bold text-[#FF8B36] mb-1">
               All Books
             </h1>
-            {/* <p className="text-gray-500 font-medium">
-                            Manage your orders, track shipments, and configure products easily.
-                        </p> */}
         </div>
         </div>
         <OrderedBooks />
       </div>
-      <CategoryShow />
     </div>
   );
 };

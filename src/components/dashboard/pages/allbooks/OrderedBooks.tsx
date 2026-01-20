@@ -3,15 +3,13 @@ import { useAllOrders } from '@/features/dashboard/hooks/useAllOrders';
 import Image from 'next/image';
 import React from 'react';
 import { Loader2, Package, User } from 'lucide-react';
+import OrderedBooksSkeleton from './OrderedBooksSkeleton';
 
 const OrderedBooks = () => {
     const { orders, loading, error } = useAllOrders();
 
     if (loading) return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-2">
-            <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-            <p className="text-gray-500 font-medium">Loading ordered books...</p>
-        </div>
+       <OrderedBooksSkeleton />
     );
 
     if (error) return (
