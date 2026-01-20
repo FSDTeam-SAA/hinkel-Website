@@ -26,8 +26,8 @@ import { Button } from "@/components/ui/button";
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { name: "AddBook", href: "/dashboard/addbook", icon: Book },
-  { name: "AllBooks", href: "/dashboard/allbooks", icon: BookOpen },
+  { name: "All Categories", href: "/dashboard/AllCategories", icon: Book },
+  { name: "All Books", href: "/dashboard/allbooks", icon: BookOpen },
   // { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
   { name: "Set Pricing", href: "/dashboard/setPricing", icon: NotebookText },
 ];

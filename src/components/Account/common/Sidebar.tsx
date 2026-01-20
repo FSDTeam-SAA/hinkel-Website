@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ShoppingBag, Lock, LogOut, UserCircle, House } from "lucide-react";
+import { ShoppingBag, Lock, LogOut, UserCircle } from "lucide-react";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import {
@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 const profileNavigation = [
   { name: "My Orders", href: "/profile/orders", icon: ShoppingBag },
   { name: "Change Password", href: "/profile/change-password", icon: Lock },
-  { name: "Home", href: "/", icon: House },
 ];
 
 export default function ProfileSidebar() {
@@ -33,7 +32,7 @@ export default function ProfileSidebar() {
   };
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+    <div className="flex h-full w-64 flex-col border-r border-gray-100 bg-white p-4">
       {/* Profile Header */}
       <div className="mb-8 flex items-center gap-3 px-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">

@@ -1,6 +1,7 @@
 // features/auth/component/Register.tsx
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useRegister } from "../hooks/useregister";
@@ -104,18 +105,27 @@ const Register = () => {
           </div>
 
           {/* Options */}
-          <div className="flex items-center justify-between text-sm mt-2">
-            <label className="flex items-center gap-2 text-gray-600">
-              <input type="checkbox" className="accent-primary" />
-              Remember me
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm mt-4 px-1">
+            <label className="flex items-center gap-3 text-gray-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary transition-all cursor-pointer"
+                required
+              />
+              <span className="text-sm">
+                I agree to the <Link href="/privacy-policy" className="text-primary font-medium hover:underline transition-all">Privacy Policy</Link>
+              </span>
             </label>
 
-            <a
-              href="/reset-password"
-              className="text-primary hover:text-primary/80"
-            >
-              Forgot password?
-            </a>
+            <p className="text-sm text-gray-600 flex items-center gap-1">
+              Already have an account?
+              <Link
+                href="/login"
+                className="text-primary font-semibold hover:text-primary/80 transition-all hover:underline"
+              >
+                Sign In
+              </Link>
+            </p>
           </div>
 
           <button

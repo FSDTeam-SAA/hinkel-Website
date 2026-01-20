@@ -1,6 +1,7 @@
 // features/auth/component/login.tsx
 "use client";
 import Image from 'next/image'
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
 import { useLogin } from '../hooks/uselogin'
@@ -73,15 +74,22 @@ const Login = () => {
                     </div>
 
                     {/* Options */}
-                    <div className="flex items-center justify-between text-sm mt-2">
-                        <label className="flex items-center gap-2 text-gray-600">
-                            <input type="checkbox" className="accent-primary" />
+                    <div className="flex items-center justify-between text-base mt-2 px-1">
+                        <label className="flex items-center gap-2 text-gray-600 cursor-pointer select-none">
+                            <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary transition-all cursor-pointer" />
                             Remember me
                         </label>
 
-                        <a href="/reset-password" className="text-primary hover:text-primary/80">
+                        <Link href="/reset-password" title="reset password" className="text-primary font-medium hover:text-primary/80 transition-all hover:underline">
                             Forgot password?
-                        </a>
+                        </Link>
+                    </div>
+
+                    <div className="text-center text-sm text-gray-600 mt-4">
+                        Don&apos;t have an account?{' '}
+                        <Link href="/register" className="text-primary font-semibold hover:text-primary/80 transition-all hover:underline">
+                            Create an account
+                        </Link>
                     </div>
 
                     {/* Button */}
