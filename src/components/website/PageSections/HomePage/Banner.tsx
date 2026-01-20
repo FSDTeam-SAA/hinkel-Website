@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Banner() {
@@ -17,25 +15,25 @@ export default function Banner() {
   const prevSlide = () =>
     setCurrent((prev) => (prev - 1 + images.length) % images.length);
 
-  const startAutoSlide = () => {
-    stopAutoSlide(); 
-    intervalRef.current = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % images.length);
-    }, 5000);
-  };
-
-  const stopAutoSlide = () => {
+  const stopAutoSlide = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-  };
+  }, []);
+
+  const startAutoSlide = useCallback(() => {
+    stopAutoSlide();
+    intervalRef.current = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length);
+    }, 5000);
+  }, [images.length, stopAutoSlide]);
 
   // Start auto-slide on mount
   useEffect(() => {
     startAutoSlide();
-    return stopAutoSlide;  
-  }, []);
+    return stopAutoSlide;
+  }, [startAutoSlide, stopAutoSlide]);
 
   // Restart auto-slide when manually changing slides
   const handlePrevClick = () => {
@@ -50,8 +48,8 @@ export default function Banner() {
   return (
     <section
       className="relative lg:grid lg:h-screen lg:place-content-center"
-      onMouseEnter={stopAutoSlide}  
-      onMouseLeave={startAutoSlide}  
+      onMouseEnter={stopAutoSlide}
+      onMouseLeave={startAutoSlide}
     >
       {/* Background Images */}
       {images.map((img, index) => (
@@ -76,7 +74,8 @@ export default function Banner() {
           <p className="mt-4 text-base text-gray-200 sm:text-lg/relaxed">
             Explore our premium iron and steel products with custom cutting,
             bending, and rebar services built for maximum performance, delivered
-            with industrial precision, and tailored to your exact specifications.
+            with industrial precision, and tailored to your exact
+            specifications.
           </p>
           <div className="mt-6 flex justify-center gap-4">
             <a
