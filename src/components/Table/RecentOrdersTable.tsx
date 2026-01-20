@@ -1,7 +1,7 @@
-
 "use client";
 import { useAllOrders, Order } from "@/features/dashboard/hooks/useAllOrders";
-import { ChevronDown } from "lucide-react";
+import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
+import { ChevronDown, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -14,7 +14,7 @@ import {
 import { Button } from "../ui/button";
 
 const getStatusStyles = (status: string) => {
-  const base = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-2 w-fit";
+  const base = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-2 w-fit transition-all";
   switch (status.toLowerCase()) {
     case "paid":
     case "delivered":
@@ -23,23 +23,35 @@ const getStatusStyles = (status: string) => {
       return `${base} bg-[#FFF7ED] text-[#F97316]`;
     case "processing":
       return `${base} bg-[#EFF6FF] text-[#3B82F6]`;
+    case "cancelled":
+      return `${base} bg-red-100 text-red-600`;
     default:
       return `${base} bg-gray-100 text-gray-700`;
   }
 };
 
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+const getInitials = (name?: string) => {
+  if (!name) return "??";
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 };
 
 const RecentOrdersTable = () => {
-  const { orders, loading, error } = useAllOrders();
+  const { orders, loading, error, refetch } = useAllOrders();
+  const { updateStatus, loading: updatingId } = useStatusUpdate();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [activeUpdatingId, setActiveUpdatingId] = useState<string | null>(null);
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    setActiveUpdatingId(orderId);
+    try {
+      await updateStatus(orderId, newStatus);
+      refetch();
+    } catch (err) {
+      console.error("Failed to update status", err);
+    } finally {
+      setActiveUpdatingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -68,10 +80,8 @@ const RecentOrdersTable = () => {
             </th>
             <th className="py-4 px-4 text-[13px] font-semibold text-gray-500 uppercase tracking-wider">Order ID</th>
             <th className="py-4 px-4 text-[13px] font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-            <th className="py-4 px-4 text-[13px] font-semibold text-gray-500 uppercase tracking-wider">Product</th>
             <th className="py-4 px-4 text-[13px] font-semibold text-gray-500 uppercase tracking-wider">Date</th>
             <th className="py-4 px-4 text-[13px] font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-            <th className="py-4 px-4 text-[13px] font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
             <th className="py-4 px-4 text-[13px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
             <th className="py-4 px-4 text-[13px] font-semibold text-gray-500 uppercase tracking-wider text-right">Action</th>
           </tr>
@@ -89,37 +99,41 @@ const RecentOrdersTable = () => {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border border-[#FF8B36]/10">
                     <AvatarFallback className="bg-[#FFF7ED] text-[#FF8B36] font-bold">
-                      {getInitials(order.userId.name)}
+                      {getInitials(order?.userId?.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold text-gray-900">{order.userId.name}</span>
-                    <span className="text-xs text-gray-500">{order.userId.email}</span>
+                    <span className="text-sm font-bold text-gray-900">{order?.userId?.name}</span>
+                    <span className="text-xs text-gray-500">{order?.userId?.email}</span>
                   </div>
                 </div>
               </td>
-              <td className="py-4 px-4 text-sm font-semibold text-gray-600">
-                {order.pageCount} Pages
-              </td>
               <td className="py-4 px-4 text-sm text-gray-500">
-                {new Date(order.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "2-digit",
-                  year: "numeric",
-                })}
+                {new Date(order.createdAt).toLocaleDateString()}
               </td>
               <td className="py-4 px-4 text-sm font-bold text-[#FF8B36]">
                 ${(order.totalAmount / 100).toFixed(2)}
               </td>
               <td className="py-4 px-4">
-                <span className="px-3 py-1 text-xs font-semibold rounded-md bg-[#ECFDF5] text-[#10B981]">
-                  Paid
-                </span>
-              </td>
-              <td className="py-4 px-4">
-                <div className={getStatusStyles(order.status)}>
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                <div className="relative inline-block">
+                  {activeUpdatingId === order._id ? (
+                    <div className="px-3 py-1.5 flex items-center gap-2 text-xs text-gray-400">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Updating...
+                    </div>
+                  ) : (
+                    <div className="group/select relative">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                        className={`appearance-none cursor-pointer outline-none border-none pr-8 ${getStatusStyles(order.status)}`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                      <ChevronDown className="h-3 w-3 absolute right-2 top-1/2 -translate-y-1/2 text-current pointer-events-none opacity-50" />
+                    </div>
+                  )}
                 </div>
               </td>
               <td className="py-4 px-4 text-right">
@@ -158,12 +172,12 @@ const RecentOrdersTable = () => {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border border-[#FF8B36]/10">
                       <AvatarFallback className="bg-[#FFF7ED] text-[#FF8B36] font-bold">
-                        {getInitials(selectedOrder.userId.name)}
+                        {getInitials(selectedOrder?.userId?.name)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-bold text-gray-900">{selectedOrder.userId.name}</p>
-                      <p className="text-xs text-gray-500">{selectedOrder.userId.email}</p>
+                      <p className="text-sm font-bold text-gray-900">{selectedOrder?.userId?.name}</p>
+                      <p className="text-xs text-gray-500">{selectedOrder?.userId?.email}</p>
                     </div>
                   </div>
                 </div>

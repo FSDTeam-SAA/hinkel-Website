@@ -1,4 +1,5 @@
 import { CategoryShow } from "./CategoryShow";
+import OrderedBooks from "./OrderedBooks";
 
 const Allbooks = () => {
   return (
@@ -13,10 +14,11 @@ const Allbooks = () => {
             {/* <p className="text-gray-500 font-medium">
                             Manage your orders, track shipments, and configure products easily.
                         </p> */}
-          </div>
         </div>
-        <CategoryShow />
+        </div>
+        <OrderedBooks />
       </div>
+      <CategoryShow />
     </div>
   );
 };
