@@ -1,4 +1,5 @@
 import { CategoryShow } from './CategoryShow'
+import OrderedBooks from './OrderedBooks'
 
 const Allbooks = () => {
     return (
@@ -13,7 +14,7 @@ const Allbooks = () => {
                         </p> */}
                     </div>
                 </div>
-                <CategoryShow />
+                <OrderedBooks />
             </div>
         </div>
     )
