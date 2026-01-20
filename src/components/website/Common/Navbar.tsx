@@ -1,13 +1,16 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { useContent } from "@/features/category-page/hooks/use-content";
+import { ChevronDown } from "lucide-react";
+import { CategoryContent } from "@/features/category-page/types";
 
 const menuItems = [
   { href: "/", label: "Home" },
@@ -22,6 +25,25 @@ export default function Navbar() {
   // const [scrolled, setScrolled] = useState(false);
   const { status } = useSession();
   const pathname = usePathname();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const { data: contentData } = useContent({ limit: 12 });
+  const categories = contentData?.data || [];
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // useEffect(() => {
   //   const handleScroll = () => {
@@ -59,20 +81,78 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Menu Items */}
-        <ul className="hidden md:flex space-x-8 font-medium">
+        <ul className="hidden md:flex space-x-8 font-medium items-center">
           {menuItems.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={cn(
-                  "transition-all duration-200 hover:text-primary relative pb-1",
-                  isActive(item.href)
-                    ? "text-primary font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
-                    : "text-primary-foreground",
-                )}
-              >
-                {item.label}
-              </Link>
+            <li key={item.href} className="relative">
+              {item.label === "Products" ? (
+                <div ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className={cn(
+                      "flex items-center gap-1 transition-all duration-200 hover:text-primary relative pb-1",
+                      isActive(item.href) || showDropdown
+                        ? "text-primary font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
+                        : "text-primary-foreground",
+                    )}
+                  >
+                    {item.label}
+                    <ChevronDown
+                      className={cn(
+                        "w-4 h-4 transition-transform duration-200",
+                        showDropdown && "rotate-180",
+                      )}
+                    />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {showDropdown && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[600px] bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl p-6 grid grid-cols-3 gap-4 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                      {categories.map((category: CategoryContent) => (
+                        <Link
+                          key={category._id}
+                          href={`/category/${category.type}`}
+                          onClick={() => setShowDropdown(false)}
+                          className="group flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors"
+                        >
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-accent shrink-0 border border-black/5">
+                            <Image
+                              src={category.image || "/no-image.jpg"}
+                              alt={category.title}
+                              fill
+                              className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
+                              {category.title}
+                            </span>
+                            <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">
+                              {category.type}
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                      {categories.length === 0 && (
+                        <div className="col-span-3 text-center py-4 text-gray-500 text-sm">
+                          No categories found
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "transition-all duration-200 hover:text-primary relative pb-1",
+                    isActive(item.href)
+                      ? "text-primary font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
+                      : "text-primary-foreground",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              )}
             </li>
           ))}
         </ul>

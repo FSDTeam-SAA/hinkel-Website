@@ -4,17 +4,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Calendar,
   NotebookText,
-  CircleDollarSign,
-  Ship,
   LogOut,
-  HardDrive,
-  MessageCircleMore,
-  ShoppingBag,
-  ShoppingBasket,
-  Users,
-  Send,
   Book,
   BookOpen,
 } from "lucide-react";
@@ -80,7 +71,6 @@ export default function Sidebar() {
             item.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname === item.href || pathname.startsWith(item.href + "/");
-
 
           return (
             <Link
