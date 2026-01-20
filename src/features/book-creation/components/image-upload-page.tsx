@@ -4,12 +4,13 @@ import type React from "react";
 import { useState, useRef } from "react";
 import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Loader2, Wand2 } from "lucide-react";
+import { Upload, X, Loader2, Wand2, CheckCircle2 } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
 import Image from "next/image";
 import { isValidFile, fileToDataURL } from "../utils/file-validation";
 import { toast } from "sonner";
+import { useGeneratePreview } from "../hooks/useGeneratePreview";
 
 export default function ImageUploadPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -26,13 +27,15 @@ export default function ImageUploadPage() {
     convertedPageImages,
     addConvertedPageImage,
     removeConvertedPageImage,
+    pageTexts,
+    updatePageText,
   } = useBookStore();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isConverting, setIsConverting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { generatePreview, loading: isConverting } = useGeneratePreview();
 
   const steps = [
     "Book Setup",
@@ -73,10 +76,9 @@ export default function ImageUploadPage() {
       // Add to uploaded list
       addUploadedPageImage(pageNum, imageData);
 
-      // If this is the first image or no image is currently selected, select it automatically
-      if (!pageImages[pageNum] || currentImages.length === 0) {
-        updatePageImage(pageNum, imageData);
-      }
+      // ALWAYS select the newly uploaded image as the active page image
+      updatePageImage(pageNum, imageData);
+
       toast.success("Image uploaded successfully!");
     } catch (err) {
       console.error("Image processing error:", err);
@@ -131,7 +133,13 @@ export default function ImageUploadPage() {
       if (remainingImages.length > 0) {
         updatePageImage(pageNum, remainingImages[0]);
       } else {
-        updatePageImage(pageNum, "");
+        // Fallback to conversions if any
+        const conversions = convertedPageImages[pageNum] || [];
+        if (conversions.length > 0) {
+          updatePageImage(pageNum, conversions[0]);
+        } else {
+          updatePageImage(pageNum, "");
+        }
       }
     }
   };
@@ -144,26 +152,28 @@ export default function ImageUploadPage() {
       return;
     }
 
-    setIsConverting(true);
     toast.info("Converting to line art...");
 
     try {
-      // Simulate API call delay (placeholder for actual backend integration)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const lineArtImage = await generatePreview(image);
 
-      // For now, we'll just add the same image as a placeholder
-      // In production, this would be the converted line art image from the API
-      addConvertedPageImage(pageNum, image);
+      if (lineArtImage) {
+        // Find and remove the original uploaded image
+        const uploadIndex = (uploadedPageImages[pageNum] || []).indexOf(image);
+        if (uploadIndex !== -1) {
+          removeUploadedPageImage(pageNum, uploadIndex);
+        }
 
-      // Auto-select the converted image as the page image
-      updatePageImage(pageNum, image);
+        addConvertedPageImage(pageNum, lineArtImage);
 
-      toast.success("Image converted to line art!");
+        // Auto-select the converted image as the page image
+        updatePageImage(pageNum, lineArtImage);
+
+        toast.success("Image converted to line art!");
+      }
     } catch (err) {
       console.error("Conversion error:", err);
       toast.error("Failed to convert image. Please try again.");
-    } finally {
-      setIsConverting(false);
     }
   };
 
@@ -197,16 +207,22 @@ export default function ImageUploadPage() {
 
   const currentUploadedImages = uploadedPageImages[currentPage] || [];
   const currentConvertedImages = convertedPageImages[currentPage] || [];
-  const hasMaxImages = currentUploadedImages.length >= 3;
-  const hasUploadedImage = currentUploadedImages.length > 0;
-  const selectedUploadedImage = currentUploadedImages[0] || null;
+  const hasMaxConversions = currentConvertedImages.length >= 3;
+
+  // The active image for the current page from the store
+  const activeImage = pageImages[currentPage] || null;
+
+  // Check if the currently active image is one that can be converted (i.e., it's an upload)
+  const isConvertible =
+    activeImage && currentUploadedImages.includes(activeImage);
+
   const conversionsUsed = currentConvertedImages.length;
   const maxConversions = 3;
 
-  const isContinueDisabled = Array.from(
-    { length: totalPages },
-    (_, i) => i + 1,
-  ).some((pageNum) => !pageImages[pageNum]);
+  // const isContinueDisabled = Array.from(
+  //   { length: totalPages },
+  //   (_, i) => i + 1,
+  // ).some((pageNum) => !pageImages[pageNum]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -215,269 +231,368 @@ export default function ImageUploadPage() {
       <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
         <div className="bg-white rounded-2xl shadow-sm p-8 md:p-12">
           {/* Page selector */}
-          <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-            {Array.from({ length: totalPages }).map((_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => setCurrentPage(index + 1)}
-                className={`min-w-12 h-12 rounded-lg border-2 font-semibold transition-all ${
-                  currentPage === index + 1
-                    ? "border-primary bg-secondary"
-                    : pageImages[index + 1]
-                      ? "border-gray-300 bg-gray-50"
-                      : "border-gray-200"
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
+          <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-hide">
+            {Array.from({ length: totalPages }).map((_, index) => {
+              const pageNum = index + 1;
+              const pageImg = pageImages[pageNum];
+              const isPageComplete =
+                (convertedPageImages[pageNum] || []).length >= 3;
+
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`relative min-w-[64px] h-[64px] rounded-xl border-2 transition-all overflow-hidden flex items-center justify-center group ${
+                    currentPage === pageNum
+                      ? "border-primary ring-4 ring-primary/10 shadow-lg scale-105"
+                      : pageImg
+                        ? "border-gray-200 hover:border-primary/50"
+                        : "border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50"
+                  }`}
+                >
+                  {pageImg ? (
+                    <>
+                      <Image
+                        src={pageImg}
+                        alt={`Page ${pageNum}`}
+                        fill
+                        className="object-cover transition-transform group-hover:scale-110"
+                      />
+                      <div
+                        className={`absolute inset-0 bg-black/10 transition-opacity ${currentPage === pageNum ? "opacity-0" : "group-hover:opacity-0"}`}
+                      />
+                      <span
+                        className={`absolute bottom-0 right-0 bg-primary/90 text-white text-[10px] px-1.5 py-0.5 rounded-tl-md font-bold transition-transform ${currentPage === pageNum ? "scale-110" : ""}`}
+                      >
+                        {pageNum}
+                      </span>
+                    </>
+                  ) : (
+                    <span
+                      className={`text-sm font-bold ${currentPage === pageNum ? "text-primary" : "text-gray-400"}`}
+                    >
+                      {pageNum}
+                    </span>
+                  )}
+
+                  {isPageComplete && (
+                    <div className="absolute top-0 right-0 bg-green-500 text-white p-0.5 rounded-bl-md shadow-sm">
+                      <Wand2 className="w-3 h-3" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Main content area */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
-            {/* Header with page title and conversion counter */}
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h2 className="text-xl font-bold">Page {currentPage}</h2>
-                <p className="text-gray-500 text-sm">
-                  Upload up to 3 images to find the perfect one
-                </p>
-              </div>
-              <div className="text-sm text-gray-600 border border-gray-200 rounded-md px-3 py-1">
-                {conversionsUsed}/{maxConversions} conversions used
-              </div>
-            </div>
-
-            {/* Upload / Preview area */}
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, currentPage)}
-              className={`relative rounded-lg border-2 border-dashed overflow-hidden transition-colors mb-4 ${
-                isDragging
-                  ? "border-primary bg-secondary"
-                  : hasUploadedImage
-                    ? "border-gray-200"
-                    : "border-gray-300 bg-gray-50"
-              }`}
-              style={{ minHeight: "300px" }}
-            >
-              {hasUploadedImage && selectedUploadedImage ? (
-                // Show uploaded image preview
+          {/* Main content grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-12 mt-12">
+            {/* Left Column: Paper Canvas (The actual page editor) */}
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
+                    Page {currentPage}
+                    {hasMaxConversions && (
+                      <span className="text-sm font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center gap-1.5 animate-in fade-in zoom-in">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Ready to Print
+                      </span>
+                    )}
+                  </h2>
+                </div>
                 <div
-                  className="relative w-full h-full"
-                  style={{ minHeight: "300px" }}
+                  className={`text-sm font-black rounded-xl px-5 py-2.5 border transition-all ${
+                    hasMaxConversions
+                      ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
+                      : "bg-gray-50 border-gray-200 text-gray-600"
+                  }`}
                 >
-                  <Image
-                    src={selectedUploadedImage}
-                    alt={`Page ${currentPage} preview`}
-                    fill
-                    className="object-contain"
+                  {conversionsUsed}/{maxConversions} Sketches Created
+                </div>
+              </div>
+
+              {/* The "Paper" - Mockup of the A4 page */}
+              <div className="relative bg-white aspect-[1/1.414] rounded-sm shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] border border-gray-100 p-8 flex flex-col items-stretch overflow-hidden group">
+                {/* Visual paper edge effect */}
+                <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-r from-gray-100/50 to-transparent" />
+
+                {/* Top Text Input Area */}
+                <div className="relative mb-6">
+                  <input
+                    type="text"
+                    placeholder="CLICK TO ADD TOP TEXT..."
+                    value={pageTexts[currentPage]?.topLine || ""}
+                    onChange={(e) =>
+                      updatePageText(
+                        currentPage,
+                        e.target.value,
+                        pageTexts[currentPage]?.bottomLine || "",
+                      )
+                    }
+                    className="w-full text-center text-2xl font-black placeholder:text-gray-200 text-gray-900 bg-transparent border-b-2 border-dashed border-transparent hover:border-gray-100 focus:border-primary focus:bg-primary/5 transition-all outline-none py-4"
                   />
                 </div>
-              ) : (
-                // Show upload prompt
-                <div
-                  className="flex flex-col items-center justify-center p-8 text-center"
-                  style={{ minHeight: "300px" }}
-                >
-                  <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                  <p className="text-gray-600 mb-6">PNG, JPG up to 20MB</p>
 
-                  {!hasMaxImages ? (
-                    <div className="flex flex-col items-center">
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        accept="image/png,image/jpeg"
-                        onChange={(e) => handleImageUpload(e, currentPage)}
-                        className="hidden"
+                {/* CENTRAL DRAWING AREA (Image Upload/Preview) */}
+                <div
+                  onDragOver={(e) => !hasMaxConversions && handleDragOver(e)}
+                  onDragLeave={(e) => !hasMaxConversions && handleDragLeave(e)}
+                  onDrop={(e) =>
+                    !hasMaxConversions && handleDrop(e, currentPage)
+                  }
+                  className={`relative flex-1 rounded-xl border-2 border-dashed transition-all duration-500 flex items-center justify-center ${
+                    isDragging
+                      ? "border-primary bg-secondary/30 scale-[0.98]"
+                      : activeImage
+                        ? "border-transparent bg-gray-50/30"
+                        : hasMaxConversions
+                          ? "border-gray-100 bg-gray-50/10 grayscale cursor-not-allowed"
+                          : "border-gray-200 hover:border-primary/30 bg-gray-50/50 cursor-pointer"
+                  }`}
+                  onClick={() =>
+                    !activeImage &&
+                    !hasMaxConversions &&
+                    fileInputRef.current?.click()
+                  }
+                >
+                  {activeImage ? (
+                    <div className="relative w-full h-full p-4 animate-in fade-in zoom-in duration-500">
+                      <Image
+                        src={activeImage}
+                        alt={`Page ${currentPage} preview`}
+                        fill
+                        className="object-contain"
                       />
-                      <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="bg-primary hover:bg-primary/90 cursor-pointer h-12 px-8 text-lg font-semibold rounded-xl"
-                        disabled={isUploading}
-                      >
-                        {isUploading ? (
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        ) : (
-                          <Upload className="w-5 h-5 mr-2" />
-                        )}
-                        {isUploading ? "Uploading..." : "Upload image"}
-                      </Button>
+                      {/* Floating Remove Button inside the canvas for better UX */}
+                      {!isConverting && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isConvertible) {
+                              const idx =
+                                currentUploadedImages.indexOf(activeImage);
+                              if (idx !== -1)
+                                handleRemoveUploadedImage(currentPage, idx);
+                            } else {
+                              const idx =
+                                currentConvertedImages.indexOf(activeImage);
+                              if (idx !== -1)
+                                handleRemoveConvertedImage(currentPage, idx);
+                            }
+                          }}
+                          className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-red-50 text-red-500 rounded-lg shadow-sm border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      )}
                     </div>
                   ) : (
-                    <div className="text-primary font-medium">
-                      Maximum of 3 images reached for this page.
+                    <div className="flex flex-col items-center justify-center p-12 text-center">
+                      <div
+                        className={`p-6 rounded-full shadow-sm mb-6 ${hasMaxConversions ? "bg-gray-50" : "bg-white border border-gray-100"}`}
+                      >
+                        {isUploading ? (
+                          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                        ) : (
+                          <Upload
+                            className={`w-12 h-12 transition-colors ${hasMaxConversions ? "text-gray-200" : "text-primary"}`}
+                          />
+                        )}
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        {isUploading
+                          ? "Processing..."
+                          : hasMaxConversions
+                            ? "Page Complete"
+                            : "Add Your Drawing"}
+                      </h3>
+                      <p className="text-gray-400 max-w-[280px]">
+                        {hasMaxConversions
+                          ? "Maximum versions generated for this page."
+                          : "Drop your image here or click to browse"}
+                      </p>
                     </div>
                   )}
 
-                  <p className="text-sm text-gray-500 mt-4">
-                    {!hasMaxImages
-                      ? "or drag and drop your image here"
-                      : "Remove an image to upload a new one"}
-                  </p>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/png,image/jpeg"
+                    onChange={(e) => handleImageUpload(e, currentPage)}
+                    className="hidden"
+                  />
+                </div>
+
+                {/* Bottom Text Input Area */}
+                <div className="relative mt-6">
+                  <input
+                    type="text"
+                    placeholder="CLICK TO ADD BOTTOM TEXT..."
+                    value={pageTexts[currentPage]?.bottomLine || ""}
+                    onChange={(e) =>
+                      updatePageText(
+                        currentPage,
+                        pageTexts[currentPage]?.topLine || "",
+                        e.target.value,
+                      )
+                    }
+                    className="w-full text-center text-2xl font-black placeholder:text-gray-200 text-gray-900 bg-transparent border-t-2 border-dashed border-transparent hover:border-gray-100 focus:border-primary focus:bg-primary/5 transition-all outline-none py-4"
+                  />
+                </div>
+
+                {/* Page Number Mockup */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-300">
+                  PAGE {currentPage}
+                </div>
+              </div>
+
+              {/* Action Buttons for the active image */}
+              {activeImage && isConvertible && (
+                <div className="animate-in slide-in-from-bottom-4 duration-500">
+                  <Button
+                    onClick={() =>
+                      handleConvertToLineArt(currentPage, activeImage)
+                    }
+                    disabled={isConverting || hasMaxConversions}
+                    className="w-full h-16 text-xl font-black rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:scale-[1.01] active:scale-[0.99] text-white shadow-2xl shadow-purple-500/20 transition-all border-none"
+                  >
+                    {isConverting ? (
+                      <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                    ) : (
+                      <Wand2 className="w-6 h-6 mr-3" />
+                    )}
+                    {isConverting
+                      ? "MAGICAL SKETCHING..."
+                      : "CONVERT TO LINE ART"}
+                  </Button>
                 </div>
               )}
             </div>
 
-            {/* Convert button and Remove button row */}
-            {hasUploadedImage && selectedUploadedImage && (
-              <div className="flex gap-2 mb-6">
-                <Button
-                  onClick={() =>
-                    handleConvertToLineArt(currentPage, selectedUploadedImage)
-                  }
-                  disabled={isConverting || conversionsUsed >= maxConversions}
-                  className="flex-1 h-12 text-lg font-semibold rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white"
-                >
-                  {isConverting ? (
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  ) : (
-                    <Wand2 className="w-5 h-5 mr-2" />
-                  )}
-                  {isConverting
-                    ? "Converting..."
-                    : "Convert to Line Art (+$0.07)"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleRemoveUploadedImage(currentPage, 0)}
-                  className="h-12 px-4 rounded-xl border-gray-300 hover:bg-gray-50"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-            )}
+            {/* Right Column: Library & Sidebar */}
+            <div className="space-y-10">
+              {/* Section: Your Conversions */}
+              <div className="bg-gray-50/50 rounded-[32px] p-8 border border-gray-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-black flex items-center gap-3">
+                    <Wand2 className="w-5 h-5 text-purple-600" />
+                    CONVERSIONS
+                  </h3>
+                  <span className="text-xs font-black text-gray-400 bg-white px-3 py-1 rounded-full shadow-xs">
+                    {currentConvertedImages.length}/3
+                  </span>
+                </div>
 
-            {/* Upload more button if image already uploaded but less than max */}
-            {hasUploadedImage && !hasMaxImages && (
-              <div className="flex justify-center mb-6">
-                <input
-                  type="file"
-                  id="upload-more"
-                  accept="image/png,image/jpeg"
-                  onChange={(e) => handleImageUpload(e, currentPage)}
-                  className="hidden"
-                />
-                <label htmlFor="upload-more">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      document.getElementById("upload-more")?.click()
-                    }
-                    className="cursor-pointer border-primary text-primary hover:bg-secondary"
-                    disabled={isUploading}
-                  >
-                    {isUploading ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Upload className="w-4 h-4 mr-2" />
-                    )}
-                    Upload another image
-                  </Button>
-                </label>
+                {currentConvertedImages.length === 0 ? (
+                  <div className="aspect-square rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-6 text-center text-gray-400">
+                    <p className="text-sm font-bold">No sketches yet.</p>
+                    <p className="text-xs mt-1">Upload and convert an image!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    {currentConvertedImages.map((img: string, idx: number) => (
+                      <div
+                        key={idx}
+                        className={`group relative aspect-square rounded-2xl overflow-hidden border-2 cursor-pointer transition-all ${
+                          activeImage === img
+                            ? "border-primary ring-4 ring-primary/10 scale-105"
+                            : "border-white hover:border-primary/40"
+                        }`}
+                        onClick={() => handleSelectImage(currentPage, img)}
+                      >
+                        <Image
+                          fill
+                          src={img}
+                          alt="Sketch"
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveConvertedImage(currentPage, idx);
+                          }}
+                          className="absolute top-2 right-2 bg-white/95 text-red-500 p-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Section: Recent Uploads */}
+              <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-xs">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-black flex items-center gap-3">
+                    <Upload className="w-5 h-5 text-blue-500" />
+                    GALLERY
+                  </h3>
+                  {!hasMaxConversions && (
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-primary hover:text-primary/70 transition-colors"
+                    >
+                      <Upload className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+
+                {currentUploadedImages.length === 0 ? (
+                  <p className="text-xs text-center text-gray-400 py-4 font-bold uppercase tracking-tight">
+                    Your uploaded images will appear here
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-3">
+                    {currentUploadedImages.map((img: string, idx: number) => (
+                      <div
+                        key={idx}
+                        className={`group relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${
+                          activeImage === img
+                            ? "border-primary ring-2 ring-primary/10"
+                            : "border-gray-50 hover:border-blue-400/40 shadow-xs"
+                        }`}
+                        onClick={() => handleSelectImage(currentPage, img)}
+                      >
+                        <Image
+                          fill
+                          src={img}
+                          alt="Upload"
+                          className="object-cover"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveUploadedImage(currentPage, idx);
+                          }}
+                          className="absolute top-1 right-1 bg-white/95 text-red-500 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Your Conversions section */}
-          {currentConvertedImages.length > 0 && (
-            <div className="mb-12">
-              <h3 className="font-semibold mb-4">Your Conversions</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {currentConvertedImages.map((img: string, idx: number) => (
-                  <div
-                    key={idx}
-                    className={`relative rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${
-                      pageImages[currentPage] === img
-                        ? "border-primary ring-2 ring-primary/20"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => handleSelectImage(currentPage, img)}
-                  >
-                    <div className="absolute top-1 left-1 bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">
-                      {idx + 1}
-                    </div>
-                    <Image
-                      height={150}
-                      width={150}
-                      src={img || "/placeholder.svg"}
-                      alt={`Conversion ${idx + 1}`}
-                      className="w-full h-32 object-cover"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveConvertedImage(currentPage, idx);
-                      }}
-                      className="absolute top-1 right-1 bg-white/90 hover:bg-red-50 text-red-500 p-1 rounded-full shadow-lg transition-all hover:scale-110"
-                      title="Remove conversion"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Uploaded images thumbnails (if more than one) */}
-          {currentUploadedImages.length > 1 && (
-            <div className="mb-12">
-              <h3 className="font-semibold mb-4">Uploaded Images</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {currentUploadedImages.map((img: string, idx: number) => (
-                  <div
-                    key={idx}
-                    className={`relative rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${
-                      selectedUploadedImage === img
-                        ? "border-primary ring-2 ring-primary/20"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => {
-                      // Re-order so this becomes the first/selected
-                      // For simplicity, we just update page image selection logic
-                    }}
-                  >
-                    <Image
-                      height={150}
-                      width={150}
-                      src={img || "/placeholder.svg"}
-                      alt={`Upload ${idx + 1}`}
-                      className="w-full h-32 object-cover"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveUploadedImage(currentPage, idx);
-                      }}
-                      className="absolute top-1 right-1 bg-white/90 hover:bg-red-50 text-red-500 p-1 rounded-full shadow-lg transition-all hover:scale-110"
-                      title="Remove image"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Navigation buttons */}
-          <div className="flex gap-4 justify-between">
+          <div className="flex gap-4 justify-between mt-16 pt-10 border-t border-gray-100">
             <Button
               variant="outline"
-              onClick={() => setStep("setup")}
-              className="h-14 px-8 text-xl font-semibold border-2 border-primary text-primary hover:bg-secondary rounded-2xl"
+              disabled
+              className="h-16 px-10 text-xl cursor-not-allowed font-black border-2 border-gray-200 text-gray-400 rounded-2xl"
             >
-              ← Back
+              ← BACK
             </Button>
             <Button
               onClick={() => setStep("finalize")}
-              disabled={isContinueDisabled}
-              className="h-14 px-8 text-xl font-semibold bg-primary hover:bg-primary/90 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-16 px-12 text-xl font-black bg-[#ff8b36] hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 border-none"
             >
-              Continue →
+              REVIEW BOOK →
             </Button>
           </div>
         </div>

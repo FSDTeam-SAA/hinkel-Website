@@ -81,6 +81,7 @@ export type OutputFormat = "pdf" | "printed" | "pdf&printed";
  * Page number to image URL mapping
  */
 export type PageImages = Record<number, string>;
+export type PageTexts = Record<number, { topLine: string; bottomLine: string }>;
 
 /**
  * Complete book configuration and state
@@ -102,6 +103,7 @@ export interface BookState {
 
   // Page content
   pageImages: PageImages;
+  pageTexts: PageTexts;
   uploadedPageImages: Record<number, string[]>;
   convertedPageImages: Record<number, string[]>;
 
@@ -132,6 +134,11 @@ export interface BookActions {
   // Page images
   setPageImages: (images: PageImages) => void;
   updatePageImage: (pageNum: number, image: string) => void;
+  updatePageText: (
+    pageNum: number,
+    topLine: string,
+    bottomLine: string,
+  ) => void;
 
   // Uploaded images management
   setUploadedPageImages: (uploadedPageImages: Record<number, string[]>) => void;

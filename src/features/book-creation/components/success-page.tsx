@@ -1,19 +1,49 @@
 "use client";
 
-import { CheckCircle, Home } from "lucide-react";
+import { CheckCircle, Home, Download, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
+import { toast } from "sonner";
+
+import { generateBookPdf } from "../utils/pdf-generator";
 
 export default function SuccessPage() {
   const resetBook = useBookStore((state: BookStore) => state.resetBook);
-  const pageCount = useBookStore((state: BookStore) => state.pageCount);
+  const state = useBookStore();
+  const { pageCount } = state;
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleCreateAnother = () => {
     resetBook();
   };
 
+  const handleDownload = async () => {
+    try {
+      setIsGenerating(true);
+      toast.success("Creating your PDF coloring book...");
+
+      const pdfBlob = await generateBookPdf(state);
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${state.bookTitle || "My-Coloring-Book"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success("Download started!");
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      toast.error("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-background to-background/80 flex items-center justify-center px-4 py-12">
       <div className="max-w-2xl w-full text-center">
         <div className="mb-8 flex justify-center">
           <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
@@ -55,13 +85,28 @@ export default function SuccessPage() {
           </div>
         </div>
 
-        <button
-          onClick={handleCreateAnother}
-          className="w-full bg-muted hover:bg-muted/80 text-foreground font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
-        >
-          <Home className="w-5 h-5" />
-          Create Another Book
-        </button>
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={handleDownload}
+            disabled={isGenerating}
+            className="w-full bg-[#ff8b36] hover:bg-orange-600 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all hover:scale-105 shadow-lg shadow-orange-500/20"
+          >
+            {isGenerating ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <Download className="w-6 h-6" />
+            )}
+            {isGenerating ? "Generating PDF..." : "Download color book"}
+          </button>
+
+          <button
+            onClick={handleCreateAnother}
+            className="w-full bg-muted hover:bg-muted/80 text-foreground font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors"
+          >
+            <Home className="w-5 h-5" />
+            Create Another Book
+          </button>
+        </div>
       </div>
     </div>
   );

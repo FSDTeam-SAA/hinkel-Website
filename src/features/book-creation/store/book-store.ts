@@ -21,6 +21,7 @@ const initialState: BookState = {
   coverImageVariants: [],
   selectedCoverVariantIndex: null,
   pageImages: {},
+  pageTexts: {},
   uploadedPageImages: {},
   convertedPageImages: {},
   dedicationText: "",
@@ -50,6 +51,13 @@ export const useBookStore = create<BookStore>()(
           pageImages: {
             ...state.pageImages,
             [pageNum]: image,
+          },
+        })),
+      updatePageText: (pageNum, topLine, bottomLine) =>
+        set((state) => ({
+          pageTexts: {
+            ...state.pageTexts,
+            [pageNum]: { topLine, bottomLine },
           },
         })),
       setUploadedPageImages: (uploadedPageImages) =>
