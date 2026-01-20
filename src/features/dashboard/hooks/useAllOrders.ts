@@ -1,5 +1,4 @@
-"use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getAllOrders } from "../api/allOrders.api";
 
 export interface Order {
@@ -19,24 +18,27 @@ export function useAllOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
 
-  useEffect(() => {
-    async function fetchOrders() {
-      try {
-        const res = await getAllOrders();
-        setOrders(res.data); // API shape: { success, count, data }
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
+  const fetchOrders = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getAllOrders();
+      setOrders(res.data); // API shape: { success, count, data }
+      setError(null);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
     }
-
-    fetchOrders();
   }, []);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   return {
     orders,
     loading,
     error,
+    refetch: fetchOrders,
   };
 }

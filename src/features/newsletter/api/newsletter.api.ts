@@ -7,8 +7,8 @@ export async function subscribeToNewsletter(email: string) {
   } catch (error) {
     const err = error as { response?: { data?: { message?: string } }; message?: string };
     console.error("Error subscribing to newsletter:", err);
-    throw new Error(
-      err?.response?.data?.message || "Failed to subscribe to newsletter",
-    );
+    const message =
+      err instanceof Error ? err.message : "Failed to subscribe to newsletter";
+    throw new Error(message);
   }
 }
