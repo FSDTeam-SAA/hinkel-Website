@@ -6,7 +6,8 @@ import { useBookStore } from "@/features/book-creation/store/book-store";
 import { BookStore } from "../types";
 import { generateBookPdf } from "../utils/pdf-generator";
 import { useState } from "react";
-import { Eye, Loader2 } from "lucide-react";
+import { useUploadBook } from "@/features/book-creation/hooks/useUploadBook";
+import { Eye, Loader2, ArrowLeft, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function FinalizeBookPage() {
@@ -15,6 +16,8 @@ export default function FinalizeBookPage() {
   const setDedicationText = useBookStore(
     (state: BookStore) => state.setDedicationText,
   );
+  const setReturnStep = useBookStore((state: BookStore) => state.setReturnStep);
+  const returnStep = useBookStore((state: BookStore) => state.returnStep);
   const state = useBookStore();
   const {
     bookTitle,
@@ -25,6 +28,19 @@ export default function FinalizeBookPage() {
     outputFormat,
   } = state;
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Handle returning to the step user was at before previewing
+  const handleReturnToCreation = () => {
+    if (returnStep) {
+      const stepToReturn = returnStep;
+      setReturnStep(null); // Clear the return step
+      setStep(stepToReturn);
+    } else {
+      setStep("images");
+    }
+  };
+
+  const { uploadBook, isLoading: isUploading } = useUploadBook();
 
   const handlePreview = async () => {
     try {
@@ -37,6 +53,35 @@ export default function FinalizeBookPage() {
     } catch (error) {
       console.error("Preview failed:", error);
       toast.error("Failed to generate preview.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    if (!state.orderId) {
+      toast.error("Order ID not found. Please complete payment first.");
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      toast.info("Preparing your book for upload...");
+
+      const pdfBlob = await generateBookPdf(state);
+
+      const response = await uploadBook({
+        title: bookTitle || "My Coloring Book",
+        image: pdfBlob,
+        orderId: state.orderId,
+        approvalStatus: "pending",
+      });
+
+      if (response.success) {
+        setStep("success");
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
     } finally {
       setIsGenerating(false);
     }
@@ -174,16 +219,28 @@ export default function FinalizeBookPage() {
           <div className="flex gap-4 justify-between">
             <Button
               variant="outline"
-              onClick={() => setStep("images")}
-              className="w-32 bg-transparent"
+              onClick={handleReturnToCreation}
+              className="bg-transparent flex items-center gap-2 px-6"
             >
-              ← Back
+              <ArrowLeft className="w-4 h-4" />
+              {returnStep ? "Return to Creation" : "Back"}
             </Button>
             <Button
-              onClick={() => setStep("success")}
-              className="w-32 bg-orange-500 hover:bg-orange-600"
+              onClick={handleComplete}
+              disabled={isGenerating || isUploading}
+              className="w-48 bg-orange-500 hover:bg-orange-600 transition-all rounded-xl h-14 font-semibold text-lg gap-2"
             >
-              Complete →
+              {isGenerating || isUploading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>PROCESSING...</span>
+                </>
+              ) : (
+                <>
+                  <span>FINALIZE BOOK</span>
+                  <CheckCircle className="w-5 h-5" />
+                </>
+              )}
             </Button>
           </div>
         </div>

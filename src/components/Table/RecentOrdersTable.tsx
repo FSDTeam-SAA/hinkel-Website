@@ -129,8 +129,8 @@ const RecentOrdersTable = () => {
                         className={`appearance-none cursor-pointer outline-none border-none pr-8 ${getStatusStyles(order.deliveryStatus || "pending")}`}
                       >
                         <option value="pending">Pending</option>
-                        <option value="paid">Paid</option>
-                        <option value="canceled">Canceled</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
                       </select>
                       <ChevronDown className="h-3 w-3 absolute right-2 top-1/2 -translate-y-1/2 text-current pointer-events-none opacity-50" />
                     </div>

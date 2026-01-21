@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { indexedDbStorage } from "@/lib/indexed-db-storage";
 import type { BookState, BookStore } from "../types";
+import { GENERATION_LIMITS } from "../types";
 
 export type BookStep =
   | "landing"
@@ -13,6 +15,7 @@ export type BookStep =
 
 const initialState: BookState = {
   step: "landing",
+  returnStep: null,
   bookTitle: "",
   pageCount: 20,
   includeDedicationPage: false,
@@ -24,6 +27,10 @@ const initialState: BookState = {
   pageTexts: {},
   uploadedPageImages: {},
   convertedPageImages: {},
+  generationCounts: {
+    cover: 0,
+    pages: {},
+  },
   dedicationText: "",
   hasPaid: false,
   orderId: null,
@@ -31,10 +38,11 @@ const initialState: BookState = {
 
 export const useBookStore = create<BookStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
 
       setStep: (step) => set({ step }),
+      setReturnStep: (returnStep) => set({ returnStep }),
       setBookTitle: (bookTitle) => set({ bookTitle }),
       setPageCount: (pageCount) => set({ pageCount }),
       setIncludeDedicationPage: (includeDedicationPage) =>
@@ -106,6 +114,39 @@ export const useBookStore = create<BookStore>()(
             },
           };
         }),
+
+      // Generation count tracking
+      incrementCoverGeneration: () =>
+        set((state) => ({
+          generationCounts: {
+            ...state.generationCounts,
+            cover: state.generationCounts.cover + 1,
+          },
+        })),
+      incrementPageGeneration: (pageNum) =>
+        set((state) => ({
+          generationCounts: {
+            ...state.generationCounts,
+            pages: {
+              ...state.generationCounts.pages,
+              [pageNum]: (state.generationCounts.pages[pageNum] || 0) + 1,
+            },
+          },
+        })),
+      canGenerateCover: () => {
+        const state = get();
+        return state.generationCounts.cover < GENERATION_LIMITS.MAX_COVER;
+      },
+      canGeneratePage: (pageNum) => {
+        const state = get();
+        const count = state.generationCounts.pages[pageNum] || 0;
+        return count < GENERATION_LIMITS.MAX_PER_PAGE;
+      },
+      getPageGenerationCount: (pageNum) => {
+        const state = get();
+        return state.generationCounts.pages[pageNum] || 0;
+      },
+
       setDedicationText: (dedicationText) => set({ dedicationText }),
       setHasPaid: (hasPaid) => set({ hasPaid }),
       setOrderId: (orderId) => set({ orderId }),
@@ -113,7 +154,7 @@ export const useBookStore = create<BookStore>()(
     }),
     {
       name: "hinklecreek-book-storage",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => indexedDbStorage),
     },
   ),
 );
