@@ -85,7 +85,7 @@ export default function BookSetupFormatPage() {
 
     if (!session?.user?.id) {
       toast.error("Please login to continue");
-      router.push("/login");
+      router.push("/login?callbackUrl=/create-book");
       return;
     }
 

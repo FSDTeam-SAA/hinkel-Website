@@ -4,6 +4,7 @@
 
 export interface GeneratePreviewRequest {
   image: string; // Base64 encoded image
+  type: string;
 }
 
 export interface GeneratePreviewResponse {
@@ -84,11 +85,20 @@ export type PageImages = Record<number, string>;
 export type PageTexts = Record<number, { topLine: string; bottomLine: string }>;
 
 /**
+ * Generation counts tracking per page and cover
+ */
+export interface GenerationCounts {
+  cover: number;
+  pages: Record<number, number>;
+}
+
+/**
  * Complete book configuration and state
  */
 export interface BookState {
   // Step tracking
   step: BookStep;
+  returnStep: BookStep | null; // For mid-flow preview navigation
 
   // Book metadata
   bookTitle: string;
@@ -107,6 +117,9 @@ export interface BookState {
   uploadedPageImages: Record<number, string[]>;
   convertedPageImages: Record<number, string[]>;
 
+  // Generation tracking
+  generationCounts: GenerationCounts;
+
   // Order details
   outputFormat: OutputFormat | null;
   hasPaid: boolean;
@@ -119,6 +132,7 @@ export interface BookState {
 export interface BookActions {
   // Navigation
   setStep: (step: BookStep) => void;
+  setReturnStep: (step: BookStep | null) => void;
 
   // Book setup
   setBookTitle: (title: string) => void;
@@ -149,6 +163,13 @@ export interface BookActions {
   addConvertedPageImage: (pageNum: number, image: string) => void;
   removeConvertedPageImage: (pageNum: number, index: number) => void;
 
+  // Generation count tracking
+  incrementCoverGeneration: () => void;
+  incrementPageGeneration: (pageNum: number) => void;
+  canGenerateCover: () => boolean;
+  canGeneratePage: (pageNum: number) => boolean;
+  getPageGenerationCount: (pageNum: number) => number;
+
   // Order details
   setOutputFormat: (format: OutputFormat) => void;
   setHasPaid: (paid: boolean) => void;
@@ -170,6 +191,14 @@ export const FILE_VALIDATION = {
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
   ALLOWED_TYPES: ["image/jpeg", "image/png", "image/webp"],
   ALLOWED_EXTENSIONS: [".jpg", ".jpeg", ".png", ".webp"],
+} as const;
+
+/**
+ * Generation limits constants
+ */
+export const GENERATION_LIMITS = {
+  MAX_PER_PAGE: 3,
+  MAX_COVER: 3,
 } as const;
 
 /**

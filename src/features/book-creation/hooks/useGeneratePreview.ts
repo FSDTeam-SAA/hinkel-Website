@@ -1,43 +1,57 @@
 "use client";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { generatePreview as generatePreviewApi } from "../api/generate-preview.api";
 
 /**
  * Hook for generating sketch previews from images
- * Manages loading state, errors, and the generated preview
+ * Uses TanStack Query for efficient state management
  */
 export function useGeneratePreview() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const mutation = useMutation({
+    mutationFn: async ({ image, type }: { image: string; type?: string }) => {
+      const response = await generatePreviewApi({
+        image,
+        type: type || "",
+      });
 
-  const generatePreview = async (imageBase64: string) => {
-    setLoading(true);
-    setError(null);
+      console.log("Generate Preview Response:", response);
+
+      // Handle potentially different response structures (flat or nested)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const responseData = response as any;
+      const url =
+        responseData.previewUrl ||
+        responseData.data?.previewUrl ||
+        responseData.url;
+
+      if (!url) {
+        throw new Error("Received empty preview URL from server");
+      }
+
+      return url;
+    },
+  });
+
+  const generatePreview = async (image: string, type?: string) => {
     try {
-      const response = await generatePreviewApi({ image: imageBase64 });
-      setPreviewImage(response.previewUrl);
-      return response.previewUrl;
-    } catch (err) {
-      const error = err as {
-        response?: { data?: { message?: string } };
-        message?: string;
-      };
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to generate preview",
-      );
+      return await mutation.mutateAsync({ image, type });
+    } catch (error) {
+      console.error("Generate preview error:", error);
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 
   const reset = () => {
-    setPreviewImage(null);
-    setError(null);
+    mutation.reset();
   };
 
-  return { generatePreview, loading, error, previewImage, reset };
+  return {
+    generatePreview,
+    loading: mutation.isPending,
+    error: mutation.error
+      ? mutation.error.message || "Failed to generate preview"
+      : null,
+    previewImage: mutation.data || null,
+    reset,
+  };
 }

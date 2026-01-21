@@ -6,7 +6,7 @@ import { useBookStore } from "@/features/book-creation/store/book-store";
 import { BookStore } from "../types";
 import { generateBookPdf } from "../utils/pdf-generator";
 import { useState } from "react";
-import { Eye, Loader2 } from "lucide-react";
+import { Eye, Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function FinalizeBookPage() {
@@ -15,6 +15,8 @@ export default function FinalizeBookPage() {
   const setDedicationText = useBookStore(
     (state: BookStore) => state.setDedicationText,
   );
+  const setReturnStep = useBookStore((state: BookStore) => state.setReturnStep);
+  const returnStep = useBookStore((state: BookStore) => state.returnStep);
   const state = useBookStore();
   const {
     bookTitle,
@@ -25,6 +27,17 @@ export default function FinalizeBookPage() {
     outputFormat,
   } = state;
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Handle returning to the step user was at before previewing
+  const handleReturnToCreation = () => {
+    if (returnStep) {
+      const stepToReturn = returnStep;
+      setReturnStep(null); // Clear the return step
+      setStep(stepToReturn);
+    } else {
+      setStep("images");
+    }
+  };
 
   const handlePreview = async () => {
     try {
@@ -174,10 +187,11 @@ export default function FinalizeBookPage() {
           <div className="flex gap-4 justify-between">
             <Button
               variant="outline"
-              onClick={() => setStep("images")}
-              className="w-32 bg-transparent"
+              onClick={handleReturnToCreation}
+              className="bg-transparent flex items-center gap-2 px-6"
             >
-              ← Back
+              <ArrowLeft className="w-4 h-4" />
+              {returnStep ? "Return to Creation" : "Back"}
             </Button>
             <Button
               onClick={() => setStep("success")}
