@@ -9,7 +9,9 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      name: string;
       email: string;
+      image: string;
       role: string;
     };
     accessToken: string;
@@ -18,7 +20,9 @@ declare module "next-auth" {
 
   interface User {
     id: string;
+    name: string;
     email: string;
+    image: string;
     role: string;
     token: string;
     refreshToken: string;
@@ -28,7 +32,9 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
+    name: string;
     email: string;
+    image: string;
     role: string;
     accessToken: string;
     refreshToken: string;
@@ -78,7 +84,9 @@ const handler = NextAuth({
           // Return the object that NextAuth will use as 'user' in the jwt callback
           return {
             id: user._id || user.id, // Ensure we get the ID
+            name: user.name,
             email: user.email,
+            image: user.profileImage, // Map profileImage to image
             role: user.role,
             token: accessToken, // We attach the token here as a property of the user
             refreshToken: user.refreshToken,
@@ -101,7 +109,9 @@ const handler = NextAuth({
       if (user) {
         console.log("JWT callback - Initial Sign In - User:", user);
         token.id = user.id;
+        token.name = user.name;
         token.email = user.email;
+        token.image = user.image;
         token.role = user.role;
         token.accessToken = user.token;
         token.refreshToken = user.refreshToken;
@@ -121,7 +131,9 @@ const handler = NextAuth({
         session.user = {
           ...session.user,
           id: token.id as string,
+          name: token.name as string,
           email: token.email as string,
+          image: token.image as string,
           role: token.role as string,
         };
         session.accessToken = token.accessToken as string;

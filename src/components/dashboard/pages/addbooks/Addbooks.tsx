@@ -28,7 +28,9 @@ const Addbooks = () => {
 
                     </div>
                 </div>
-
+                {/* add category component */}
+                
+                
                 <CategoryShow />
             </div>
     </div>

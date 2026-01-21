@@ -7,16 +7,18 @@ import {
   Package,
   CheckCircle2,
   Clock,
-  ChevronRight,
-  Search,
-  Filter,
   Loader2,
   AlertCircle,
+  Eye,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useOrderList } from "@/features/account/hooks/useOrderlist";
 import { useSession } from "next-auth/react";
 
@@ -27,8 +29,15 @@ interface Order {
   deliveryType?: string;
   productName?: string;
   createdAt?: string;
+  updatedAt?: string;
   amount?: string | number;
+  totalAmount?: number;
   status?: string;
+  deliveryStatus?: string;
+  pageCount?: number;
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+  refundStatus?: string;
 }
 
 const OrderListPage = () => {
@@ -38,6 +47,9 @@ const OrderListPage = () => {
     isLoading,
     error,
   } = useOrderList(session?.user?.id as string);
+
+  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
   const orders: Order[] = ordersData?.data || [];
 
@@ -117,7 +129,7 @@ const OrderListPage = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between px-2">
+      {/* <div className="flex flex-col md:flex-row gap-4 items-center justify-between px-2">
         <div className="relative w-full md:w-96 group">
           <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#ff7a00] transition-colors"
@@ -134,7 +146,7 @@ const OrderListPage = () => {
         >
           <Filter size={18} /> Filter Registry
         </Button>
-      </div>
+      </div> */}
 
       {/* Orders List */}
       <div className="space-y-4">
@@ -187,18 +199,17 @@ const OrderListPage = () => {
                   <div className="flex flex-col items-end min-w-[120px]">
                     <div
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest 
-                      ${
-                        order.status === "Delivered" ||
-                        order.status === "completed"
+                      ${order.status === "Delivered" ||
+                          order.status === "completed"
                           ? "bg-green-50 text-green-600 border border-green-100"
                           : order.status === "Processing" ||
-                              order.status === "pending"
+                            order.status === "pending"
                             ? "bg-blue-50 text-blue-600 border border-blue-100"
                             : "bg-[#ff7a00]/10 text-[#ff7a00] border border-[#ff7a00]/20"
-                      }`}
+                        }`}
                     >
                       {order.status === "Delivered" ||
-                      order.status === "completed" ? (
+                        order.status === "completed" ? (
                         <CheckCircle2 size={12} />
                       ) : (
                         <Clock size={12} />
@@ -210,9 +221,13 @@ const OrderListPage = () => {
                   <Button
                     variant="ghost"
                     size="icon"
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setIsDialogOpen(true);
+                    }}
                     className="rounded-full hover:bg-[#ff7a00] hover:text-white transition-all text-gray-400"
                   >
-                    <ChevronRight size={20} />
+                    <Eye size={20} />
                   </Button>
                 </div>
               </div>
@@ -235,12 +250,125 @@ const OrderListPage = () => {
         )}
       </div>
 
-      {/* Bottom Visual Guard */}
       <div className="p-8 bg-gray-50 rounded-[2rem] border border-gray-200 border-dashed flex items-center justify-center">
         <p className="text-gray-400 text-sm font-medium flex items-center gap-2">
           <ShoppingBag size={16} /> All transactions are encrypted and verified.
         </p>
       </div>
+
+      {/* Order Detail Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl bg-white rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
+          {selectedOrder && (
+            <div className="flex flex-col">
+              {/* Header */}
+              <div className="bg-gray-900 p-8 text-white relative">
+                <div className="flex justify-between items-start relative z-10">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-black text-[#ff7a00] uppercase tracking-widest px-3 py-1 bg-[#ff7a00]/10 rounded-full border border-[#ff7a00]/20">
+                        Detailed Protocol
+                      </span>
+                    </div>
+                    <DialogTitle className="text-3xl font-black tracking-tighter">
+                      Order <span className="text-[#ff7a00]">Manifest</span>
+                    </DialogTitle>
+                    <p className="text-gray-400 font-mono text-xs">
+                      REF: {selectedOrder._id || selectedOrder.id}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-1">
+                      Final Value
+                    </div>
+                    <div className="text-3xl font-black text-white">
+                      ${selectedOrder.totalAmount ? (selectedOrder.totalAmount / 100).toFixed(2) : (Number(selectedOrder.amount) || 0).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+                {/* Visual Accent */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff7a00] opacity-10 blur-[60px] rounded-full"></div>
+              </div>
+
+              {/* Body */}
+              <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto">
+                {/* Status Section */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col gap-1">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Transaction Status</span>
+                    <span className={`text-sm font-bold uppercase tracking-tight ${selectedOrder.status === 'paid' ? 'text-green-600' : 'text-blue-600'}`}>
+                      {selectedOrder.status}
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col gap-1">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Delivery Vector</span>
+                    <span className="text-sm font-bold uppercase tracking-tight text-gray-900">
+                      {selectedOrder.deliveryStatus} ({selectedOrder.deliveryType})
+                    </span>
+                  </div>
+                </div>
+
+                {/* Technical Specs */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                    <div className="h-4 w-1 bg-[#ff7a00] rounded-full"></div>
+                    Registry data
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex justify-between items-center p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
+                      <span className="text-xs font-bold text-gray-500">Page Count</span>
+                      <span className="text-sm font-black text-gray-900">{selectedOrder.pageCount || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
+                      <span className="text-xs font-bold text-gray-500">Refund Lock</span>
+                      <span className="text-sm font-black text-white px-2 py-0.5 bg-gray-900 rounded-md uppercase text-[10px]">{selectedOrder.refundStatus}</span>
+                    </div>
+                    <div className="flex flex-col p-4 rounded-xl bg-white border border-gray-100 shadow-sm md:col-span-2">
+                      <span className="text-xs font-bold text-gray-500 mb-2">Stripe Protocol Session</span>
+                      <span className="text-[10px] font-mono text-gray-400 break-all bg-gray-50 p-2 rounded-lg leading-relaxed">
+                        {selectedOrder.stripeSessionId}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timeline */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                    <div className="h-4 w-1 bg-[#ff7a00] rounded-full"></div>
+                    Temporal Markers
+                  </h4>
+                  <div className="flex items-center gap-10">
+                    <div>
+                      <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">Initialized</div>
+                      <div className="text-xs font-bold text-gray-900">
+                        {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : "Unknown"}
+                      </div>
+                    </div>
+                    <div className="h-8 w-px bg-gray-200"></div>
+                    <div>
+                      <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">Last Sync</div>
+                      <div className="text-xs font-bold text-gray-900">
+                        {selectedOrder.updatedAt ? new Date(selectedOrder.updatedAt).toLocaleString() : "Unknown"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-8 bg-gray-50 flex justify-end gap-4 border-t border-gray-100">
+                <Button
+                  onClick={() => setIsDialogOpen(false)}
+                  className="rounded-2xl h-14 px-10 bg-gray-900 text-white hover:bg-black transition-all font-black uppercase tracking-widest text-xs"
+                >
+                  Close Registry
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

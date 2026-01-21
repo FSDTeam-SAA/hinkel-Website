@@ -13,7 +13,7 @@ import SubtitleCategory from "@/components/website/Common/SubtitleCategory";
 
 export function CategoryGrid() {
   const { data: contentData, isLoading, error } = useContent({ limit: 10 });
-  const { data: headerData, isLoading: isHeaderLoading } = useCategoryHeader();
+  const { data: headerData } = useCategoryHeader();
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showArrows, setShowArrows] = useState(false);
@@ -88,7 +88,7 @@ export function CategoryGrid() {
     return null; // Or specific empty state
   }
 
-  console.log("headerdata",headerData);
+  console.log("headerdata", headerData);
 
   return (
     <section

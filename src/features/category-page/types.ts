@@ -12,6 +12,7 @@ export interface DashboardStatsResponse {
 export interface CategoryContent {
   _id: string;
   title: string;
+  subtitle?: string;
   image: string;
   type?: string;
   isSplit?: boolean;
@@ -23,7 +24,7 @@ export interface ContentResponse {
 }
 
 export interface CategoryHeader {
-    title: string;
-    subtitle: string;
+  title: string;
+  subtitle: string;
 }
 
