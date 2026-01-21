@@ -10,25 +10,38 @@ export async function proxy(request: NextRequest) {
     const token = await getToken({ req: request });
     const { pathname } = request.nextUrl;
 
-    const isAdmin = token?.role === "admin";
-    const isUser = token?.role === "user";
+    console.log("-----------------------------------------");
+    console.log("Middleware/Proxy Running for:", pathname);
+    console.log("Token Present:", !!token);
+    
+    if (token) {
+        console.log("Token Role:", token.role);
+    }
+
+    const userRole = (token?.role as string)?.toLowerCase();
+    const isAdmin = userRole === "admin" || userRole === "ADMIN";
+    const isUser = userRole === "user" || userRole === "guest" || userRole === "USER" || userRole === "GUEST";
     const isGuest = !token;
 
     // 1. Guest Flow: Unauthenticated users blocked from /dashboard
     if (isGuest && pathname.startsWith("/dashboard")) {
+        console.log("Decision: Redirect Guest to /auth/login");
         return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
-    // 2. Admin Flow: Redirect root path (/) to /dashboard
-    if (isAdmin && pathname === "/") {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-
-    // 3. Standard User Flow: Block access to /dashboard* and redirect to /
-    if (isUser && pathname.startsWith("/dashboard")) {
+    // 2. Strict Dashboard Access: Only Admins allowed
+    if (pathname.startsWith("/dashboard") && !isAdmin) {
+        console.log(`Decision: Blocking ${userRole || 'Unknown'} from dashboard. Redirect to /`);
         return NextResponse.redirect(new URL("/", request.url));
     }
 
+    // 3. Admin Flow: Redirect root path (/) to /dashboard
+    if (isAdmin && pathname === "/") {
+        console.log("Decision: Redirect Admin to /dashboard");
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    console.log("Decision: Proceed to next()");
     return NextResponse.next();
 }
 
@@ -46,6 +59,10 @@ export const config = {
          * - assets (explicit public assets)
          * - favicon.ico, sitemap.xml, robots.txt
          */
+        // dashboard and user routes
+
         "/((?!api|_next/static|_next/image|assets|favicon.ico|sitemap.xml|robots.txt).*)",
+        // "/dashboard/:path*",
+        // "/user/:path*",
     ],
 };
