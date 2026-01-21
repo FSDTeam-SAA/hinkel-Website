@@ -25,6 +25,7 @@ const getStatusStyles = (status: string) => {
     case "processing":
       return `${base} bg-[#EFF6FF] text-[#3B82F6]`;
     case "cancelled":
+    case "canceled":
       return `${base} bg-red-100 text-red-600`;
     default:
       return `${base} bg-gray-100 text-gray-700`;
@@ -35,10 +36,9 @@ const getInitials = (name?: string) => {
   if (!name) return "??";
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 };
-
 const RecentOrdersTable = () => {
   const { orders, loading, error, refetch } = useAllOrders();
-  const { updateStatus, loading: updatingId } = useStatusUpdate();
+  const { updateStatus } = useStatusUpdate();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeUpdatingId, setActiveUpdatingId] = useState<string | null>(null);
 
@@ -124,13 +124,13 @@ const RecentOrdersTable = () => {
                   ) : (
                     <div className="group/select relative">
                       <select
-                        value={order.status}
+                        value={order.deliveryStatus || "pending"}
                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                        className={`appearance-none cursor-pointer outline-none border-none pr-8 ${getStatusStyles(order.status)}`}
+                        className={`appearance-none cursor-pointer outline-none border-none pr-8 ${getStatusStyles(order.deliveryStatus || "pending")}`}
                       >
                         <option value="pending">Pending</option>
                         <option value="paid">Paid</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="canceled">Canceled</option>
                       </select>
                       <ChevronDown className="h-3 w-3 absolute right-2 top-1/2 -translate-y-1/2 text-current pointer-events-none opacity-50" />
                     </div>
@@ -162,8 +162,19 @@ const RecentOrdersTable = () => {
                   <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Order ID</p>
                   <p className="text-lg font-bold text-gray-900">#{selectedOrder._id.toUpperCase()}</p>
                 </div>
-                <div className={getStatusStyles(selectedOrder.status)}>
-                  {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                <div className="flex gap-4">
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Payment</p>
+                    <div className={getStatusStyles(selectedOrder.status)}>
+                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Delivery</p>
+                    <div className={getStatusStyles(selectedOrder.deliveryStatus || "pending")}>
+                      {(selectedOrder.deliveryStatus || "pending").charAt(0).toUpperCase() + (selectedOrder.deliveryStatus || "pending").slice(1)}
+                    </div>
+                  </div>
                 </div>
               </div>
 

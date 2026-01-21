@@ -2,14 +2,34 @@
 import { useAllOrders } from '@/features/dashboard/hooks/useAllOrders';
 import Image from 'next/image';
 import React from 'react';
-import { Loader2, Package, User } from 'lucide-react';
+import { Loader2, Package, User, Truck } from 'lucide-react';
 import OrderedBooksSkeleton from './OrderedBooksSkeleton';
+import { useStatusUpdate } from '@/features/dashboard/hooks/useStatusUpdate';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { toast } from 'sonner';
 
 const OrderedBooks = () => {
-    const { orders, loading, error } = useAllOrders();
+    const { orders, loading, error, refetch } = useAllOrders();
+    const { updateStatus, loading: isUpdating } = useStatusUpdate();
+
+    const handleStatusChange = async (orderId: string, newStatus: string) => {
+        try {
+            await updateStatus(orderId, newStatus);
+            toast.success("Delivery status synchronized");
+            refetch(); // Refresh the list
+        } catch {
+            toast.error("Failed to update delivery protocol");
+        }
+    };
 
     if (loading) return (
-       <OrderedBooksSkeleton />
+        <OrderedBooksSkeleton />
     );
 
     if (error) return (
@@ -51,13 +71,20 @@ const OrderedBooks = () => {
                                 )}
 
                                 {/* Status Badge */}
-                                <div className="absolute top-4 right-4">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ${order.status === 'paid' ? 'bg-green-500 text-white' :
-                                            order.status === 'pending' ? 'bg-amber-500 text-white' :
-                                                'bg-gray-500 text-white'
+                                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm ${order.status === 'paid' ? 'bg-green-500 text-white' :
+                                        order.status === 'pending' ? 'bg-amber-500 text-white' :
+                                            order.status === 'canceled' ? 'bg-rose-500 text-white' :
+                                                'bg-slate-400 text-white'
                                         }`}>
-                                        {order.status}
+                                        Payment: {order.status}
                                     </span>
+                                    <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
+                                        <Truck size={12} className="text-orange-600" />
+                                        <span className="text-[10px] font-bold text-gray-700 uppercase">
+                                            {order.deliveryStatus || 'pending'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -92,18 +119,41 @@ const OrderedBooks = () => {
                                     </div>
 
                                     {/* Footer Details */}
-                                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase font-bold text-gray-400">Total Price</span>
-                                            <span className="text-lg font-black text-orange-600">
-                                                ${(order.totalAmount / 100).toFixed(2)}
-                                            </span>
+                                    <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] uppercase font-bold text-gray-400">Total Price</span>
+                                                <span className="text-lg font-black text-orange-600">
+                                                    ${(order.totalAmount / 100).toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-[10px] uppercase font-bold text-gray-400 block">Ordered On</span>
+                                                <span className="text-xs font-medium text-gray-600">
+                                                    {new Date(order.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="text-[10px] uppercase font-bold text-gray-400 block">Ordered On</span>
-                                            <span className="text-xs font-medium text-gray-600">
-                                                {new Date(order.createdAt).toLocaleDateString()}
+
+                                        {/* Status Update Control */}
+                                        <div className="w-full flex items-center justify-between gap-3 p-2 bg-gray-50 rounded-xl border border-gray-100">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-2">
+                                                Update Protocol
                                             </span>
+                                            <Select
+                                                defaultValue={order.deliveryStatus || 'pending'}
+                                                onValueChange={(value) => handleStatusChange(order._id, value)}
+                                                disabled={isUpdating}
+                                            >
+                                                <SelectTrigger className="h-8 w-[120px] text-[10px] font-bold uppercase tracking-widest bg-white border-gray-200">
+                                                    <SelectValue placeholder="Set Status" />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-white border-gray-200">
+                                                    <SelectItem value="pending" className="text-[10px] font-bold uppercase tracking-widest">Pending</SelectItem>
+                                                    <SelectItem value="paid" className="text-[10px] font-bold uppercase tracking-widest">Paid</SelectItem>
+                                                    <SelectItem value="canceled" className="text-[10px] font-bold uppercase tracking-widest">Canceled</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </div>
                                     </div>
                                 </div>
