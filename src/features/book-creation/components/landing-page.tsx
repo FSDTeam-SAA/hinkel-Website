@@ -4,8 +4,10 @@ import { useState } from "react";
 import { ArrowUpFromLine } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import { useGeneratePreview } from "@/features/book-creation/hooks/useGeneratePreview";
+import { useSearchParams } from "next/navigation";
 import ImagePreviewModal from "./image-preview-modal";
-import { BookStore } from "../types";
+import { BookStore, GENERATION_LIMITS } from "../types";
+import { toast } from "sonner";
 
 export default function LandingPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -16,11 +18,22 @@ export default function LandingPage() {
   const setSelectedCoverVariant = useBookStore(
     (state: BookStore) => state.setSelectedCoverVariant,
   );
+  const incrementCoverGeneration = useBookStore(
+    (state: BookStore) => state.incrementCoverGeneration,
+  );
+  const canGenerateCover = useBookStore(
+    (state: BookStore) => state.canGenerateCover,
+  );
+  const coverGenerationCount = useBookStore(
+    (state: BookStore) => state.generationCounts.cover,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
 
   // Generate preview hook
   const { generatePreview, loading, error, reset } = useGeneratePreview();
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type");
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,9 +61,23 @@ export default function LandingPage() {
   const handleConfirmGeneration = async () => {
     if (!pendingImage) return;
 
-    const previewResult = await generatePreview(pendingImage);
+    // Check cover generation limit
+    if (!canGenerateCover()) {
+      toast.error(
+        `Maximum ${GENERATION_LIMITS.MAX_COVER} cover generations allowed. This limit cannot be reset.`,
+      );
+      return;
+    }
+
+    const previewResult = await generatePreview(
+      pendingImage,
+      type || undefined,
+    );
 
     if (previewResult) {
+      // Increment cover generation count
+      incrementCoverGeneration();
+
       // Successfully generated
       // 1. Store original image
       setCoverImage(pendingImage);
@@ -58,6 +85,12 @@ export default function LandingPage() {
       setCoverImageVariants([previewResult]);
       // 3. Set selected variant to the newly generated one
       setSelectedCoverVariant(0);
+
+      const remaining =
+        GENERATION_LIMITS.MAX_COVER - (coverGenerationCount + 1);
+      toast.success(
+        `Cover generated! ${remaining} generation${remaining !== 1 ? "s" : ""} remaining.`,
+      );
 
       setIsModalOpen(false);
       setPendingImage(null);
@@ -68,7 +101,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-linear-to-br from-background to-background/80 flex items-center justify-center px-4">
         <div className="max-w-2xl w-full text-center">
           <div className="mb-6 flex justify-center">
             <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">

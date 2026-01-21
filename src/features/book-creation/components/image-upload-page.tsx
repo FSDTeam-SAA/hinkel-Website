@@ -4,16 +4,19 @@ import type React from "react";
 import { useState, useRef } from "react";
 import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Loader2, Wand2, CheckCircle2 } from "lucide-react";
+import { Upload, X, Loader2, Wand2, CheckCircle2, Eye } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
+import { GENERATION_LIMITS } from "@/features/book-creation/types";
 import Image from "next/image";
 import { isValidFile, fileToDataURL } from "../utils/file-validation";
 import { toast } from "sonner";
 import { useGeneratePreview } from "../hooks/useGeneratePreview";
+import { useSearchParams } from "next/navigation";
 
 export default function ImageUploadPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
+  const setReturnStep = useBookStore((state: BookStore) => state.setReturnStep);
   const updatePageImage = useBookStore(
     (state: BookStore) => state.updatePageImage,
   );
@@ -29,6 +32,9 @@ export default function ImageUploadPage() {
     removeConvertedPageImage,
     pageTexts,
     updatePageText,
+    incrementPageGeneration,
+    canGeneratePage,
+    getPageGenerationCount,
   } = useBookStore();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,6 +42,8 @@ export default function ImageUploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { generatePreview, loading: isConverting } = useGeneratePreview();
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type");
 
   const steps = [
     "Book Setup",
@@ -145,19 +153,23 @@ export default function ImageUploadPage() {
   };
 
   const handleConvertToLineArt = async (pageNum: number, image: string) => {
-    // Check conversion limit (max 3 per page)
-    const currentConversions = convertedPageImages[pageNum] || [];
-    if (currentConversions.length >= 3) {
-      toast.error("Maximum 3 conversions allowed per page.");
+    // Check generation limit using store tracking (max 3 per page)
+    if (!canGeneratePage(pageNum)) {
+      toast.error(
+        `Maximum ${GENERATION_LIMITS.MAX_PER_PAGE} generations allowed per page. This limit cannot be reset.`,
+      );
       return;
     }
 
     toast.info("Converting to line art...");
 
     try {
-      const lineArtImage = await generatePreview(image);
+      const lineArtImage = await generatePreview(image, type || undefined);
 
       if (lineArtImage) {
+        // Increment generation count BEFORE adding the image
+        incrementPageGeneration(pageNum);
+
         // Find and remove the original uploaded image
         const uploadIndex = (uploadedPageImages[pageNum] || []).indexOf(image);
         if (uploadIndex !== -1) {
@@ -169,7 +181,13 @@ export default function ImageUploadPage() {
         // Auto-select the converted image as the page image
         updatePageImage(pageNum, lineArtImage);
 
-        toast.success("Image converted to line art!");
+        const remaining =
+          GENERATION_LIMITS.MAX_PER_PAGE - getPageGenerationCount(pageNum);
+        toast.success(
+          `Image converted! ${remaining} generation${remaining !== 1 ? "s" : ""} remaining.`,
+        );
+      } else {
+        toast.error("Failed to convert image. Please try again.");
       }
     } catch (err) {
       console.error("Conversion error:", err);
@@ -207,7 +225,11 @@ export default function ImageUploadPage() {
 
   const currentUploadedImages = uploadedPageImages[currentPage] || [];
   const currentConvertedImages = convertedPageImages[currentPage] || [];
-  const hasMaxConversions = currentConvertedImages.length >= 3;
+
+  // Use store tracking for generation limits (persists even after removing images)
+  const generationsUsed = getPageGenerationCount(currentPage);
+  const hasMaxGenerations = !canGeneratePage(currentPage);
+  const maxConversions = GENERATION_LIMITS.MAX_PER_PAGE;
 
   // The active image for the current page from the store
   const activeImage = pageImages[currentPage] || null;
@@ -216,8 +238,11 @@ export default function ImageUploadPage() {
   const isConvertible =
     activeImage && currentUploadedImages.includes(activeImage);
 
-  const conversionsUsed = currentConvertedImages.length;
-  const maxConversions = 3;
+  // Handle preview navigation with state preservation
+  const handlePreviewBook = () => {
+    setReturnStep("images");
+    setStep("finalize");
+  };
 
   // const isContinueDisabled = Array.from(
   //   { length: totalPages },
@@ -293,7 +318,7 @@ export default function ImageUploadPage() {
                 <div>
                   <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
                     Page {currentPage}
-                    {hasMaxConversions && (
+                    {hasMaxGenerations && (
                       <span className="text-sm font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center gap-1.5 animate-in fade-in zoom-in">
                         <CheckCircle2 className="w-4 h-4" />
                         Ready to Print
@@ -303,12 +328,12 @@ export default function ImageUploadPage() {
                 </div>
                 <div
                   className={`text-sm font-black rounded-xl px-5 py-2.5 border transition-all ${
-                    hasMaxConversions
+                    hasMaxGenerations
                       ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
                       : "bg-gray-50 border-gray-200 text-gray-600"
                   }`}
                 >
-                  {conversionsUsed}/{maxConversions} Sketches Created
+                  {generationsUsed}/{maxConversions} Sketches Created
                 </div>
               </div>
 
@@ -336,23 +361,23 @@ export default function ImageUploadPage() {
 
                 {/* CENTRAL DRAWING AREA (Image Upload/Preview) */}
                 <div
-                  onDragOver={(e) => !hasMaxConversions && handleDragOver(e)}
-                  onDragLeave={(e) => !hasMaxConversions && handleDragLeave(e)}
+                  onDragOver={(e) => !hasMaxGenerations && handleDragOver(e)}
+                  onDragLeave={(e) => !hasMaxGenerations && handleDragLeave(e)}
                   onDrop={(e) =>
-                    !hasMaxConversions && handleDrop(e, currentPage)
+                    !hasMaxGenerations && handleDrop(e, currentPage)
                   }
                   className={`relative flex-1 rounded-xl border-2 border-dashed transition-all duration-500 flex items-center justify-center ${
                     isDragging
                       ? "border-primary bg-secondary/30 scale-[0.98]"
                       : activeImage
                         ? "border-transparent bg-gray-50/30"
-                        : hasMaxConversions
+                        : hasMaxGenerations
                           ? "border-gray-100 bg-gray-50/10 grayscale cursor-not-allowed"
                           : "border-gray-200 hover:border-primary/30 bg-gray-50/50 cursor-pointer"
                   }`}
                   onClick={() =>
                     !activeImage &&
-                    !hasMaxConversions &&
+                    !hasMaxGenerations &&
                     fileInputRef.current?.click()
                   }
                 >
@@ -390,25 +415,25 @@ export default function ImageUploadPage() {
                   ) : (
                     <div className="flex flex-col items-center justify-center p-12 text-center">
                       <div
-                        className={`p-6 rounded-full shadow-sm mb-6 ${hasMaxConversions ? "bg-gray-50" : "bg-white border border-gray-100"}`}
+                        className={`p-6 rounded-full shadow-sm mb-6 ${hasMaxGenerations ? "bg-gray-50" : "bg-white border border-gray-100"}`}
                       >
                         {isUploading ? (
                           <Loader2 className="w-12 h-12 text-primary animate-spin" />
                         ) : (
                           <Upload
-                            className={`w-12 h-12 transition-colors ${hasMaxConversions ? "text-gray-200" : "text-primary"}`}
+                            className={`w-12 h-12 transition-colors ${hasMaxGenerations ? "text-gray-200" : "text-primary"}`}
                           />
                         )}
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 mb-2">
                         {isUploading
                           ? "Processing..."
-                          : hasMaxConversions
+                          : hasMaxGenerations
                             ? "Page Complete"
                             : "Add Your Drawing"}
                       </h3>
                       <p className="text-gray-400 max-w-[280px]">
-                        {hasMaxConversions
+                        {hasMaxGenerations
                           ? "Maximum versions generated for this page."
                           : "Drop your image here or click to browse"}
                       </p>
@@ -454,7 +479,7 @@ export default function ImageUploadPage() {
                     onClick={() =>
                       handleConvertToLineArt(currentPage, activeImage)
                     }
-                    disabled={isConverting || hasMaxConversions}
+                    disabled={isConverting || hasMaxGenerations}
                     className="w-full h-16 text-xl font-black rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:scale-[1.01] active:scale-[0.99] text-white shadow-2xl shadow-purple-500/20 transition-all border-none"
                   >
                     {isConverting ? (
@@ -530,7 +555,7 @@ export default function ImageUploadPage() {
                     <Upload className="w-5 h-5 text-blue-500" />
                     GALLERY
                   </h3>
-                  {!hasMaxConversions && (
+                  {!hasMaxGenerations && (
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="text-primary hover:text-primary/70 transition-colors"
@@ -588,12 +613,22 @@ export default function ImageUploadPage() {
             >
               ← BACK
             </Button>
-            <Button
-              onClick={() => setStep("finalize")}
-              className="h-16 px-12 text-xl font-black bg-[#ff8b36] hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 border-none"
-            >
-              REVIEW BOOK →
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                onClick={handlePreviewBook}
+                variant="outline"
+                className="h-16 px-8 text-xl font-black border-2 border-primary/30 text-primary hover:bg-primary/5 rounded-2xl transition-all flex items-center gap-2"
+              >
+                <Eye className="w-5 h-5" />
+                PREVIEW BOOK
+              </Button>
+              <Button
+                onClick={() => setStep("finalize")}
+                className="h-16 px-12 text-xl font-black bg-[#ff8b36] hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 border-none"
+              >
+                REVIEW BOOK →
+              </Button>
+            </div>
           </div>
         </div>
       </div>

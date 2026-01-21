@@ -38,7 +38,13 @@ export function Hero({ type }: { type?: string }) {
             {heroContent?.subtitle ||
               "Turn any photo or drawing into a clean coloring page with powerful AI technology, designed to capture every detail you love and transform it into creative outlines, ready for coloring, sharing, or printing instantly."}
           </p>
-          <Link href="/create-book">
+          <Link
+            href={
+              type
+                ? `/create-book?type=${encodeURIComponent(type)}`
+                : "/create-book"
+            }
+          >
             <Button
               size="lg"
               className="bg-primary text-white  px-8 h-12 text-base font-bold shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98]"
