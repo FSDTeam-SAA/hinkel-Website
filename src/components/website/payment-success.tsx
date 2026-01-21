@@ -9,15 +9,29 @@ export default function PaymentSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
-  const { setStep, setHasPaid } = useBookStore();
+  const {
+    setStep,
+    setHasPaid,
+    pendingExtraPages,
+    pageCount,
+    setPageCount,
+    setPendingExtraPages,
+  } = useBookStore();
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     if (sessionId) {
       setHasPaid(true);
-      // We rely on orderId being set in the previous step (setup-format page)
-      // or verified later. As per user request, we don't use sessionId as orderId.
-      setStep("images");
+
+      if (pendingExtraPages) {
+        setPageCount(pageCount + pendingExtraPages);
+        setPendingExtraPages(null);
+        setStep("finalize");
+      } else {
+        // We rely on orderId being set in the previous step (setup-format page)
+        // or verified later. As per user request, we don't use sessionId as orderId.
+        setStep("images");
+      }
     }
 
     const timer = setInterval(() => {
@@ -25,7 +39,15 @@ export default function PaymentSuccessPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [sessionId, setHasPaid, setStep]);
+  }, [
+    sessionId,
+    setHasPaid,
+    setStep,
+    pageCount,
+    pendingExtraPages,
+    setPageCount,
+    setPendingExtraPages,
+  ]);
 
   useEffect(() => {
     if (countdown <= 0) {

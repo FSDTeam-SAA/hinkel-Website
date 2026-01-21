@@ -4,7 +4,15 @@ import type React from "react";
 import { useState, useRef } from "react";
 import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Loader2, Wand2, CheckCircle2, Eye } from "lucide-react";
+import {
+  Upload,
+  X,
+  Loader2,
+  Wand2,
+  CheckCircle2,
+  Eye,
+  Plus,
+} from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
 import { GENERATION_LIMITS } from "@/features/book-creation/types";
@@ -13,6 +21,7 @@ import { isValidFile, fileToDataURL } from "../utils/file-validation";
 import { toast } from "sonner";
 import { useGeneratePreview } from "../hooks/useGeneratePreview";
 import { useSearchParams } from "next/navigation";
+import AddPagesModal from "./AddPagesModal";
 
 export default function ImageUploadPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -41,6 +50,7 @@ export default function ImageUploadPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
   const { generatePreview, loading: isConverting } = useGeneratePreview();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -308,6 +318,15 @@ export default function ImageUploadPage() {
                 </button>
               );
             })}
+
+            {/* Add Extra Pages Button */}
+            <button
+              onClick={() => setIsAddPagesOpen(true)}
+              className="relative min-w-[64px] h-[64px] rounded-xl border-2 border-dashed border-orange-300 bg-orange-50 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center group"
+              title="Add extra pages"
+            >
+              <Plus className="w-6 h-6 text-orange-600 transition-transform group-hover:scale-125" />
+            </button>
           </div>
 
           {/* Main content grid */}
@@ -632,6 +651,10 @@ export default function ImageUploadPage() {
           </div>
         </div>
       </div>
+      <AddPagesModal
+        isOpen={isAddPagesOpen}
+        onClose={() => setIsAddPagesOpen(false)}
+      />
     </div>
   );
 }
