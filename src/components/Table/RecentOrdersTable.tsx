@@ -1,7 +1,8 @@
 "use client";
 import { useAllOrders, Order } from "@/features/dashboard/hooks/useAllOrders";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2, Package } from "lucide-react";
+import Image from "next/image";
 import React, { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -24,6 +25,7 @@ const getStatusStyles = (status: string) => {
     case "processing":
       return `${base} bg-[#EFF6FF] text-[#3B82F6]`;
     case "cancelled":
+    case "canceled":
       return `${base} bg-red-100 text-red-600`;
     default:
       return `${base} bg-gray-100 text-gray-700`;
@@ -34,10 +36,9 @@ const getInitials = (name?: string) => {
   if (!name) return "??";
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 };
-
 const RecentOrdersTable = () => {
   const { orders, loading, error, refetch } = useAllOrders();
-  const { updateStatus, loading: updatingId } = useStatusUpdate();
+  const { updateStatus } = useStatusUpdate();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeUpdatingId, setActiveUpdatingId] = useState<string | null>(null);
 
@@ -123,13 +124,13 @@ const RecentOrdersTable = () => {
                   ) : (
                     <div className="group/select relative">
                       <select
-                        value={order.status}
+                        value={order.deliveryStatus || "pending"}
                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                        className={`appearance-none cursor-pointer outline-none border-none pr-8 ${getStatusStyles(order.status)}`}
+                        className={`appearance-none cursor-pointer outline-none border-none pr-8 ${getStatusStyles(order.deliveryStatus || "pending")}`}
                       >
                         <option value="pending">Pending</option>
                         <option value="paid">Paid</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="canceled">Canceled</option>
                       </select>
                       <ChevronDown className="h-3 w-3 absolute right-2 top-1/2 -translate-y-1/2 text-current pointer-events-none opacity-50" />
                     </div>
@@ -161,8 +162,19 @@ const RecentOrdersTable = () => {
                   <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Order ID</p>
                   <p className="text-lg font-bold text-gray-900">#{selectedOrder._id.toUpperCase()}</p>
                 </div>
-                <div className={getStatusStyles(selectedOrder.status)}>
-                  {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                <div className="flex gap-4">
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Payment</p>
+                    <div className={getStatusStyles(selectedOrder.status)}>
+                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Delivery</p>
+                    <div className={getStatusStyles(selectedOrder.deliveryStatus || "pending")}>
+                      {(selectedOrder.deliveryStatus || "pending").charAt(0).toUpperCase() + (selectedOrder.deliveryStatus || "pending").slice(1)}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -188,6 +200,30 @@ const RecentOrdersTable = () => {
                   </p>
                 </div>
               </div>
+
+              {(selectedOrder.book || selectedOrder.title) && (
+                <div className="flex gap-4 p-4 bg-orange-50/50 rounded-xl border border-orange-100">
+                  <div className="relative h-20 w-16 flex-shrink-0 bg-white rounded-lg overflow-hidden border border-orange-200 flex items-center justify-center text-orange-200">
+                    {selectedOrder.book ? (
+                      <Image
+                        src={selectedOrder.book}
+                        alt={selectedOrder.title || "Book cover"}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <Package size={32} />
+                    )}
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <p className="text-xs text-orange-600 uppercase font-bold tracking-wider mb-1">Purchased Book</p>
+                    <p className="text-sm font-bold text-gray-900 line-clamp-2">
+                      {selectedOrder.title || "Untitled Book"}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 italic">{selectedOrder.deliveryType}</p>
+                  </div>
+                </div>
+              )}
 
               <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Product Details</p>
