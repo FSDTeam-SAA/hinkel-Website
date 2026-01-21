@@ -11,6 +11,36 @@ export interface GeneratePreviewResponse {
   previewUrl: string; // Base64 or URL of generated preview
 }
 
+/**
+ * Update Book API Types
+ */
+export interface UploadBookRequest {
+  title: string;
+  image: File | Blob;
+  orderId: string;
+  approvalStatus?: string;
+}
+
+export interface UploadBookResponse {
+  success: boolean;
+  message: string;
+  order?: {
+    _id: string;
+    userId: string;
+    deliveryType: DeliveryType;
+    pageCount: number;
+    totalAmount: number;
+    status: string;
+    deliveryStatus: string;
+    stripeSessionId: string;
+    createdAt: string;
+    updatedAt: string;
+    book: string; // Cloudinary URL
+    title: string;
+    approvalStatus: string;
+  };
+}
+
 export type DeliveryType = "digital" | "print" | "print&digital";
 
 export interface PricingData {

@@ -8,10 +8,11 @@ import ImageUploadPage from "@/features/book-creation/components/image-upload-pa
 import FinalizeBookPage from "@/features/book-creation/components/finalize-book-page";
 import SuccessPage from "@/features/book-creation/components/success-page";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import { BookState } from "../types";
+import { BookStore } from "../types";
 
 export default function BookCreation() {
-  const step = useBookStore((state: BookState) => state.step);
+  const step = useBookStore((state: BookStore) => state.step);
+  const setStep = useBookStore((state: BookStore) => state.setStep);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -19,6 +20,18 @@ export default function BookCreation() {
     useBookStore.persist.rehydrate();
     setTimeout(() => setHydrated(true), 0);
   }, []);
+
+  // Handle successful payment return from Stripe
+  useEffect(() => {
+    if (hydrated) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("success") === "true") {
+        setStep("images");
+        // Clear params from URL without refreshing
+        window.history.replaceState({}, "", "/create-book");
+      }
+    }
+  }, [hydrated, setStep]);
 
   if (!hydrated) {
     return (
