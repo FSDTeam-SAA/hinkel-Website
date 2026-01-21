@@ -67,7 +67,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
 
     return (
         <Card className="group h-full bg-white border-2 border-gray-100 rounded-[2rem] py-0! transition-all duration-500 flex flex-col hover:border-[#ff7a00]/30 hover:shadow-2xl hover:shadow-[#ff7a00]/10 overflow-hidden relative">
-            <Link href={`/${category.type}`} className="absolute inset-0 z-10" />
+            <Link href={`/category/${category.type}`} className="absolute inset-0 z-10" />
             <div className="aspect-[4/5] relative w-full overflow-hidden bg-gray-100 border-b border-gray-100">
                 <Image
                     src={category.image || "/no-image.jpg"}
