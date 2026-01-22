@@ -227,7 +227,7 @@ export const ContactForm = memo(() => {
                         <FormLabel className="text-slate-600 font-normal">
                           You agree to our friendly{" "}
                           <a
-                            href="#"
+                            href="/privacy-policy"
                             className="underline hover:text-orange-600 transition-colors"
                           >
                             privacy policy
