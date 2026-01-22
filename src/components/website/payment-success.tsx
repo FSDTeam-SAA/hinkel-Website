@@ -9,15 +9,34 @@ export default function PaymentSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
-  const { setStep, setHasPaid } = useBookStore();
+  const {
+    setStep,
+    setHasPaid,
+    pendingPageCount,
+    setPageCount,
+    setPendingPageCount,
+    step,
+  } = useBookStore();
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     if (sessionId) {
       setHasPaid(true);
-      // We rely on orderId being set in the previous step (setup-format page)
-      // or verified later. As per user request, we don't use sessionId as orderId.
-      setStep("images");
+
+      if (pendingPageCount) {
+        setPageCount(pendingPageCount);
+        setPendingPageCount(null);
+
+        // If we were in setup, go to images. Otherwise (extra pages), return to where we were.
+        if (step === "setup") {
+          setStep("images");
+        } else {
+          // If they added pages from finalize or images, stay there
+          setStep(step);
+        }
+      } else {
+        setStep("images");
+      }
     }
 
     const timer = setInterval(() => {
@@ -25,7 +44,15 @@ export default function PaymentSuccessPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [sessionId, setHasPaid, setStep]);
+  }, [
+    sessionId,
+    setHasPaid,
+    setStep,
+    pendingPageCount,
+    setPageCount,
+    setPendingPageCount,
+    step,
+  ]);
 
   useEffect(() => {
     if (countdown <= 0) {

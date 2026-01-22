@@ -7,8 +7,9 @@ import { BookStore } from "../types";
 import { generateBookPdf } from "../utils/pdf-generator";
 import { useState } from "react";
 import { useUploadBook } from "@/features/book-creation/hooks/useUploadBook";
-import { Eye, Loader2, ArrowLeft, CheckCircle } from "lucide-react";
+import { Eye, Loader2, ArrowLeft, CheckCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
+import AddPagesModal from "./AddPagesModal";
 
 export default function FinalizeBookPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -28,6 +29,7 @@ export default function FinalizeBookPage() {
     outputFormat,
   } = state;
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
 
   // Handle returning to the step user was at before previewing
   const handleReturnToCreation = () => {
@@ -199,6 +201,14 @@ export default function FinalizeBookPage() {
                 <p>
                   <span className="text-gray-600">Total Pages:</span>{" "}
                   <span className="font-semibold">{pageCount}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsAddPagesOpen(true)}
+                    className="h-6 w-6 ml-2 rounded-full bg-orange-100 text-orange-600 hover:bg-orange-200"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
                 </p>
                 <p>
                   <span className="text-gray-600">Format:</span>{" "}
@@ -245,6 +255,10 @@ export default function FinalizeBookPage() {
           </div>
         </div>
       </div>
+      <AddPagesModal
+        isOpen={isAddPagesOpen}
+        onClose={() => setIsAddPagesOpen(false)}
+      />
     </div>
   );
 }

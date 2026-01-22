@@ -16,7 +16,7 @@ const Addbooks = () => {
                         </p>
                     </div>
 
-                    <div className="relative w-full max-w-[320px]">
+                    {/* <div className="relative w-full max-w-[320px]">
                         <Link href="/create-book">
                             <Button
                                 className="text-lg font-bold text-primary bg-transparent border border-primary 
@@ -26,7 +26,7 @@ const Addbooks = () => {
                             </Button>
                         </Link>
 
-                    </div>
+                    </div> */}
                 </div>
                 {/* add category component */}
                 

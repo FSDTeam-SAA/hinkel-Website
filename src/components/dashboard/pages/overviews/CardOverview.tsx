@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
+
 
 interface CardOverviewProps {
     title: string;
@@ -24,12 +24,8 @@ const CardOverview: React.FC<CardOverviewProps> = ({
                     <div className="space-y-3">
                         <div className="text-4xl font-extrabold text-[#111827]">{numberInfo}</div>
                         {trend && (
-                            <div className="flex items-center gap-2 text-sm font-semibold">
-                                <span className={isUp ? "text-[#10B981] flex items-center gap-1" : "text-[#EF4444] flex items-center gap-1"}>
-                                    {isUp ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                                    {trend}
-                                </span>
-                                <span className="text-gray-400 font-medium">vs last month</span>
+                            <div className="text-sm font-medium text-gray-500 mt-1">
+                                Last month
                             </div>
                         )}
                     </div>

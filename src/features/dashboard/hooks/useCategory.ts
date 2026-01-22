@@ -7,6 +7,7 @@ export const useCreateCategory = () => {
         mutationFn: createCategoryApi,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] });
+            queryClient.invalidateQueries({ queryKey: ['content'] });
         }
     });
 };
@@ -17,6 +18,7 @@ export const useUpdateCategory = () => {
         mutationFn: updateCategoryApi,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] });
+            queryClient.invalidateQueries({ queryKey: ['content'] });
         }
     });
 };

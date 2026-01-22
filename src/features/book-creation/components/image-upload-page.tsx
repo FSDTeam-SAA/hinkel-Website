@@ -4,7 +4,15 @@ import type React from "react";
 import { useState, useRef } from "react";
 import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Loader2, Wand2, CheckCircle2, Eye } from "lucide-react";
+import {
+  Upload,
+  X,
+  Loader2,
+  Wand2,
+  CheckCircle2,
+  Eye,
+  Plus,
+} from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
 import { GENERATION_LIMITS } from "@/features/book-creation/types";
@@ -13,10 +21,11 @@ import { isValidFile, fileToDataURL } from "../utils/file-validation";
 import { toast } from "sonner";
 import { useGeneratePreview } from "../hooks/useGeneratePreview";
 import { useSearchParams } from "next/navigation";
+import { generateBookPdf } from "../utils/pdf-generator";
+import AddPagesModal from "./AddPagesModal";
 
 export default function ImageUploadPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
-  const setReturnStep = useBookStore((state: BookStore) => state.setReturnStep);
   const updatePageImage = useBookStore(
     (state: BookStore) => state.updatePageImage,
   );
@@ -41,6 +50,9 @@ export default function ImageUploadPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+  const state = useBookStore();
   const { generatePreview, loading: isConverting } = useGeneratePreview();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -238,10 +250,21 @@ export default function ImageUploadPage() {
   const isConvertible =
     activeImage && currentUploadedImages.includes(activeImage);
 
-  // Handle preview navigation with state preservation
-  const handlePreviewBook = () => {
-    setReturnStep("images");
-    setStep("finalize");
+  // Handle preview directly with PDF generation
+  const handlePreviewBook = async () => {
+    try {
+      setIsGeneratingPreview(true);
+      toast.success("Generating preview...");
+      const pdfBlob = await generateBookPdf(state);
+      const url = URL.createObjectURL(pdfBlob);
+      window.open(url, "_blank");
+      toast.success("Preview PDF opened in new tab!");
+    } catch (error) {
+      console.error("Preview failed:", error);
+      toast.error("Failed to generate preview.");
+    } finally {
+      setIsGeneratingPreview(false);
+    }
   };
 
   // const isContinueDisabled = Array.from(
@@ -308,6 +331,15 @@ export default function ImageUploadPage() {
                 </button>
               );
             })}
+
+            {/* Add Extra Pages Button */}
+            <button
+              onClick={() => setIsAddPagesOpen(true)}
+              className="relative min-w-[64px] h-[64px] rounded-xl border-2 border-dashed border-orange-300 bg-orange-50 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center group"
+              title="Add extra pages"
+            >
+              <Plus className="w-6 h-6 text-orange-600 transition-transform group-hover:scale-125" />
+            </button>
           </div>
 
           {/* Main content grid */}
@@ -616,11 +648,16 @@ export default function ImageUploadPage() {
             <div className="flex gap-4">
               <Button
                 onClick={handlePreviewBook}
+                disabled={isGeneratingPreview}
                 variant="outline"
                 className="h-16 px-8 text-xl font-black border-2 border-primary/30 text-primary hover:bg-primary/5 rounded-2xl transition-all flex items-center gap-2"
               >
-                <Eye className="w-5 h-5" />
-                PREVIEW BOOK
+                {isGeneratingPreview ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+                {isGeneratingPreview ? "GENERATING..." : "PREVIEW BOOK"}
               </Button>
               <Button
                 onClick={() => setStep("finalize")}
@@ -632,6 +669,10 @@ export default function ImageUploadPage() {
           </div>
         </div>
       </div>
+      <AddPagesModal
+        isOpen={isAddPagesOpen}
+        onClose={() => setIsAddPagesOpen(false)}
+      />
     </div>
   );
 }
