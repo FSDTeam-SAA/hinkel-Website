@@ -27,7 +27,8 @@ interface AddPagesModalProps {
 
 export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
   const [extraCount, setExtraCount] = useState<number>(1);
-  const { orderId, outputFormat, setPendingExtraPages } = useBookStore();
+  const { orderId, outputFormat, setPendingPageCount, pageCount } =
+    useBookStore();
   const { data: session } = useSession();
 
   // Map output format to API delivery type
@@ -68,7 +69,7 @@ export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
       });
 
       if (response.success && response.sessionUrl) {
-        setPendingExtraPages(extraCount);
+        setPendingPageCount(pageCount + extraCount);
         window.location.href = response.sessionUrl;
       } else {
         toast.error("Failed to initiate payment session");

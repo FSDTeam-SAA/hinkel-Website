@@ -155,7 +155,7 @@ export interface BookState {
   outputFormat: OutputFormat | null;
   hasPaid: boolean;
   orderId: string | null;
-  pendingExtraPages: number | null;
+  pendingPageCount: number | null;
 }
 
 /**
@@ -206,7 +206,7 @@ export interface BookActions {
   setOutputFormat: (format: OutputFormat) => void;
   setHasPaid: (paid: boolean) => void;
   setOrderId: (orderId: string | null) => void;
-  setPendingExtraPages: (count: number | null) => void;
+  setPendingPageCount: (count: number | null) => void;
 
   // Reset state
   resetBook: () => void;

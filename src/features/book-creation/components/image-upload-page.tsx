@@ -21,11 +21,11 @@ import { isValidFile, fileToDataURL } from "../utils/file-validation";
 import { toast } from "sonner";
 import { useGeneratePreview } from "../hooks/useGeneratePreview";
 import { useSearchParams } from "next/navigation";
+import { generateBookPdf } from "../utils/pdf-generator";
 import AddPagesModal from "./AddPagesModal";
 
 export default function ImageUploadPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
-  const setReturnStep = useBookStore((state: BookStore) => state.setReturnStep);
   const updatePageImage = useBookStore(
     (state: BookStore) => state.updatePageImage,
   );
@@ -51,6 +51,8 @@ export default function ImageUploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+  const state = useBookStore();
   const { generatePreview, loading: isConverting } = useGeneratePreview();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -248,10 +250,21 @@ export default function ImageUploadPage() {
   const isConvertible =
     activeImage && currentUploadedImages.includes(activeImage);
 
-  // Handle preview navigation with state preservation
-  const handlePreviewBook = () => {
-    setReturnStep("images");
-    setStep("finalize");
+  // Handle preview directly with PDF generation
+  const handlePreviewBook = async () => {
+    try {
+      setIsGeneratingPreview(true);
+      toast.success("Generating preview...");
+      const pdfBlob = await generateBookPdf(state);
+      const url = URL.createObjectURL(pdfBlob);
+      window.open(url, "_blank");
+      toast.success("Preview PDF opened in new tab!");
+    } catch (error) {
+      console.error("Preview failed:", error);
+      toast.error("Failed to generate preview.");
+    } finally {
+      setIsGeneratingPreview(false);
+    }
   };
 
   // const isContinueDisabled = Array.from(
@@ -635,11 +648,16 @@ export default function ImageUploadPage() {
             <div className="flex gap-4">
               <Button
                 onClick={handlePreviewBook}
+                disabled={isGeneratingPreview}
                 variant="outline"
                 className="h-16 px-8 text-xl font-black border-2 border-primary/30 text-primary hover:bg-primary/5 rounded-2xl transition-all flex items-center gap-2"
               >
-                <Eye className="w-5 h-5" />
-                PREVIEW BOOK
+                {isGeneratingPreview ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+                {isGeneratingPreview ? "GENERATING..." : "PREVIEW BOOK"}
               </Button>
               <Button
                 onClick={() => setStep("finalize")}

@@ -12,10 +12,10 @@ export default function PaymentSuccessPage() {
   const {
     setStep,
     setHasPaid,
-    pendingExtraPages,
-    pageCount,
+    pendingPageCount,
     setPageCount,
-    setPendingExtraPages,
+    setPendingPageCount,
+    step,
   } = useBookStore();
   const [countdown, setCountdown] = useState(3);
 
@@ -23,13 +23,18 @@ export default function PaymentSuccessPage() {
     if (sessionId) {
       setHasPaid(true);
 
-      if (pendingExtraPages) {
-        setPageCount(pageCount + pendingExtraPages);
-        setPendingExtraPages(null);
-        setStep("finalize");
+      if (pendingPageCount) {
+        setPageCount(pendingPageCount);
+        setPendingPageCount(null);
+
+        // If we were in setup, go to images. Otherwise (extra pages), return to where we were.
+        if (step === "setup") {
+          setStep("images");
+        } else {
+          // If they added pages from finalize or images, stay there
+          setStep(step);
+        }
       } else {
-        // We rely on orderId being set in the previous step (setup-format page)
-        // or verified later. As per user request, we don't use sessionId as orderId.
         setStep("images");
       }
     }
@@ -43,10 +48,10 @@ export default function PaymentSuccessPage() {
     sessionId,
     setHasPaid,
     setStep,
-    pageCount,
-    pendingExtraPages,
+    pendingPageCount,
     setPageCount,
-    setPendingExtraPages,
+    setPendingPageCount,
+    step,
   ]);
 
   useEffect(() => {

@@ -34,7 +34,7 @@ const initialState: BookState = {
   dedicationText: "",
   hasPaid: false,
   orderId: null,
-  pendingExtraPages: null,
+  pendingPageCount: null,
 };
 
 export const useBookStore = create<BookStore>()(
@@ -151,7 +151,7 @@ export const useBookStore = create<BookStore>()(
       setDedicationText: (dedicationText) => set({ dedicationText }),
       setHasPaid: (hasPaid) => set({ hasPaid }),
       setOrderId: (orderId) => set({ orderId }),
-      setPendingExtraPages: (pendingExtraPages) => set({ pendingExtraPages }),
+      setPendingPageCount: (pendingPageCount) => set({ pendingPageCount }),
       resetBook: () => set(initialState),
     }),
     {
