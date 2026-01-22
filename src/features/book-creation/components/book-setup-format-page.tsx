@@ -14,7 +14,9 @@ import { toast } from "sonner";
 
 export default function BookSetupFormatPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
-  const setPageCount = useBookStore((state: BookStore) => state.setPageCount);
+  const setPendingPageCount = useBookStore(
+    (state: BookStore) => state.setPendingPageCount,
+  );
   const setOutputFormat = useBookStore(
     (state: BookStore) => state.setOutputFormat,
   );
@@ -105,7 +107,7 @@ export default function BookSetupFormatPage() {
 
       if (response.success && response.sessionUrl) {
         setBookTitle(title);
-        setPageCount(selectedPages);
+        setPendingPageCount(selectedPages);
         setOutputFormat(selectedFormat);
         setOrderId(response.orderId);
 
