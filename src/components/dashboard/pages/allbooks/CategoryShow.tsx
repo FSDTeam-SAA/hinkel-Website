@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import { useCategoryHeader, usePostCategoryHeader } from "@/features/category-page/hooks/use-categoryheader";
 import { CategoryContent } from "@/features/category-page/types";
-import { Zap, ShieldCheck, Database, Type, Activity, MonitorX } from "lucide-react";
+import { ShieldCheck, Database, Type, Activity, MonitorX } from "lucide-react";
 import { toast } from "sonner";
 import {
   Accordion,
@@ -14,16 +14,12 @@ import {
 } from "@/components/ui/accordion";
 import CategoryCard from './CategoryCard';
 import AddCategory from "../addbooks/AddCategory";
+import CategoryHeaderForm from "./CategoryHeaderForm";
 
 export function CategoryShow() {
   const { data: contentData, isLoading, error } = useContent({ limit: 50 });
   const { data: headerData } = useCategoryHeader();
   const { mutate: postHeader, isPending } = usePostCategoryHeader();
-
-  const [headerForm, setHeaderForm] = useState({
-    title: "",
-    subtitle: ""
-  });
 
   // Resolution Gate Logic
   useEffect(() => {
@@ -42,15 +38,6 @@ export function CategoryShow() {
     return () => window.removeEventListener('resize', checkResolution);
   }, []);
 
-
-  useEffect(() => {
-    if (headerData?.data?.data) {
-      setHeaderForm({
-        title: headerData.data.data.title || "",
-        subtitle: headerData.data.data.subtitle || ""
-      });
-    }
-  }, [headerData]);
 
   const categories = contentData?.data || [];
 
@@ -123,52 +110,18 @@ export function CategoryShow() {
                 </AccordionTrigger>
 
                 <AccordionContent className="relative z-10 px-8 pb-8">
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      postHeader(headerForm, {
+                  <CategoryHeaderForm
+                    key={headerData?.data?.data ? "loaded" : "loading"}
+                    initialTitle={headerData?.data?.data?.title || ""}
+                    initialSubtitle={headerData?.data?.data?.subtitle || ""}
+                    isPending={isPending}
+                    onSubmit={(data) => {
+                      postHeader(data, {
                         onSuccess: () => toast.success("System parameters updated"),
                         onError: (error) => toast.error("Update failed: " + error.message)
                       });
                     }}
-                    className="space-y-6 pt-4"
-                  >
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          Global Title
-                        </label>
-                        <input
-                          type="text"
-                          value={headerForm.title}
-                          onChange={(e) => setHeaderForm({ ...headerForm, title: e.target.value })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ff7a00]/50 focus:ring-1 focus:ring-[#ff7a00]/50 transition-all text-sm font-medium"
-                          placeholder="Enter system title..."
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          Sub-Protocol Description
-                        </label>
-                        <textarea
-                          value={headerForm.subtitle}
-                          onChange={(e) => setHeaderForm({ ...headerForm, subtitle: e.target.value })}
-                          rows={3}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ff7a00]/50 focus:ring-1 focus:ring-[#ff7a00]/50 transition-all text-sm font-medium resize-none"
-                          placeholder="Enter description..."
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isPending}
-                      className="w-full bg-[#ff7a00] hover:bg-[#ff8a00] text-white font-bold text-xs uppercase tracking-[0.15em] py-4 rounded-xl shadow-lg shadow-[#ff7a00]/20 hover:shadow-[#ff7a00]/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                    >
-                      {isPending ? "Syncing..." : <><Zap size={14} /> Commit Update</>}
-                    </button>
-                  </form>
+                  />
                 </AccordionContent>
               </div>
             </AccordionItem>
