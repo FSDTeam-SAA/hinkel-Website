@@ -150,8 +150,8 @@ const OrderedBooks = () => {
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-white border-gray-200">
                                                     <SelectItem value="pending" className="text-[10px] font-bold uppercase tracking-widest">Pending</SelectItem>
-                                                    <SelectItem value="paid" className="text-[10px] font-bold uppercase tracking-widest">Paid</SelectItem>
-                                                    <SelectItem value="canceled" className="text-[10px] font-bold uppercase tracking-widest">Canceled</SelectItem>
+                                                    <SelectItem value="approved" className="text-[10px] font-bold uppercase tracking-widest">Approved</SelectItem>
+                                                    <SelectItem value="rejected" className="text-[10px] font-bold uppercase tracking-widest">Rejected</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>

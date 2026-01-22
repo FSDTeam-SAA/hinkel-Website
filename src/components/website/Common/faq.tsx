@@ -7,6 +7,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import HeaderTitle from "./head-title";
+import Link from "next/link";
 
 const FAQS = [
   {
@@ -92,9 +93,11 @@ export function FAQ() {
               our friendly team.
             </p>
           </div>
-          <Button className="bg-primary hover:bg-primary/90 text-white rounded-lg px-8 h-12 font-semibold">
-            Get in touch
-          </Button>
+          <Link href="/contact-us">
+            <Button className="bg-primary hover:bg-primary/90 text-white rounded-lg px-8 h-12 font-semibold">
+              Get in touch
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

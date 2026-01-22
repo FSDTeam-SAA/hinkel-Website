@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import { useCategoryHeader, usePostCategoryHeader } from "@/features/category-page/hooks/use-categoryheader";
 import { CategoryContent } from "@/features/category-page/types";
-import { Zap, ShieldCheck, Database, Type, AlignLeft } from "lucide-react";
+import { Zap, ShieldCheck, Database, Type, Activity, MonitorX } from "lucide-react";
 import { toast } from "sonner";
 import {
   Accordion,
@@ -25,25 +25,40 @@ export function CategoryShow() {
     subtitle: ""
   });
 
-  // Track previous data to sync state during render (recommended alternative to useEffect for this case)
-  const [prevHeaderData, setPrevHeaderData] = useState(headerData);
-  if (headerData !== prevHeaderData) {
-    setPrevHeaderData(headerData);
+  // Resolution Gate Logic
+  useEffect(() => {
+    const checkResolution = () => {
+      if (window.innerWidth < 720) {
+        toast.message("Low Resolution Detected", {
+          description: "For the best administrative experience, please switch to a workstation.",
+          icon: <MonitorX className="w-4 h-4 text-amber-500" />,
+        });
+      }
+    };
+
+    checkResolution();
+    // Debounced resize listener could be better, but simple check on mount/resize works for now
+    window.addEventListener('resize', checkResolution);
+    return () => window.removeEventListener('resize', checkResolution);
+  }, []);
+
+
+  useEffect(() => {
     if (headerData?.data?.data) {
       setHeaderForm({
         title: headerData.data.data.title || "",
         subtitle: headerData.data.data.subtitle || ""
       });
     }
-  }
+  }, [headerData]);
 
   const categories = contentData?.data || [];
 
   if (error) {
     return (
-      <section className="py-24 px-6 bg-slate-50 flex justify-center items-center min-h-[50vh]">
-        <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-6 rounded-2xl flex items-center gap-4">
-          <ShieldCheck className="w-6 h-6" />
+      <section className="py-24 px-6 bg-slate-950 flex justify-center items-center min-h-[50vh]">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-6 rounded-2xl flex items-center gap-4 backdrop-blur-md">
+          <ShieldCheck className="w-6 h-6 animate-pulse" />
           <span className="font-mono tracking-widest uppercase text-xs">System Failure: Could not load categories.</span>
         </div>
       </section>
@@ -51,204 +66,133 @@ export function CategoryShow() {
   }
 
   return (
-    <section className="min-h-screen bg-transparent space-y-12 py-10 animate-in fade-in duration-1000">
-      <div className="container mx-auto px-6 space-y-12">
+    <section className="min-h-screen bg-slate-50 relative overflow-hidden py-10 selection:bg-[#ff7a00]/30 selection:text-[#ff7a00]">
+      <div className="container mx-auto px-6 space-y-12 relative z-10">
+
         {/* Global Command Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-white p-10 rounded-[2.5rem] shadow-sm relative overflow-hidden border border-slate-200">
-          <div className="space-y-4 relative z-10">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
+
+          <div className="space-y-3 relative z-10">
             <div className="flex items-center gap-3">
-              <span className="flex h-3 w-3 rounded-full bg-green-500 animate-pulse ring-4 ring-green-500/20"></span>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Library Control Hub</span>
+              <span className="flex h-2 w-2 rounded-full bg-[#ff7a00] shadow-[0_0_10px_#ff7a00] animate-pulse"></span>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Cybernetic Control Hub</span>
             </div>
-            <h1 className="text-5xl font-black text-slate-900 tracking-tighter">
-              Category <span className="text-[#ff7a00]">Command</span>
+            <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter">
+              Category <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff7a00] to-orange-400">Command</span>
             </h1>
           </div>
 
           <div className="grid grid-cols-2 gap-4 relative z-10">
-            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-1">
-              <div className="text-slate-400 text-xs font-bold uppercase tracking-tighter flex items-center gap-2">
-                <Database size={14} className="text-[#ff7a00]" /> Total Indices
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-1 group/stat hover:border-[#ff7a00]/30 transition-colors duration-300">
+              <div className="text-slate-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                <Database size={12} className="text-[#ff7a00]" /> Indices
               </div>
-              <div className="text-2xl font-mono text-slate-900 tracking-widest">
+              <div className="text-2xl font-mono text-slate-900 tracking-widest group-hover/stat:text-[#ff7a00] transition-colors">
                 {isLoading ? "..." : categories.length.toString().padStart(2, '0')}
               </div>
             </div>
-            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-1">
-              <div className="text-slate-400 text-xs font-bold uppercase tracking-tighter flex items-center gap-2">
-                <Zap size={14} className="text-[#ff7a00]" /> System Status
-              </div>
-              <div className="text-2xl font-mono text-green-600 tracking-widest italic pt-1">ONLINE</div>
-            </div>
-          </div>
 
-          <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
-            <div className="absolute top-10 right-10 w-64 h-64 bg-[#ff7a00] rounded-full blur-[120px]"></div>
-            <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-              <defs>
-                <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" />
-                </pattern>
-              </defs>
-              <rect width="100" height="100" fill="url(#grid)" />
-            </svg>
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-1 group/stat hover:border-green-500/30 transition-colors duration-300">
+              <div className="text-slate-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                <Activity size={12} className="text-green-500" /> Status
+              </div>
+              <div className="text-2xl font-mono text-green-600 tracking-widest group-hover/stat:text-green-500 transition-colors animate-pulse">active</div>
+            </div>
           </div>
         </div>
 
-        {/* Category Header Settings Section */}
-        <Accordion type="single" collapsible className="w-full mb-12 cursor-pointer">
-          <AccordionItem value="system-parameters" className="border-none">
-            <div className="group/settings relative rounded-[3rem] shadow-sm overflow-hidden border border-slate-200 transition-all duration-700 hover:shadow-md">
-              {/* Soft Background Layers */}
-              <div className="absolute inset-0 bg-white" />
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-transparent to-blue-50/30" />
+        {/* Category Header Settings & Add Category */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Settings Accordion */}
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="system-parameters" className="border-none">
+              <div className="group/settings relative rounded-[2rem] bg-white border border-slate-200 transition-all duration-500 hover:border-[#ff7a00]/30 hover:shadow-lg overflow-hidden">
 
-              {/* Decorative Floating Orb (Softened) */}
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#ff7a00]/10 rounded-full blur-[100px] animate-pulse" />
-              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-100 rounded-full blur-[100px] opacity-40 animate-pulse" style={{ animationDelay: '2s' }} />
-
-              {/* Light Tech Grid Overlay */}
-              <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #cbd5e1 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-
-              <AccordionTrigger className="relative z-10 px-10 py-8 cursor-pointer hover:no-underline group/trigger">
-                <div className="flex flex-col items-start space-y-2 text-left w-full">
+                <AccordionTrigger className="relative z-10 px-8 py-6 cursor-pointer hover:no-underline group/trigger">
                   <div className="flex items-center gap-4">
-                    <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-blue-500" />
-                    <span className="text-2xl md:text-3xl font-black text-blue-500 uppercase tracking-[0.2em] group-hover/trigger:tracking-[0.3em] transition-all duration-500">
-                      System Parameters
-                    </span>
+                    <div className="p-3 rounded-xl bg-[#ff7a00]/10 text-[#ff7a00]">
+                      <Type size={18} />
+                    </div>
+                    <div className="text-left">
+                      <h2 className="text-lg font-bold text-slate-900 tracking-tight group-hover/trigger:text-[#ff7a00] transition-colors">
+                        Header Parameters
+                      </h2>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-lg md:text-xl font-bold text-slate-400 tracking-tight">
-                      Header <span className="text-slate-900 italic">Architecture</span>
-                    </h2>
-                  </div>
-                </div>
-              </AccordionTrigger>
+                </AccordionTrigger>
 
-              <AccordionContent className="relative z-10 px-10 pb-10">
-                <div className="space-y-10">
-                  <p className="text-slate-600 text-sm font-medium max-w-lg border-l-2 border-blue-500/30 pl-4 py-1">
-                    Modify the primary interface metadata. These changes propagate across the global category grid in real-time.
-                  </p>
-
+                <AccordionContent className="relative z-10 px-8 pb-8">
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       postHeader(headerForm, {
-                        onSuccess: () => {
-                          toast.success("System parameters updated successfully");
-                        },
-                        onError: (error) => {
-                          toast.error("Failed to update header: " + error.message);
-                        }
+                        onSuccess: () => toast.success("System parameters updated"),
+                        onError: (error) => toast.error("Update failed: " + error.message)
                       });
                     }}
-                    className="grid grid-cols-1 lg:grid-cols-12 gap-10"
+                    className="space-y-6 pt-4"
                   >
-                    <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {/* Title Input */}
-                      <div className="group/field relative space-y-3">
-                        <div className="flex items-center justify-between px-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 group-focus-within/field:text-[#ff7a00] transition-colors">
-                            <Type size={12} /> Title
-                          </label>
-                        </div>
-                        <div className="relative group/input">
-                          <input
-                            type="text"
-                            placeholder="e.g., Digital Archive"
-                            value={headerForm.title}
-                            onChange={(e) => setHeaderForm({ ...headerForm, title: e.target.value })}
-                            required
-                            className="w-full bg-slate-50 border border-slate-200 rounded-[1.25rem] px-6 py-5 text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/10 focus:border-[#ff7a00] transition-all duration-500"
-                          />
-                          <div className="absolute inset-0 rounded-[1.25rem] bg-gradient-to-tr from-[#ff7a00]/5 to-transparent opacity-0 group-focus-within/field:opacity-100 pointer-events-none transition-opacity duration-500" />
-                        </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                          Global Title
+                        </label>
+                        <input
+                          type="text"
+                          value={headerForm.title}
+                          onChange={(e) => setHeaderForm({ ...headerForm, title: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ff7a00]/50 focus:ring-1 focus:ring-[#ff7a00]/50 transition-all text-sm font-medium"
+                          placeholder="Enter system title..."
+                        />
                       </div>
 
-                      {/* Subtitle Textarea */}
-                      <div className="group/field relative space-y-3 md:col-span-2">
-                        <div className="flex items-center justify-between px-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 group-focus-within/field:text-[#ff7a00] transition-colors">
-                            <AlignLeft size={12} /> Subtitle
-                          </label>
-                        </div>
-                        <div className="relative">
-                          <textarea
-                            placeholder="Enter a compelling description for your categories..."
-                            value={headerForm.subtitle}
-                            onChange={(e) => setHeaderForm({ ...headerForm, subtitle: e.target.value })}
-                            required
-                            rows={4}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-[1.5rem] px-6 py-5 text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/10 focus:border-[#ff7a00] transition-all duration-500 shadow-sm resize-none leading-relaxed"
-                          />
-                          <div className="absolute bottom-6 right-6 flex gap-1.5 opacity-20">
-                            <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                            <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                          </div>
-                        </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                          Sub-Protocol Description
+                        </label>
+                        <textarea
+                          value={headerForm.subtitle}
+                          onChange={(e) => setHeaderForm({ ...headerForm, subtitle: e.target.value })}
+                          rows={3}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ff7a00]/50 focus:ring-1 focus:ring-[#ff7a00]/50 transition-all text-sm font-medium resize-none"
+                          placeholder="Enter description..."
+                        />
                       </div>
                     </div>
 
-                    {/* Action Sidebar */}
-                    <div className="lg:col-span-4 flex flex-col justify-end space-y-6">
-                      <div className="bg-slate-50 rounded-3xl p-6 border border-slate-200 space-y-4 shadow-inner">
-                        <div className="flex items-center gap-3 text-slate-400">
-                          <ShieldCheck size={16} className="text-green-600" />
-                          <span className="text-xs font-semibold">Protected Transmission</span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">
-                          Once committed, these parameters will be broadcasted to website.
-                        </p>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={isPending}
-                        className="relative group/btn cursor-pointer w-full py-5 rounded-2xl overflow-hidden transition-all duration-500 active:scale-95"
-                      >
-                        <div className="absolute inset-0 bg-[#ff7a00] group-hover/btn:scale-105 transition-transform duration-500" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
-
-                        <div className="relative flex items-center justify-center gap-3 text-white font-black uppercase tracking-[0.2em] text-sm">
-                          {isPending ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              Syncing...
-                            </>
-                          ) : (
-                            <>
-                              <Zap size={18} fill="currentColor" />
-                              Execute Update
-                            </>
-                          )}
-                        </div>
-                      </button>
-                    </div>
+                    <button
+                      type="submit"
+                      disabled={isPending}
+                      className="w-full bg-[#ff7a00] hover:bg-[#ff8a00] text-white font-bold text-xs uppercase tracking-[0.15em] py-4 rounded-xl shadow-lg shadow-[#ff7a00]/20 hover:shadow-[#ff7a00]/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
+                      {isPending ? "Syncing..." : <><Zap size={14} /> Commit Update</>}
+                    </button>
                   </form>
-                </div>
-              </AccordionContent>
-            </div>
-          </AccordionItem>
-        </Accordion>
+                </AccordionContent>
+              </div>
+            </AccordionItem>
+          </Accordion>
 
+          {/* Add Category Card */}
+          <AddCategory />
+        </div>
 
-        <AddCategory />
 
         {/* Content Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-96 rounded-[2rem] bg-gray-100 animate-pulse"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="aspect-square rounded-[1.75rem] bg-slate-100 border border-slate-200 animate-pulse"></div>
             ))}
           </div>
         ) : categories.length === 0 ? (
-          <div className="text-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
-            <p className="text-xl font-bold text-gray-400 uppercase tracking-widest">No Categories Detected</p>
+          <div className="text-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
+            <Database className="mx-auto h-10 w-10 text-slate-400 mb-4 opacity-50" />
+            <p className="text-lg font-bold text-slate-400 uppercase tracking-widest">Digital Void Empty</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {categories.map((category: CategoryContent) => (
               <CategoryCard key={category._id} category={category} />
             ))}
