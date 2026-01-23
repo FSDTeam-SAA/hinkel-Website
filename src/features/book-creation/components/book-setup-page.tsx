@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
 import { useBookStore } from "@/features/book-creation/store/book-store";
@@ -35,6 +36,7 @@ export default function BookSetupPage() {
     const newErrors: { title?: string } = {};
     if (!title.trim()) {
       newErrors.title = "Book title is required";
+      toast.error(newErrors.title);
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -65,11 +67,10 @@ export default function BookSetupPage() {
                 if (errors.title) setErrors({});
               }}
               placeholder="My Amazing Coloring Book"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none transition-colors ${
-                errors.title
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none transition-colors ${errors.title
                   ? "border-red-500 focus:border-red-500"
                   : "border-gray-300 focus:border-orange-500"
-              }`}
+                }`}
             />
             {errors.title && (
               <p className="text-red-500 text-sm mt-2">{errors.title}</p>
@@ -85,11 +86,10 @@ export default function BookSetupPage() {
                 <button
                   key={option}
                   onClick={() => setSelectedPages(option)}
-                  className={`py-6 rounded-lg font-semibold transition-all ${
-                    selectedPages === option
+                  className={`py-6 rounded-lg font-semibold transition-all ${selectedPages === option
                       ? "border-2 border-orange-500 bg-orange-50"
                       : "border-2 border-gray-200 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   <div className="text-2xl">{option}</div>
                   <div className="text-sm text-gray-600">Page</div>

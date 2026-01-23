@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { ArrowUpFromLine } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import { useGeneratePreview } from "@/features/book-creation/hooks/useGeneratePreview";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import ImagePreviewModal from "./image-preview-modal";
 import { BookStore, GENERATION_LIMITS } from "../types";
 import { toast } from "sonner";
+import { useContent } from "@/features/category-page/hooks/use-content";
+import { cn } from "@/lib/utils";
+import { BookStyleSelector } from "./BookStyleSelector";
 
 export default function LandingPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -32,17 +35,40 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
 
+  // Navigation hooks
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  // State for categories
+  const { data: contentData } = useContent({ limit: 12 });
+  const categories = contentData?.data || [];
+
+  // Dropdown persistence logic (extracted but local state management for sync)
+  const currentTypeFromUrl = searchParams.get("type");
+
+  // Sync URL to State (Initial & URL changes)
+  useEffect(() => {
+    if (currentTypeFromUrl && currentTypeFromUrl !== bookType) {
+      setBookType(currentTypeFromUrl);
+    } else if (!currentTypeFromUrl && bookType) {
+      // If store has it but URL doesn't, sync store to URL
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("type", bookType);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [currentTypeFromUrl, bookType, setBookType, pathname, router, searchParams]);
+
+  // Handle manual selection
+  const handleStyleSelect = useCallback((type: string) => {
+    setBookType(type);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("type", type);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [setBookType, pathname, router, searchParams]);
+
   // Generate preview hook
   const { generatePreview, loading, error, reset } = useGeneratePreview();
-  const searchParams = useSearchParams();
-
-  // Sync type from URL to store
-  const typeFromUrl = searchParams.get("type");
-  const effectiveType = typeFromUrl || "kids";
-
-  useEffect(() => {
-    setBookType(effectiveType);
-  }, [effectiveType, setBookType]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -123,6 +149,12 @@ export default function LandingPage() {
             Transform your images into beautiful sketch coloring books. Upload
             an image, preview the sketch, and create your print-ready book.
           </p>
+
+          <BookStyleSelector
+            selectedType={bookType}
+            categories={categories}
+            onSelect={handleStyleSelect}
+          />
 
           <div className="bg-white rounded-2xl p-12 shadow-sm border border-border">
             <h2 className="text-2xl font-bold text-foreground mb-3">
