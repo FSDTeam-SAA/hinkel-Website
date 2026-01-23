@@ -20,7 +20,6 @@ import Image from "next/image";
 import { isValidFile, fileToDataURL } from "../utils/file-validation";
 import { toast } from "sonner";
 import { useGeneratePreview } from "../hooks/useGeneratePreview";
-import { useSearchParams } from "next/navigation";
 import { generateBookPdf } from "../utils/pdf-generator";
 import AddPagesModal from "./AddPagesModal";
 
@@ -44,6 +43,7 @@ export default function ImageUploadPage() {
     incrementPageGeneration,
     canGeneratePage,
     getPageGenerationCount,
+    bookType,
   } = useBookStore();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,8 +54,6 @@ export default function ImageUploadPage() {
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const state = useBookStore();
   const { generatePreview, loading: isConverting } = useGeneratePreview();
-  const searchParams = useSearchParams();
-  const type = searchParams.get("type");
 
   const steps = [
     "Book Setup",
@@ -176,7 +174,7 @@ export default function ImageUploadPage() {
     toast.info("Converting to line art...");
 
     try {
-      const lineArtImage = await generatePreview(image, type || undefined);
+      const lineArtImage = await generatePreview(image, bookType);
 
       if (lineArtImage) {
         // Increment generation count BEFORE adding the image
@@ -512,7 +510,7 @@ export default function ImageUploadPage() {
                       handleConvertToLineArt(currentPage, activeImage)
                     }
                     disabled={isConverting || hasMaxGenerations}
-                    className="w-full h-16 text-xl font-black rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:scale-[1.01] active:scale-[0.99] text-white shadow-2xl shadow-purple-500/20 transition-all border-none"
+                    className="w-full h-16 text-xl font-black rounded-2xl bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 hover:scale-[1.01] active:scale-[0.99] text-white shadow-2xl shadow-purple-500/20 transition-all border-none"
                   >
                     {isConverting ? (
                       <Loader2 className="w-6 h-6 mr-3 animate-spin" />

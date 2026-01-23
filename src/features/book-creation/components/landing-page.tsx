@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowUpFromLine } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import { useGeneratePreview } from "@/features/book-creation/hooks/useGeneratePreview";
@@ -21,6 +21,8 @@ export default function LandingPage() {
   const incrementCoverGeneration = useBookStore(
     (state: BookStore) => state.incrementCoverGeneration,
   );
+  const setBookType = useBookStore((state: BookStore) => state.setBookType);
+  const bookType = useBookStore((state: BookStore) => state.bookType);
   const canGenerateCover = useBookStore(
     (state: BookStore) => state.canGenerateCover,
   );
@@ -33,7 +35,14 @@ export default function LandingPage() {
   // Generate preview hook
   const { generatePreview, loading, error, reset } = useGeneratePreview();
   const searchParams = useSearchParams();
-  const type = searchParams.get("type");
+
+  // Sync type from URL to store
+  const typeFromUrl = searchParams.get("type");
+  const effectiveType = typeFromUrl || "kids";
+
+  useEffect(() => {
+    setBookType(effectiveType);
+  }, [effectiveType, setBookType]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -69,10 +78,7 @@ export default function LandingPage() {
       return;
     }
 
-    const previewResult = await generatePreview(
-      pendingImage,
-      type || undefined,
-    );
+    const previewResult = await generatePreview(pendingImage, bookType);
 
     if (previewResult) {
       // Increment cover generation count
