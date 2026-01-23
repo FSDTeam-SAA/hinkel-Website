@@ -14,3 +14,8 @@ export const updateCategoryApi = ({ id, data }: { id: string; data: FormData }) 
 export const deleteCategoryApi = (id: string) => {
     return api.delete(`/content/${id}`);
 }
+
+// get all categories
+export const getAllCategoriesApi = () => {
+    return api.get("/content/");
+}

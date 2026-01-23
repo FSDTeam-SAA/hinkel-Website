@@ -49,11 +49,11 @@ export function Hero({ type }: { type?: string }) {
               size="lg"
               className="bg-primary text-white  px-8 h-12 text-base font-bold shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98]"
             >
-              Create Your Coloring Book <MoveRightIcon />
+              Start creating NOW!<MoveRightIcon />
             </Button>
           </Link>
 
-          <div className="flex flex-wrap gap-8 pt-2">
+          {/* <div className="flex flex-wrap gap-8 pt-2">
             <div className="flex gap-3 items-center">
               <span className="text-4xl font-bold text-primary-foreground">
                 {statsData?.totalUsersCount}+
@@ -74,7 +74,7 @@ export function Hero({ type }: { type?: string }) {
                 Book Created
               </span>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="relative max-h-full">
