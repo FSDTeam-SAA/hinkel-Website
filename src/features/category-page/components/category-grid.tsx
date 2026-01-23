@@ -92,7 +92,7 @@ export function CategoryGrid() {
 
   return (
     <section
-      className="py-24 px-6 bg-secondary"
+      className="py-12 px-6 bg-secondary"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -130,7 +130,7 @@ export function CategoryGrid() {
             <Link
               key={category._id}
               href={`/category/${category.type}`}
-              className="group relative rounded-4xl overflow-hidden bg-white shadow-lg  transition-all duration-500 shrink-0 w-[85%] sm:w-[45%] lg:w-[calc(25%-1.5rem)] snap-start border border-transparent hover:border-primary"
+              className="group relative rounded-4xl overflow-hidden bg-white shadow-lg  transition-all duration-500 shrink-0 w-[70%] sm:w-[40%] lg:w-[calc(20%-1rem)] snap-start border border-transparent hover:border-primary"
             >
               <div className="aspect-4/5 relative bg-accent">
                 {category.isSplit ? (

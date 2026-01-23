@@ -35,6 +35,7 @@ const initialState: BookState = {
   hasPaid: false,
   orderId: null,
   pendingPageCount: null,
+  bookType: "kids",
 };
 
 export const useBookStore = create<BookStore>()(
@@ -152,6 +153,7 @@ export const useBookStore = create<BookStore>()(
       setHasPaid: (hasPaid) => set({ hasPaid }),
       setOrderId: (orderId) => set({ orderId }),
       setPendingPageCount: (pendingPageCount) => set({ pendingPageCount }),
+      setBookType: (bookType) => set({ bookType }),
       resetBook: () => set(initialState),
     }),
     {

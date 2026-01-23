@@ -22,7 +22,7 @@ export default function BookSetupFormatPage() {
   );
   const setBookTitle = useBookStore((state: BookStore) => state.setBookTitle);
   const setOrderId = useBookStore((state: BookStore) => state.setOrderId);
-  const { bookTitle, pageCount, outputFormat } = useBookStore();
+  const { bookTitle, pageCount, outputFormat, bookType } = useBookStore();
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -103,6 +103,7 @@ export default function BookSetupFormatPage() {
         userId: session.user.id,
         pageCount: selectedPages,
         deliveryType: deliveryTypeMap[selectedFormat],
+        bookType: bookType,
       });
 
       if (response.success && response.sessionUrl) {
