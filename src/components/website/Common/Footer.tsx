@@ -87,7 +87,7 @@ const Footer = () => {
           </div>
 
           {/* Product Links */}
-          <FooterLinkSection title="Product" links={FOOTER_LINKS.product} />
+          <FooterLinkSection title="Styles" links={FOOTER_LINKS.product} />
 
           {/* Resources Links */}
           <FooterLinkSection
