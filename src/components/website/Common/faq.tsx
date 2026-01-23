@@ -70,20 +70,7 @@ export function FAQ() {
         </Accordion>
 
         <div className="mt-24 p-12 bg-white rounded-3xl text-center space-y-8">
-          <div className="flex justify-center -space-x-4">
-            <Avatar className="w-12 h-12 border-4 border-[#FAF7F2] shrink-0">
-              <AvatarImage src="/diverse-person.png" />
-              <AvatarFallback>U1</AvatarFallback>
-            </Avatar>
-            <Avatar className="w-12 h-12 border-4 border-[#FAF7F2] shrink-0">
-              <AvatarImage src="/diverse-group-two.png" />
-              <AvatarFallback>U2</AvatarFallback>
-            </Avatar>
-            <Avatar className="w-12 h-12 border-4 border-[#FAF7F2] shrink-0">
-              <AvatarImage src="/diverse-group-outdoors.png" />
-              <AvatarFallback>U3</AvatarFallback>
-            </Avatar>
-          </div>
+          
           <div className="space-y-2">
             <h3 className="text-xl font-bold text-gray-900">
               Still have questions?
