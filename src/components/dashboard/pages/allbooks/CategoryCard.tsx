@@ -23,12 +23,6 @@ import { CategoryContent } from "@/features/category-page/types";
 import { useDeleteCategory } from "@/features/dashboard/hooks/useCategory";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
 import EditCategory from "./EditCategory";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface CategoryCardProps {
@@ -149,6 +143,11 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
                     {category.subtitle && (
                         <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed font-medium">
                             {category.subtitle}
+                        </p>
+                    )}
+                    {category.prompt && (
+                        <p className="text-[9px] text-[#ff7a00]/70 line-clamp-1 italic mt-1 font-medium bg-[#ff7a00]/5 px-2 py-0.5 rounded-md border border-[#ff7a00]/10">
+                            P: {category.prompt}
                         </p>
                     )}
                 </div>

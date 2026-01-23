@@ -11,13 +11,7 @@ import { toast } from "sonner"; // or your preferred toast library
 import { ImagePlus, Type, AlignLeft, Layers, Zap } from "lucide-react";
 import Image from "next/image";
 import { useCreateCategory } from '@/features/dashboard/hooks/useCategory';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Accordion,
   AccordionContent,
@@ -29,6 +23,7 @@ const formSchema = z.object({
   title: z.string().min(2, "Title is required"),
   subtitle: z.string().min(2, "Subtitle is required"),
   type: z.string().min(2, "Type is required (e.g., adult, pet)"),
+  prompt: z.string().optional(),
   image: z.any().refine((file) => file?.length > 0, "Image is required"),
 });
 
@@ -38,7 +33,7 @@ const AddCategory = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { title: "", subtitle: "", type: "" },
+    defaultValues: { title: "", subtitle: "", type: "", prompt: "" },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -46,6 +41,9 @@ const AddCategory = () => {
     formData.append("title", values.title);
     formData.append("subtitle", values.subtitle);
     formData.append("type", values.type);
+    if (values.prompt) {
+      formData.append("prompt", values.prompt);
+    }
     formData.append("image", values.image[0]);
 
     createCategory(formData, {
@@ -146,7 +144,7 @@ const AddCategory = () => {
                           </div>
                         </div>
 
-                        {/* Type Select */}
+                        {/* Type Input (Changed from Select to allow custom typing) */}
                         <div className="group/field relative space-y-3">
                           <div className="flex items-center justify-between px-1">
                             <label className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2 group-focus-within/field:text-[#ff7a00] transition-colors">
@@ -159,19 +157,13 @@ const AddCategory = () => {
                               name="type"
                               render={({ field }) => (
                                 <FormItem className="space-y-0">
-                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger className="bg-black/20 backdrop-blur-md border border-white/10 rounded-[1.25rem] px-6 py-7 text-white placeholder:text-white/50 focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00]/50 transition-all duration-500 shadow-2xl">
-                                        <SelectValue placeholder="Select classification" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent className="bg-slate-900 border-white/10 text-white">
-                                      <SelectItem value="kids" className="focus:bg-[#ff7a00]/20 focus:text-white">Kids</SelectItem>
-                                      <SelectItem value="pets" className="focus:bg-[#ff7a00]/20 focus:text-white">Pets</SelectItem>
-                                      <SelectItem value="memory" className="focus:bg-[#ff7a00]/20 focus:text-white">Memory</SelectItem>
-                                      <SelectItem value="adults" className="focus:bg-[#ff7a00]/20 focus:text-white">Adults</SelectItem>
-                                    </SelectContent>
-                                  </Select>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="e.g. kids, pets, adults..."
+                                      {...field}
+                                      className="bg-black/20 backdrop-blur-md border border-white/10 rounded-[1.25rem] px-6 py-7 text-white placeholder:text-white/50 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-2xl"
+                                    />
+                                  </FormControl>
                                   <FormMessage className="text-[10px] pt-1" />
                                 </FormItem>
                               )}
@@ -190,6 +182,30 @@ const AddCategory = () => {
                             <FormField
                               control={form.control}
                               name="subtitle"
+                              render={({ field }) => (
+                                <FormItem className="space-y-0">
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Describe this category node..."
+                                      {...field}
+                                      className="bg-black/20 backdrop-blur-md border border-white/10 rounded-[1.25rem] px-6 py-7 text-white placeholder:text-white/50 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-2xl"
+                                    />
+                                  </FormControl>
+                                  <FormMessage className="text-[10px] pt-1" />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                        {/* prompt input along with get the prompt here */}
+                        <div className="">
+                          <label className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2 px-1">
+                            <AlignLeft size={12} /> Prompt
+                          </label>
+                          <div className="relative">
+                            <FormField
+                              control={form.control}
+                              name="prompt"
                               render={({ field }) => (
                                 <FormItem className="space-y-0">
                                   <FormControl>
