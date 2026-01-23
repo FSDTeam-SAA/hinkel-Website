@@ -5,7 +5,8 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useVerifyCode } from '../hooks/useverifycode';
 import { useForgotPassword } from '../hooks/useforgotpassword';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { TimerIcon } from 'lucide-react';
+import { TimerIcon, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 const Verifycode = () => {
     const router = useRouter();
@@ -78,17 +79,20 @@ const Verifycode = () => {
     }, [success, router, email]);
     return (
         <div className="min-h-screen flex items-center justify-center  px-4">
-            <div className=" max-w-3xl bg-white rounded-xl shadow-md px-10 py-12">
+            <div className=" max-w-3xl bg-white rounded-xl shadow-md px-10 py-12 relative">
+                
 
                 {/* Logo */}
                 <div className="flex justify-center mb-6">
-                    <Image
-                        src="/images/logo.png"
-                        alt="sktchLABS"
-                        width={160}
-                        height={40}
-                        className="object-contain"
-                    />
+                    <Link href="/">
+                        <Image
+                            src="/images/logo.png"
+                            alt="sktchLABS"
+                            width={160}
+                            height={40}
+                            className="object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                        />
+                    </Link>
                 </div>
 
                 {/* Heading */}

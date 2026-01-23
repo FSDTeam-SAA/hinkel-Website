@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useRegister } from "../hooks/useregister";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 const Register = () => {
   const { loading, error, handleRegister } = useRegister();
@@ -21,21 +23,27 @@ const Register = () => {
     const name = `${capitalize(firstName)} ${capitalize(lastName)}`;
     const res = await handleRegister(name, email, password);
     if (res && !res.error) {
+      toast.success("Check your inbox to verify");
       router.push("/login");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="max-w-6xl bg-white rounded-xl shadow-lg p-10">
+      <div className="max-w-6xl bg-white rounded-xl shadow-lg p-10 relative">
+        
+
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-5">
-          <Image
-            src="/images/logo.png"
-            alt="Company Logo"
-            width={120}
-            height={120}
-          />
+          <Link href="/">
+            <Image
+              src="/images/logo.png"
+              alt="Company Logo"
+              width={120}
+              height={120}
+              className="cursor-pointer hover:opacity-80 transition-opacity"
+            />
+          </Link>
         </div>
 
         {/* Title */}

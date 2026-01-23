@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useForgotPassword } from '../hooks/useforgotpassword'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 const ResetPassword = () => {
   const [email, setEmail] = useState('')
@@ -24,17 +26,21 @@ const ResetPassword = () => {
   }
   return (
     <div className="min-h-screen flex items-center justify-center  px-4">
-      <div className=" max-w-3xl bg-white rounded-xl shadow-md px-10 py-12">
+      <div className=" max-w-3xl bg-white rounded-xl shadow-md px-10 py-12 relative">
+        {/* Go To Website Link */}
+        
 
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <Image
-            src="/images/logo.png"
-            alt="sktchLABS"
-            width={160}
-            height={40}
-            className="object-contain"
-          />
+          <Link href="/">
+            <Image
+              src="/images/logo.png"
+              alt="sktchLABS"
+              width={160}
+              height={40}
+              className="object-contain cursor-pointer hover:opacity-80 transition-opacity"
+            />
+          </Link>
         </div>
 
         {/* Heading */}
