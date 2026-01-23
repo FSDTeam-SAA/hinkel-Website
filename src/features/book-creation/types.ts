@@ -79,6 +79,7 @@ export interface ConfirmPaymentRequest {
   pageCount: number;
   deliveryType: DeliveryType;
   orderId?: string;
+  bookType?: string;
 }
 
 export interface ConfirmPaymentResponse {
@@ -141,6 +142,7 @@ export interface BookState {
   coverImage: string | null;
   coverImageVariants: string[];
   selectedCoverVariantIndex: number | null;
+  bookType: string;
 
   // Page content
   pageImages: PageImages;
@@ -207,6 +209,7 @@ export interface BookActions {
   setHasPaid: (paid: boolean) => void;
   setOrderId: (orderId: string | null) => void;
   setPendingPageCount: (count: number | null) => void;
+  setBookType: (type: string) => void;
 
   // Reset state
   resetBook: () => void;
