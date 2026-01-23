@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Monitor, BookOpen, Layers, DollarSign, Loader2, Zap, ArrowUpRight, Calculator, ShieldCheck } from "lucide-react";
+import { Monitor, BookOpen, Layers, DollarSign, Loader2, Zap, ArrowUpRight, Calculator, ShieldCheck, Info } from "lucide-react";
 import { DeliveryType } from "@/features/dashboard/types/pricing.types";
 import { toast } from "sonner";
 
@@ -16,7 +16,7 @@ type PricingFormState = {
     both: string;
 };
 
-const SAMPLE_PAGE_COUNT = 100;
+// const SAMPLE_PAGE_COUNT = 100;
 
 const PriceSet: React.FC = () => {
     const { createPricing, loading } = useSetPricing();
@@ -26,6 +26,8 @@ const PriceSet: React.FC = () => {
         print: "",
         both: "",
     });
+
+    const [userPageCount, setUserPageCount] = useState<string>("100");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -54,21 +56,22 @@ const PriceSet: React.FC = () => {
                 description: `Global rate set to $${value}/page`,
                 icon: <ArrowUpRight className="text-green-500" />
             });
-        } catch (err) {
+        } catch {
             toast.error("Synchronization Failure", {
                 description: "The system could not commit these changes. Retry in 60s."
             });
         }
     };
 
-    // Dynamic calculators for each tier
+    // Dynamic calculators based on user input or custom page count
     const impacts = useMemo(() => {
+        const count = Number(userPageCount) || 0;
         return {
-            digital: (Number(form.digital) * SAMPLE_PAGE_COUNT).toFixed(2),
-            print: (Number(form.print) * SAMPLE_PAGE_COUNT).toFixed(2),
-            both: (Number(form.both) * SAMPLE_PAGE_COUNT).toFixed(2),
+            digital: (Number(form.digital) * count).toFixed(2),
+            print: (Number(form.print) * count).toFixed(2),
+            both: (Number(form.both) * count).toFixed(2),
         };
-    }, [form]);
+    }, [form, userPageCount]);
 
     const tiers = [
         {
@@ -123,18 +126,29 @@ const PriceSet: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 relative z-10">
-                    <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 space-y-1">
-                        <div className="text-gray-500 text-xs font-bold uppercase tracking-tighter flex items-center gap-2">
-                            <Calculator size={14} className="text-[#ff7a00]" /> Base Calculation
+                <div className="grid grid-cols-2 gap-4 relative z-10 w-full lg:w-auto">
+                    <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 space-y-2">
+                        <div className="text-gray-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                            <Calculator size={14} className="text-[#ff7a00]" /> Configurator
                         </div>
-                        <div className="text-2xl font-mono text-white tracking-widest">{SAMPLE_PAGE_COUNT} Pages</div>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={userPageCount}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === "" || /^\d*$/.test(val)) setUserPageCount(val);
+                                }}
+                                className="bg-transparent border-b-2 border-white/20 text-2xl font-mono text-white tracking-widest focus:outline-none focus:border-[#ff7a00] w-24"
+                            />
+                            <span className="text-gray-400 ml-2 text-lg font-mono tracking-widest uppercase">Pages</span>
+                        </div>
                     </div>
                     <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 space-y-1">
-                        <div className="text-gray-500 text-xs font-bold uppercase tracking-tighter flex items-center gap-2 text-white">
-                            <Zap size={14} className="text-[#ff7a00]" /> System Status
+                        <div className="text-gray-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-white">
+                            <Zap size={14} className="text-[#ff7a00]" /> Visualizer
                         </div>
-                        <div className="text-2xl font-mono text-green-400 tracking-widest italic">ACTIVE</div>
+                        <div className="text-2xl font-mono text-green-400 tracking-widest italic uppercase">Sync</div>
                     </div>
                 </div>
 
@@ -173,15 +187,30 @@ const PriceSet: React.FC = () => {
                         </CardHeader>
 
                         <CardContent className="space-y-8 px-8">
-                            {/* Live Impact Display */}
+                            {/* Interactive Impact Display */}
                             <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-[#ff7a00] relative overflow-hidden group-hover:bg-white transition-all duration-500">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 block flex items-center gap-2">
-                                    <ArrowUpRight size={12} className="text-[#ff7a00]" /> 100pg Book Impact
-                                </span>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block flex items-center gap-1">
+                                        <ArrowUpRight size={12} className="text-[#ff7a00]" /> {userPageCount || "0"}pg Revenue Impact
+                                    </span>
+                                </div>
                                 <div className="flex items-baseline gap-1 text-gray-900 tracking-tighter">
-                                    <span className="text-sm font-bold text-gray-400">$</span>
-                                    <span className="text-4xl font-black">{tier.impact}</span>
-                                    <span className="text-xs font-bold text-gray-400 ml-1">USD</span>
+                                    <div className="flex items-baseline gap-4">
+                                        <div className="">
+                                            <span className="text-sm font-bold text-gray-400">$</span>
+                                            <span className="text-4xl font-black">{tier.impact}</span>
+                                            <span className="text-xs font-bold text-gray-400 ml-1">USD</span></div>
+                                        <div className="">
+
+
+                                            <div className="group/info relative cursor-help">
+                                                <Info size={12} className="text-gray-400 hover:text-[#ff7a00] transition-colors" />
+                                                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-gray-900 text-white text-[9px] font-bold rounded-lg opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-white/10 text-center uppercase tracking-tighter">
+                                                    Adjust the &quot;Configurator&quot; in the header to change the page count impact.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 {/* Calculator Graphic */}
                                 <Calculator className="absolute right-4 bottom-4 w-12 h-12 text-gray-200/50 -rotate-12 transition-transform group-hover:rotate-0" />
@@ -205,6 +234,25 @@ const PriceSet: React.FC = () => {
                                         placeholder="0.00"
                                         className="h-16 pl-12 text-2xl font-black border-2 border-gray-100 bg-gray-50/50 rounded-2xl focus:bg-white focus:ring-4 focus:ring-[#ff7a00]/10 focus:border-[#ff7a00] transition-all"
                                     />
+                                </div>
+                            </div>
+
+                            {/* Standard Breakdown Section */}
+                            <div className="pt-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 block flex items-center gap-2">
+                                    <Layers size={12} className="text-[#ff7a00]" /> Standard Price Breakdown
+                                </span>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {[10, 20, 30, 40].map((count) => {
+                                        const rate = Number(form[tier.name]) || 0;
+                                        const total = (rate * count).toFixed(2);
+                                        return (
+                                            <div key={count} className="bg-gray-50/50 rounded-xl p-3 border border-gray-100 flex flex-col items-center justify-center transition-all hover:bg-white hover:shadow-sm">
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase">{count} Pages</span>
+                                                <span className="text-lg font-black text-gray-900">${total}</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </CardContent>

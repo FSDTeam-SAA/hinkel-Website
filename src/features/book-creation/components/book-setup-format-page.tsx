@@ -78,6 +78,7 @@ export default function BookSetupFormatPage() {
     const newErrors: { title?: string } = {};
     if (!title.trim()) {
       newErrors.title = "Book title is required";
+      toast.error(newErrors.title);
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -173,11 +174,10 @@ export default function BookSetupFormatPage() {
                 <button
                   key={option.count}
                   onClick={() => setSelectedPages(option.count)}
-                  className={`relative h-[208px] rounded-[12px] flex items-center justify-center transition-all ${
-                    selectedPages === option.count
+                  className={`relative h-[208px] rounded-[12px] flex items-center justify-center transition-all ${selectedPages === option.count
                       ? "border-2 border-[#ff8b36] bg-[#fffaf3]"
                       : "border-2 border-[#d5d5d5] bg-white hover:border-[#d5d5d5]"
-                  }`}
+                    }`}
                 >
                   <div className="flex flex-col items-center">
                     <div className="text-[48px] font-medium font-inter text-black text-center">

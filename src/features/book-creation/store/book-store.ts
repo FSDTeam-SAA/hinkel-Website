@@ -35,7 +35,7 @@ const initialState: BookState = {
   hasPaid: false,
   orderId: null,
   pendingPageCount: null,
-  bookType: "kids",
+  bookType: "pets",
 };
 
 export const useBookStore = create<BookStore>()(
