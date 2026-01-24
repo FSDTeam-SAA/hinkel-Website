@@ -23,6 +23,8 @@ export interface Order {
   approvalStatus?: string;
   book?: string;
   title?: string;
+  refundStatus?: string;
+  stripePaymentIntentId?: string;
 }
 
 export function useAllOrders() {
