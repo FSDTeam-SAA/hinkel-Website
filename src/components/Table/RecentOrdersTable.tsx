@@ -140,15 +140,26 @@ const RecentOrdersTable = () => {
               <td className="py-4 px-4 text-right">
                 <div className="flex items-center justify-end gap-2">
                   {order.book && (
-                    <a
-                      href={order.book}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 text-[#FF8B36] hover:bg-[#FFF7ED] rounded-md transition-colors"
-                      title="View Document"
-                    >
-                      <ExternalLink size={16} />
-                    </a>
+                    <div>
+                      <a
+                        href={order.book}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="
+      inline-flex items-center gap-1
+      p-2 rounded-md
+      text-[#FF8B36]
+      hover:bg-[#FFF7ED]
+      transition-colors
+    "
+                        title="View Book"
+                        aria-label="View book (opens in a new tab)"
+                      >
+                        <ExternalLink size={16} aria-hidden="true" />
+                        <span className="hidden sm:inline">View Book</span>
+                      </a>
+                    </div>
+
                   )}
                   <Button
                     onClick={() => setSelectedOrder(order)}
