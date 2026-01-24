@@ -1,7 +1,7 @@
 "use client";
 import { useAllOrders, Order } from "@/features/dashboard/hooks/useAllOrders";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
-import { ChevronDown, Loader2, Package } from "lucide-react";
+import { ChevronDown, Loader2, Package, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -138,12 +138,25 @@ const RecentOrdersTable = () => {
                 </div>
               </td>
               <td className="py-4 px-4 text-right">
-                <Button
-                  onClick={() => setSelectedOrder(order)}
-                  className="text-sm font-bold text-primary bg-transparent border border-primary hover:bg-primary hover:text-white"
-                >
-                  Details
-                </Button>
+                <div className="flex items-center justify-end gap-2">
+                  {order.book && (
+                    <a
+                      href={order.book}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 text-[#FF8B36] hover:bg-[#FFF7ED] rounded-md transition-colors"
+                      title="View Document"
+                    >
+                      <ExternalLink size={16} />
+                    </a>
+                  )}
+                  <Button
+                    onClick={() => setSelectedOrder(order)}
+                    className="text-sm font-bold text-primary bg-transparent border border-primary hover:bg-primary hover:text-white h-9"
+                  >
+                    Details
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}
@@ -221,6 +234,17 @@ const RecentOrdersTable = () => {
                       {selectedOrder.title || "Untitled Book"}
                     </p>
                     <p className="text-xs text-gray-500 mt-1 italic">{selectedOrder.deliveryType}</p>
+                    {selectedOrder.book && (
+                      <a
+                        href={selectedOrder.book}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 flex items-center gap-1.5 w-fit px-3 py-1.5 bg-[#FF8B36] text-white rounded-lg text-xs font-bold hover:bg-[#e67a00] transition-colors"
+                      >
+                        <ExternalLink size={14} />
+                        View Document
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
