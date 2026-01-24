@@ -1,5 +1,5 @@
-import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 
 interface CardOverviewProps {
@@ -7,18 +7,23 @@ interface CardOverviewProps {
     numberInfo: string | number;
     trend?: string;
     isUp?: boolean;
+    icon?: React.ReactNode;
 }
 
 const CardOverview: React.FC<CardOverviewProps> = ({
     title,
     numberInfo,
     trend,
-    isUp,
+    // isUp,
+    icon,
 }) => {
     return (
         <Card className="flex-1 min-w-[300px] border-lg shadow-base rounded-xl overflow-hidden bg-white">
             <CardContent className="p-6">
-                <h3 className="text-[#343A40] font-bold text-sm mb-6 uppercase tracking-wider opacity-80">{title}</h3>
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-[#343A40] font-bold text-sm uppercase tracking-wider opacity-80">{title}</h3>
+                    {icon && <div className="p-2 bg-orange-50 rounded-lg">{icon}</div>}
+                </div>
 
                 <div className="flex justify-between items-end">
                     <div className="space-y-3">
@@ -28,20 +33,6 @@ const CardOverview: React.FC<CardOverviewProps> = ({
                                 Last month
                             </div>
                         )}
-                    </div>
-
-                    {/* Sparkline Placeholder */}
-                    <div className="relative h-12 w-24">
-                        <svg className="w-full h-full" viewBox="0 0 100 40">
-                            <path
-                                d={isUp ? "M0,35 Q25,30 50,20 T100,5" : "M0,5 Q25,10 50,20 T100,35"}
-                                fill="none"
-                                stroke={isUp ? "#10B981" : "#EF4444"}
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                className="opacity-40"
-                            />
-                        </svg>
                     </div>
                 </div>
             </CardContent>

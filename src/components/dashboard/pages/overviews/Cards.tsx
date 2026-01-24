@@ -3,6 +3,7 @@ import React from "react";
 import { useOverview } from "@/features/dashboard/hooks/useOverview";
 import CardOverview from "./CardOverview";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Users, BookOpen, DollarSign } from "lucide-react";
 
 const Cards = () => {
     const { data, loading, error } = useOverview();
@@ -30,6 +31,7 @@ const Cards = () => {
                 numberInfo={data.totalUsersCount.toLocaleString()}
                 trend="40%"
                 isUp={true}
+                icon={<Users className="w-20 h-20 text-[#FF6A00]" />}
             />
 
             <CardOverview
@@ -37,6 +39,7 @@ const Cards = () => {
                 numberInfo={data.paidOrdersCount.toLocaleString()}
                 trend="10%"
                 isUp={false}
+                icon={<BookOpen className="w-20 h-20 text-[#FF6A00]" />}
             />
 
             <CardOverview
@@ -44,6 +47,7 @@ const Cards = () => {
                 numberInfo={`$${data.totalRevenue}`}
                 trend="20%"
                 isUp={true}
+                icon={<DollarSign className="w-20 h-20 text-[#FF6A00]" />}
             />
         </div>
     );

@@ -1,7 +1,7 @@
 "use client";
 import { useAllOrders, Order } from "@/features/dashboard/hooks/useAllOrders";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
-import { ChevronDown, Loader2, Package, ExternalLink } from "lucide-react";
+import { ChevronDown, Loader2, Package, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,11 +36,16 @@ const getInitials = (name?: string) => {
   if (!name) return "??";
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 };
+
 const RecentOrdersTable = () => {
-  const { orders, loading, error, refetch } = useAllOrders();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const { orders, totalCount, loading, error, refetch } = useAllOrders(currentPage, itemsPerPage);
   const { updateStatus } = useStatusUpdate();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeUpdatingId, setActiveUpdatingId] = useState<string | null>(null);
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setActiveUpdatingId(orderId);
@@ -173,6 +178,54 @@ const RecentOrdersTable = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-100">
+          <div className="text-sm text-gray-500">
+            Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+            <span className="font-medium">{Math.min(currentPage * itemsPerPage, totalCount)}</span> of{" "}
+            <span className="font-medium">{totalCount}</span> orders
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1"
+            >
+              <ChevronLeft size={16} />
+              Previous
+            </Button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-8 h-8 p-0 ${currentPage === page ? "bg-[#FF8B36] hover:bg-[#e67a00]" : ""}`}
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1"
+            >
+              Next
+              <ChevronRight size={16} />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="sm:max-w-[500px]">
