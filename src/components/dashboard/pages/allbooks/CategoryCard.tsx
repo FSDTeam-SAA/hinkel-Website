@@ -91,7 +91,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
                         </DialogTrigger>
                         <DialogContent className="bg-white text-slate-900 max-w-lg p-6">
                             <DialogHeader>
-                                <DialogTitle>Edit Protocol</DialogTitle>
+                                <DialogTitle>Edit Category</DialogTitle>
                             </DialogHeader>
                             <EditCategory category={category} onSuccess={() => setIsEditDialogOpen(false)} />
                         </DialogContent>

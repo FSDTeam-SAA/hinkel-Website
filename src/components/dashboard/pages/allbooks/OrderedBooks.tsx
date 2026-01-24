@@ -2,7 +2,7 @@
 import { useAllOrders } from '@/features/dashboard/hooks/useAllOrders';
 import Image from 'next/image';
 import React from 'react';
-import { Loader2, Package, User, Truck } from 'lucide-react';
+import { Package, User, Truck, ExternalLink } from 'lucide-react';
 import OrderedBooksSkeleton from './OrderedBooksSkeleton';
 import { useStatusUpdate } from '@/features/dashboard/hooks/useStatusUpdate';
 import {
@@ -85,6 +85,11 @@ const OrderedBooks = () => {
                                             {order.deliveryStatus || 'pending'}
                                         </span>
                                     </div>
+                                    {order.refundStatus && (
+                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm bg-rose-100 text-rose-600 border border-rose-200">
+                                            Refund: {order.refundStatus}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
@@ -138,22 +143,35 @@ const OrderedBooks = () => {
                                         {/* Status Update Control */}
                                         <div className="w-full flex items-center justify-between gap-3 p-2 bg-gray-50 rounded-xl border border-gray-100">
                                             <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-2">
-                                                Update Protocol
+                                                Update Status
                                             </span>
-                                            <Select
-                                                defaultValue={order.deliveryStatus || 'pending'}
-                                                onValueChange={(value) => handleStatusChange(order._id, value)}
-                                                disabled={isUpdating}
-                                            >
-                                                <SelectTrigger className="h-8 w-[120px] text-[10px] font-bold uppercase tracking-widest bg-white border-gray-200">
-                                                    <SelectValue placeholder="Set Status" />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-white border-gray-200">
-                                                    <SelectItem value="pending" className="text-[10px] font-bold uppercase tracking-widest">Pending</SelectItem>
-                                                    <SelectItem value="approved" className="text-[10px] font-bold uppercase tracking-widest">Approved</SelectItem>
-                                                    <SelectItem value="rejected" className="text-[10px] font-bold uppercase tracking-widest">Rejected</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                            <div className="flex items-center gap-2">
+                                                {order.book && (
+                                                    <a
+                                                        href={order.book}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        <ExternalLink size={12} className="text-orange-600" />
+                                                        View Document
+                                                    </a>
+                                                )}
+                                                <Select
+                                                    defaultValue={order.deliveryStatus || 'pending'}
+                                                    onValueChange={(value) => handleStatusChange(order._id, value)}
+                                                    disabled={isUpdating}
+                                                >
+                                                    <SelectTrigger className="h-8 w-[120px] text-[10px] font-bold uppercase tracking-widest bg-white border-gray-200">
+                                                        <SelectValue placeholder="Set Status" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white border-gray-200">
+                                                        <SelectItem value="pending" className="text-[10px] font-bold uppercase tracking-widest">Pending</SelectItem>
+                                                        <SelectItem value="approved" className="text-[10px] font-bold uppercase tracking-widest">Approved</SelectItem>
+                                                        <SelectItem value="rejected" className="text-[10px] font-bold uppercase tracking-widest">Rejected</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
