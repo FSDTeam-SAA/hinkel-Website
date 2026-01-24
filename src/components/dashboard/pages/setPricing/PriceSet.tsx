@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useSetPricing } from "@/features/dashboard/hooks/useSetPricing";
+import { useGetPricing } from "@/features/dashboard/hooks/useGetPricing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Monitor, BookOpen, Layers, DollarSign, Loader2, Zap, ArrowUpRight, Calculator, ShieldCheck, Info } from "lucide-react";
-import { DeliveryType } from "@/features/dashboard/types/pricing.types";
+import { DeliveryType, PricingData } from "@/features/dashboard/types/pricing.types";
 import { toast } from "sonner";
 
 type PricingFormState = {
@@ -19,7 +20,8 @@ type PricingFormState = {
 // const SAMPLE_PAGE_COUNT = 100;
 
 const PriceSet: React.FC = () => {
-    const { createPricing, loading } = useSetPricing();
+    const { createPricing, loading: settingPrice } = useSetPricing();
+    const { pricing, getPricing, loading: fetchingPrice } = useGetPricing();
 
     const [form, setForm] = useState<PricingFormState>({
         digital: "",
@@ -28,6 +30,32 @@ const PriceSet: React.FC = () => {
     });
 
     const [userPageCount, setUserPageCount] = useState<string>("100");
+
+    useEffect(() => {
+        getPricing();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        if (pricing?.data) {
+            const data = pricing.data;
+            if (Array.isArray(data)) {
+                setForm(prev => {
+                    const newForm = { ...prev };
+                    data.forEach((item: PricingData) => {
+                        if (item.deliveryType === "digital") newForm.digital = item.pricePerPage.toString();
+                        if (item.deliveryType === "print") newForm.print = item.pricePerPage.toString();
+                        if (item.deliveryType === "print&digital") newForm.both = item.pricePerPage.toString();
+                    });
+                    return newForm;
+                });
+            } else {
+                if (data.deliveryType === "digital") setForm(prev => ({ ...prev, digital: data.pricePerPage.toString() }));
+                if (data.deliveryType === "print") setForm(prev => ({ ...prev, print: data.pricePerPage.toString() }));
+                if (data.deliveryType === "print&digital") setForm(prev => ({ ...prev, both: data.pricePerPage.toString() }));
+            }
+        }
+    }, [pricing]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -77,7 +105,7 @@ const PriceSet: React.FC = () => {
         {
             type: "digital" as DeliveryType,
             name: "digital" as keyof PricingFormState,
-            title: "Digital Forge",
+            title: "Digital PDF",
             tag: "High Margin",
             desc: "Optimized for global distribution and zero-cost scaling.",
             icon: <Monitor className="w-8 h-8 text-blue-400" />,
@@ -88,7 +116,7 @@ const PriceSet: React.FC = () => {
         {
             type: "print" as DeliveryType,
             name: "print" as keyof PricingFormState,
-            title: "Print Nexus",
+            title: "Printed Book",
             tag: "Production",
             desc: "Direct-to-consumer physical production and logistics.",
             icon: <BookOpen className="w-8 h-8 text-[#ff7a00]" />,
@@ -99,7 +127,7 @@ const PriceSet: React.FC = () => {
         {
             type: "print&digital" as DeliveryType,
             name: "both" as keyof PricingFormState,
-            title: "Hybrid Protocol",
+            title: "Digital PDF and Printed Book",
             tag: "Maximum Value",
             desc: "Synergistic bundle offering for premium consumers.",
             icon: <Layers className="w-8 h-8 text-purple-400" />,
@@ -111,6 +139,11 @@ const PriceSet: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-transparent space-y-12 py-10 animate-in fade-in duration-1000">
+            {fetchingPrice && !pricing && (
+                <div className="fixed inset-0 bg-white/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <Loader2 className="w-12 h-12 text-[#ff7a00] animate-spin" />
+                </div>
+            )}
             {/* Global Command Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-gray-950 p-10 rounded-[2.5rem] shadow-3xl relative overflow-hidden ring-1 ring-white/10">
                 <div className="space-y-4 relative z-10">
@@ -260,11 +293,11 @@ const PriceSet: React.FC = () => {
                         <CardFooter className="p-8 pb-10">
                             <Button
                                 onClick={() => handleUpdate(tier.type, tier.name)}
-                                disabled={loading || !form[tier.name]}
+                                disabled={settingPrice || !form[tier.name]}
                                 className="w-full h-16 bg-gray-900 hover:bg-black text-white text-lg font-black rounded-2xl shadow-xl hover:shadow-2xl transition-all active:scale-[0.98] group/btn overflow-hidden relative"
                             >
                                 <span className="relative z-10 flex items-center justify-center gap-3">
-                                    {loading ? <Loader2 className="animate-spin h-6 w-6" /> : "Deploy Update"}
+                                    {settingPrice ? <Loader2 className="animate-spin h-6 w-6" /> : "Deploy Update"}
                                 </span>
                                 {/* Hover Effect Overlay */}
                                 <div className="absolute inset-0 bg-gradient-to-r from-[#ff7a00] to-[#ff9500] translate-x-[-100%] group-hover/btn:translate-x-0 transition-transform duration-500"></div>

@@ -21,5 +21,5 @@ export interface PricingData {
 export interface PricingResponse {
     success: boolean;
     message: string;
-    data: PricingData;
+    data: PricingData | PricingData[];
 }
