@@ -48,7 +48,8 @@ const Allbooks = () => {
                 <div className="flex flex-col gap-1">
                   <span className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-1">System Info</span>
                   <p className="text-[10px] leading-relaxed font-bold uppercase tracking-wider">
-                    Adjust the <span className="text-[#FF8B36] italic tracking-widest">&quot;Configurator&quot;</span> in the header to change page count impact.
+                    {/* Adjust the <span className="text-[#FF8B36] italic tracking-widest">&quot;Configurator&quot;</span> in the header to change page count impact. */}
+                    This Button will take you to the add new book page. Where you can create books as an Admin.
                   </p>
                 </div>
 
