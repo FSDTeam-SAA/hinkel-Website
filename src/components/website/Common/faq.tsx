@@ -70,7 +70,6 @@ export function FAQ() {
         </Accordion>
 
         <div className="mt-24 p-12 bg-white rounded-3xl text-center space-y-8">
-          
           <div className="space-y-2">
             <h3 className="text-xl font-bold text-gray-900">
               Still have questions?
