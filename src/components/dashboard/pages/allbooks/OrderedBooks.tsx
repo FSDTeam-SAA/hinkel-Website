@@ -154,7 +154,7 @@ const OrderedBooks = () => {
                                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-colors"
                                                     >
                                                         <ExternalLink size={12} className="text-orange-600" />
-                                                        View Document
+                                                        View Book
                                                     </a>
                                                 )}
                                                 <Select
