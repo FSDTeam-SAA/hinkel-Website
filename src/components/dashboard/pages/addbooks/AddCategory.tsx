@@ -1,16 +1,22 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { toast } from "sonner"; // or your preferred toast library
 import { ImagePlus, Type, AlignLeft, Layers, Zap } from "lucide-react";
 import Image from "next/image";
-import { useCreateCategory } from '@/features/dashboard/hooks/useCategory';
+import { useCreateCategory } from "@/features/dashboard/hooks/useCategory";
 
 import {
   Accordion,
@@ -55,7 +61,7 @@ const AddCategory = () => {
       //eslint-disable-next-line
       onError: (error: any) => {
         toast.error(error?.response?.data?.message || "Something went wrong");
-      }
+      },
     });
   }
 
@@ -72,10 +78,20 @@ const AddCategory = () => {
     <div className=" cursor-pointer">
       {/* Decorative Floating Orbs */}
       <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#ff7a00] rounded-full blur-[100px] opacity-20 animate-pulse" />
-      <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-10 animate-pulse" style={{ animationDelay: '2s' }} />
+      <div
+        className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-10 animate-pulse"
+        style={{ animationDelay: "2s" }}
+      />
 
       {/* Tech Grid Overlay */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+          backgroundSize: "24px 24px",
+        }}
+      />
 
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="category-creator" className="border-none">
@@ -86,35 +102,49 @@ const AddCategory = () => {
 
             {/* Decorative Floating Orbs */}
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#ff7a00] rounded-full blur-[100px] opacity-20 animate-pulse" />
-            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-10 animate-pulse" style={{ animationDelay: '2s' }} />
+            <div
+              className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-10 animate-pulse"
+              style={{ animationDelay: "2s" }}
+            />
 
             {/* Tech Grid Overlay */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+            <div
+              className="absolute inset-0 opacity-[0.03] pointer-events-none"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+                backgroundSize: "24px 24px",
+              }}
+            />
 
             <AccordionTrigger className="relative z-10 px-10 py-8 cursor-pointer hover:no-underline group/trigger">
               <div className="flex flex-col items-start space-y-2 text-left w-full">
                 <div className="flex items-center gap-4">
                   <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#ff7a00]" />
                   <span className="text-2xl md:text-3xl font-black text-[#ff7a00] uppercase tracking-[0.2em] group-hover/trigger:tracking-[0.3em] transition-all duration-500">
-                    Category Creator
+                    Category New Category
                   </span>
                 </div>
-                <div className="flex items-center gap-4">
+                {/* <div className="flex items-center gap-4">
                   <h2 className="text-lg md:text-xl font-bold text-white/40 tracking-tight">
-                    New <span className="text-white italic">Classification</span>
+                    New{" "}
+                    <span className="text-white italic">Classification</span>
                   </h2>
-                </div>
+                </div> */}
               </div>
             </AccordionTrigger>
 
             <AccordionContent className="relative z-10 px-10 pb-10">
               <div className="space-y-10">
                 <p className="text-white text-sm font-medium max-w-lg border-l-2 border-[#ff7a00]/30 pl-4 py-1">
-                  Initialize a new data node in the classification grid. Define metadata and visual markers for global distribution.
+                  Create a new category page for your books! 
                 </p>
 
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-10"
+                  >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                       <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Title Input */}
@@ -231,14 +261,22 @@ const AddCategory = () => {
                         <div className="flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-[2rem] p-4 hover:bg-white/5 transition-all duration-500 relative h-[240px] shadow-2xl bg-black/10 overflow-hidden">
                           {preview ? (
                             <div className="relative w-full h-full group/preview">
-                              <Image src={preview} alt="Preview" fill className="object-contain rounded-xl" />
+                              <Image
+                                src={preview}
+                                alt="Preview"
+                                fill
+                                className="object-contain rounded-xl"
+                              />
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
                                 <Button
                                   type="button"
                                   variant="destructive"
                                   size="sm"
                                   className="rounded-xl font-bold uppercase tracking-wider text-[10px]"
-                                  onClick={() => { setPreview(null); form.setValue("image", undefined); }}
+                                  onClick={() => {
+                                    setPreview(null);
+                                    form.setValue("image", undefined);
+                                  }}
                                 >
                                   Reset Marker
                                 </Button>
@@ -249,13 +287,22 @@ const AddCategory = () => {
                               <div className="p-5 rounded-full bg-white/5 group-hover/upload:bg-[#ff7a00]/10 transition-colors duration-500 mb-4">
                                 <ImagePlus className="w-8 h-8 text-white/40 group-hover/upload:text-[#ff7a00] transition-colors" />
                               </div>
-                              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest group-hover/upload:text-white transition-colors">Capture Visual Data</span>
-                              <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest group-hover/upload:text-white transition-colors">
+                                Capture Visual Data
+                              </span>
+                              <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                              />
                             </label>
                           )}
                         </div>
                         {form.formState.errors.image && (
-                          <p className="text-red-500 text-[10px] uppercase font-bold tracking-tight px-1">{form.formState.errors.image.message as string}</p>
+                          <p className="text-red-500 text-[10px] uppercase font-bold tracking-tight px-1">
+                            {form.formState.errors.image.message as string}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -278,7 +325,7 @@ const AddCategory = () => {
                           ) : (
                             <>
                               <Zap size={16} fill="currentColor" />
-                              Commit Classification
+                              Create Category
                             </>
                           )}
                         </div>
@@ -293,7 +340,6 @@ const AddCategory = () => {
       </Accordion>
     </div>
     // </div>
-
   );
 };
 
