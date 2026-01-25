@@ -1,3 +1,4 @@
+import BookCreationFlow from "@/components/website/PageSections/HomePage/BookCreationFlow";
 import { Hero } from "@/features/category-page/components/hero";
 
 export default async function page({
@@ -10,6 +11,7 @@ export default async function page({
   return (
     <div>
       <Hero type={slug} />
+      <BookCreationFlow />
     </div>
   );
 }
