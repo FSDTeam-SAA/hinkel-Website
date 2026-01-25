@@ -1,6 +1,11 @@
-import React from "react";
+"use client";
+
+import React, { useRef } from "react";
 import { Book, CreditCard, Image, Wand2, CheckCircle } from "lucide-react";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const steps = [
   {
@@ -46,10 +51,32 @@ const steps = [
 ];
 
 const BookCreationFlow = () => {
+  const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start center", "end center"],
+  });
+
+  const scaleY = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
+
   return (
-    <section className="py-20 bg-linear-to-b from-white to-gray-50 overflow-hidden">
+    <section
+      className="py-20 bg-linear-to-b from-white to-gray-50 overflow-hidden"
+      ref={containerRef}
+    >
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto mb-16"
+        >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
             From Photo to{" "}
             <span className="text-primary italic">Masterpiece</span>
@@ -58,16 +85,25 @@ const BookCreationFlow = () => {
             Create your personalized coloring book in 5 simple, creative steps.
             We&apos;ve made the process as intuitive and fun as coloring itself!
           </p>
-        </div>
+        </motion.div>
 
         <div className="relative">
           {/* Connecting Line (Desktop) */}
-          <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 w-1 bg-linear-to-b from-blue-200 via-purple-200 to-green-200 rounded-full opacity-30" />
+          <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 w-1 bg-gray-200 rounded-full" />
+
+          <motion.div
+            className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 w-1 bg-linear-to-b from-blue-400 via-purple-400 to-green-400 rounded-full origin-top"
+            style={{ scaleY }}
+          />
 
           <div className="space-y-12 lg:space-y-0 relative z-10">
             {steps.map((step, index) => (
-              <div
+              <motion.div
                 key={step.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
                 className={cn(
                   "flex flex-col lg:flex-row items-center gap-8 lg:gap-16 group",
                   index % 2 === 0 ? "lg:flex-row-reverse" : "",
@@ -121,10 +157,21 @@ const BookCreationFlow = () => {
                 </div>
 
                 {/* Icon/Timeline Node */}
-                <div className="relative shrink-0 z-10">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 20,
+                    delay: 0.2,
+                  }}
+                  className="relative shrink-0 z-10"
+                >
                   <div
                     className={cn(
-                      "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-lg border-4 border-white transition-all duration-500 transform group-hover:scale-110",
+                      "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-lg border-4 border-white transition-all duration-500",
                       step.color,
                     )}
                   >
@@ -137,22 +184,32 @@ const BookCreationFlow = () => {
                       step.color.split(" ")[0].replace("bg-", "bg-"),
                     )}
                   />
-                </div>
+                </motion.div>
 
                 {/* Empty Side for alignment */}
                 <div className="flex-1 w-full lg:w-1/2 hidden lg:block" />
-              </div>
+              </motion.div>
             ))}
           </div>
 
           {/* Final Call to Action Element */}
-          <div className="mt-16 text-center">
-            <div className="inline-flex flex-col items-center animate-bounce-slow">
-              <div className="h-16 w-1 bg-linear-to-b from-green-200 to-transparent mb-4 rounded-full opacity-50" />
-              <p className="text-sm font-medium text-gray-400 uppercase tracking-widest">
-                Ready to start?
-              </p>
-            </div>
+          <div className="mt-16 pt-20 text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="inline-flex flex-col items-center animate-bounce-slow"
+            >
+              <div className="hidden lg:block h-16 w-1 bg-linear-to-b from-green-200 to-transparent mb-4 rounded-full opacity-50 " />
+              <Button
+                size="lg"
+                className="rounded-full px-8 z-50 py-6 text-lg shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all text-white duration-300 hover:scale-105"
+                onClick={() => router.push("/create-book")}
+              >
+                Ready to Start?
+              </Button>
+            </motion.div>
           </div>
         </div>
       </div>
