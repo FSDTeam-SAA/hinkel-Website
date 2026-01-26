@@ -26,7 +26,7 @@ export default function BookSetupFormatPage() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  const { loading: pricingLoading } = usePricing();
+  const { prices, loading: pricingLoading } = usePricing();
   const { confirmPayment, isLoading: isConfirming } = useConfirmPayment();
 
   const [title, setTitle] = useState(bookTitle || "");
@@ -44,12 +44,44 @@ export default function BookSetupFormatPage() {
     "Review",
   ];
 
-  const pageOptions = [
-    { count: 10, label: "10" },
-    { count: 20, label: "20", popular: true },
-    { count: 30, label: "30" },
-    { count: 40, label: "40" },
-  ];
+  const deliveryTypeMap = useMemo<Record<OutputFormat, DeliveryType>>(
+    () => ({
+      pdf: "digital",
+      printed: "print",
+      "pdf&printed": "print&digital",
+    }),
+    [],
+  );
+
+  const pageOptions = useMemo(() => {
+    const currentType = deliveryTypeMap[selectedFormat];
+    const methodPricing = prices?.find((p) => p.deliveryType === currentType);
+    if (!methodPricing) return [];
+
+    return methodPricing.pageTiers
+      .sort((a, b) => a.pageLimit - b.pageLimit)
+      .map((tier, index, arr) => ({
+        count: tier.pageLimit,
+        label: tier.pageLimit.toString(),
+        popular: index === Math.floor(arr.length / 2), // Make the middle one popular as a heuristic
+        price: tier.price,
+      }));
+  }, [prices, selectedFormat, deliveryTypeMap]);
+
+  const handleFormatSelect = (format: OutputFormat) => {
+    setSelectedFormat(format);
+    const currentType = deliveryTypeMap[format];
+    const methodPricing = prices?.find((p) => p.deliveryType === currentType);
+    if (methodPricing && methodPricing.pageTiers.length > 0) {
+      const tiers = [...methodPricing.pageTiers].sort(
+        (a, b) => a.pageLimit - b.pageLimit,
+      );
+      const isValid = tiers.some((t) => t.pageLimit === selectedPages);
+      if (!isValid) {
+        setSelectedPages(tiers[0].pageLimit);
+      }
+    }
+  };
 
   const deliveryMethods = useMemo(() => {
     return [
@@ -165,7 +197,7 @@ export default function BookSetupFormatPage() {
           </h3>
 
           {/* Number of Pages Section */}
-          <div className="mb-[23px]">
+          <div className="mb-[80px] pb-[40px]">
             <h4 className="text-[32px] font-normal font-inter text-black mb-[16px]">
               Number of Pages
             </h4>
@@ -174,10 +206,11 @@ export default function BookSetupFormatPage() {
                 <button
                   key={option.count}
                   onClick={() => setSelectedPages(option.count)}
-                  className={`relative h-[208px] rounded-[12px] flex items-center justify-center transition-all ${selectedPages === option.count
+                  className={`relative h-[208px] rounded-[12px] flex items-center justify-center transition-all ${
+                    selectedPages === option.count
                       ? "border-2 border-[#ff8b36] bg-[#fffaf3]"
                       : "border-2 border-[#d5d5d5] bg-white hover:border-[#d5d5d5]"
-                    }`}
+                  }`}
                 >
                   <div className="flex flex-col items-center">
                     <div className="text-[48px] font-medium font-inter text-black text-center">
@@ -198,9 +231,8 @@ export default function BookSetupFormatPage() {
               ))}
             </div>
           </div>
-
           {/* Delivery Method Section */}
-          <div className="mt-[80px] pt-[40px] relative">
+          <div className="mt-[23px] relative">
             <h4 className="text-[32px] font-normal font-inter text-black mb-[23px]">
               Delivery Method
             </h4>
@@ -217,7 +249,8 @@ export default function BookSetupFormatPage() {
                     method={method}
                     selectedPages={selectedPages}
                     selectedFormat={selectedFormat}
-                    onSelect={setSelectedFormat}
+                    onSelect={handleFormatSelect}
+                    prices={prices}
                   />
                 ))}
               </div>

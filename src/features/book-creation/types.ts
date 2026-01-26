@@ -47,7 +47,7 @@ export interface PricingData {
   _id: string;
   deliveryType: DeliveryType;
   currency: string;
-  pricePerPage: number;
+  pageTiers: { pageLimit: number; price: number }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -261,4 +261,5 @@ export interface DeliveryMethodCardProps {
   selectedPages: number;
   selectedFormat: OutputFormat;
   onSelect: (id: OutputFormat) => void;
+  prices: PricingData[];
 }
