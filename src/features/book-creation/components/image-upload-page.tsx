@@ -332,7 +332,7 @@ export default function ImageUploadPage() {
 
             {/* Add Extra Pages Button */}
             <button
-              onClick={() => setIsAddPagesOpen(true)}
+              onClick={() => toast.info("This feature is coming soon.")}
               className="relative min-w-[64px] h-[64px] rounded-xl border-2 border-dashed border-orange-300 bg-orange-50 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center group"
               title="Add extra pages"
             >

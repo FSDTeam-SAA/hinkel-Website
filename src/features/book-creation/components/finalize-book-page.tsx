@@ -204,7 +204,7 @@ export default function FinalizeBookPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setIsAddPagesOpen(true)}
+                    onClick={() => toast.info("This feature is coming soon.")}
                     className="h-6 w-6 ml-2 rounded-full bg-orange-100 text-orange-600 hover:bg-orange-200"
                   >
                     <Plus className="h-3 w-3" />
