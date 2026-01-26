@@ -8,6 +8,9 @@ import {
   LogOut,
   Book,
   BookOpen,
+  HelpCircle,
+  ShieldCheck,
+  Info,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -30,6 +33,9 @@ const navigation = [
   { name: "All Books", href: "/dashboard/allbooks", icon: BookOpen },
   // { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
   { name: "Set Pricing", href: "/dashboard/setPricing", icon: NotebookText },
+  { name: "FAQs & CTA", href: "/dashboard/faqs", icon: HelpCircle },
+  { name: "About Us", href: "/dashboard/about", icon: Info },
+  { name: "Privacy Policy", href: "/dashboard/privacy", icon: ShieldCheck },
 ];
 
 export default function Sidebar() {

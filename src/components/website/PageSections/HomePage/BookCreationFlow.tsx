@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { Book, CreditCard, Image, Wand2, CheckCircle } from "lucide-react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -65,10 +65,7 @@ const BookCreationFlow = () => {
   });
 
   return (
-    <section
-      className="py-20 bg-linear-to-b from-white to-gray-50 overflow-hidden"
-      ref={containerRef}
-    >
+    <section className="py-20 overflow-hidden" ref={containerRef}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
