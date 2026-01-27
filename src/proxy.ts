@@ -82,7 +82,7 @@ export async function proxy(request: NextRequest) {
   // 2. Rule: Guests cannot see the Dashboard
   if (isGuest && pathname.startsWith("/dashboard")) {
     console.log("Action: Guest tried to enter Dashboard -> Redirect to Login");
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // 3. Rule: Regular Users cannot see the Dashboard
