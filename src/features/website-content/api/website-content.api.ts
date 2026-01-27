@@ -23,3 +23,60 @@ export const getPublicPrivacyApi = async (): Promise<PrivacyResponse> => {
     throw error;
   }
 };
+
+export interface PublicFaqItem {
+  _id: string;
+  question: string;
+  answer: {
+    sanitized: string;
+    format: "html" | "text";
+  };
+  order: number;
+  isActive: boolean;
+  defaultOpen: boolean;
+}
+
+export interface PublicFaqCta {
+  enabled: boolean;
+  heading: string;
+  text: string;
+  button: {
+    label: string;
+    href: string;
+    target: string;
+  };
+  avatars: Array<{
+    url: string;
+    alt: string;
+  }>;
+}
+
+export interface PublicFaqData {
+  _id: string;
+  key: string;
+  title: string;
+  subtitle: string;
+  status: string;
+  cta: PublicFaqCta;
+  items: PublicFaqItem[];
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+}
+
+export interface PublicFaqResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: PublicFaqData;
+}
+
+export const getPublicFaqApi = async (): Promise<PublicFaqResponse> => {
+  try {
+    const res = await api.get<PublicFaqResponse>("/faqs/pricing");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching public FAQ content:", error);
+    throw error;
+  }
+};

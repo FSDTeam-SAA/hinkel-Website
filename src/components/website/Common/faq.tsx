@@ -1,90 +1,99 @@
+"use client";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import HeaderTitle from "./head-title";
 import Link from "next/link";
-
-const FAQS = [
-  {
-    question: "Is there a free trial available?",
-    answer:
-      "Yes, you can try us for free for 30 days. If you want, we'll provide you with a free, personalized 30-minute onboarding call to get you up and running as soon as possible.",
-  },
-  {
-    question: "Can I change my plan later?",
-    answer:
-      "You can change your plan at any time through your account settings.",
-  },
-  {
-    question: "What is your cancellation policy?",
-    answer:
-      "Our cancellation policy is flexible. You can cancel your subscription at any time.",
-  },
-  {
-    question: "Can other info be added to an invoice?",
-    answer: "Yes, you can add your company name and address to your invoices.",
-  },
-  {
-    question: "How does billing work?",
-    answer: "We bill monthly or annually based on your chosen plan.",
-  },
-  {
-    question: "How do I change my account email?",
-    answer:
-      "You can change your email address in the account security settings.",
-  },
-];
+import { usePublicFaq } from "@/features/website-content/hooks/use-faq-content";
+import { Loader2 } from "lucide-react";
 
 export function FAQ() {
-  return (
-    <section className=" py-24 px-6 bg-secondary">
-      <div className="  mx-auto max-w-4xl ">
-        <div className="text-center space-y-4 mb-16">
-          <HeaderTitle title="Frequently asked questions" />
+  const { data, isLoading, isError } = usePublicFaq();
 
-          <p className="text-gray-600 text-lg">
-            Everything you need to know about the product and billing.
-          </p>
+  if (isLoading) {
+    return (
+      <section className="py-24 px-6 bg-secondary">
+        <div className="mx-auto max-w-4xl flex justify-center items-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
+
+  if (isError || !data?.data) {
+    return null;
+  }
+
+  const faqData = data.data;
+  const activeItems = faqData.items
+    .filter((item) => item.isActive)
+    .sort((a, b) => a.order - b.order);
+
+  // Find the default open item
+  const defaultOpenItem = activeItems.find((item) => item.defaultOpen);
+  const defaultValue = defaultOpenItem ? defaultOpenItem._id : undefined;
+
+  return (
+    <section className="py-24 px-6 bg-secondary">
+      <div className="mx-auto max-w-4xl">
+        <div className="text-center space-y-4 mb-16">
+          <HeaderTitle title={faqData.title} />
+          {faqData.subtitle && (
+            <p className="text-gray-600 text-lg">{faqData.subtitle}</p>
+          )}
         </div>
 
-        <Accordion type="single" collapsible className="w-full space-y-4">
-          {FAQS.map((faq, index) => (
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full space-y-4"
+          defaultValue={defaultValue}
+        >
+          {activeItems.map((faq) => (
             <AccordionItem
-              key={index}
-              value={`item-${index}`}
+              key={faq._id}
+              value={faq._id}
               className="border-b border-gray-200"
             >
               <AccordionTrigger className="text-left font-semibold text-lg hover:no-underline py-6 data-[state=open]:text-primary transition-colors">
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent className="text-gray-600 text-base leading-relaxed pb-6">
-                {faq.answer}
+                {faq.answer.format === "html" ? (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: faq.answer.sanitized }}
+                  />
+                ) : (
+                  faq.answer.sanitized
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
 
-        <div className="mt-24 p-12 bg-white rounded-3xl text-center space-y-8">
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold text-gray-900">
-              Still have questions?
-            </h3>
-            <p className="text-gray-600">
-              Can&apos;t find the answer you&apos;re looking for? Please chat to
-              our friendly team.
-            </p>
+        {faqData.cta?.enabled && (
+          <div className="mt-24 p-12 bg-white rounded-3xl text-center space-y-8">
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-gray-900">
+                {faqData.cta.heading}
+              </h3>
+              <p className="text-gray-600">{faqData.cta.text}</p>
+            </div>
+            <Link
+              href={faqData.cta.button.href}
+              target={faqData.cta.button.target}
+            >
+              <Button className="bg-primary hover:bg-primary/90 text-white rounded-lg px-8 h-12 font-semibold">
+                {faqData.cta.button.label}
+              </Button>
+            </Link>
           </div>
-          <Link href="/contact-us">
-            <Button className="bg-primary hover:bg-primary/90 text-white rounded-lg px-8 h-12 font-semibold">
-              Get in touch
-            </Button>
-          </Link>
-        </div>
+        )}
       </div>
     </section>
   );
