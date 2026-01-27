@@ -3,23 +3,23 @@
 export type DeliveryType = "digital" | "print" | "print&digital";
 
 export interface PricingPayload {
-    deliveryType: DeliveryType;
-    pricePerPage: number;
-    currency: string;
+  deliveryType: DeliveryType;
+  pageTiers: { pageLimit: number; price: number }[];
+  currency: string;
 }
 
 export interface PricingData {
-    _id: string;
-    deliveryType: DeliveryType;
-    pricePerPage: number;
-    currency: string;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
+  _id: string;
+  deliveryType: DeliveryType;
+  pageTiers: { pageLimit: number; price: number }[];
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface PricingResponse {
-    success: boolean;
-    message: string;
-    data: PricingData | PricingData[];
+  success: boolean;
+  message: string;
+  data: PricingData | PricingData[];
 }

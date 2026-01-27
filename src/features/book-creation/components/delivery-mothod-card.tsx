@@ -1,5 +1,3 @@
-import { useCalculatePrice } from "@/features/book-creation/hooks/usePricing";
-import { Loader2 } from "lucide-react";
 import { DeliveryMethodCardProps } from "../types";
 
 interface Icon {
@@ -12,13 +10,14 @@ export const DeliveryMethodCard = ({
   selectedPages,
   selectedFormat,
   onSelect,
+  prices,
 }: DeliveryMethodCardProps) => {
-  const { response, isLoading } = useCalculatePrice({
-    pageCount: selectedPages,
-    deliveryType: method.apiType,
-  });
+  const methodPricing = prices?.find((p) => p.deliveryType === method.apiType);
+  const tier = methodPricing?.pageTiers
+    ?.sort((a, b) => a.pageLimit - b.pageLimit)
+    .find((t) => t.pageLimit >= selectedPages);
 
-  const totalPrice = response?.data?.totalPrice;
+  const totalPrice = tier?.price;
   const displayPrice = totalPrice !== undefined ? `$${totalPrice}` : "---";
 
   return (
@@ -44,15 +43,9 @@ export const DeliveryMethodCard = ({
           <p className="text-[16px] font-normal font-inter text-[#4a5565]">
             {method.subtitle}
           </p>
-          {isLoading ? (
-            <div className="h-[48px] flex items-center justify-center mt-4">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <p className="text-[32px] font-bold font-inter text-[#ff8b36] mt-4">
-              {displayPrice}
-            </p>
-          )}
+          <p className="text-[32px] font-bold font-inter text-[#ff8b36] mt-4">
+            {displayPrice}
+          </p>
         </div>
       </div>
 

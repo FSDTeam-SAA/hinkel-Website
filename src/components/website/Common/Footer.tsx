@@ -3,6 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
 import { NewsletterSection } from "@/features/newsletter/components/NewsletterSection";
+import {
+  ShieldCheck,
+  CreditCard,
+  Database,
+  Cloud,
+  Lock,
+  CheckCircle2,
+  LucideIcon,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 // Extract link data to reduce repetition and improve maintainability
 const FOOTER_LINKS = {
@@ -54,6 +65,76 @@ const FooterLinkSection = memo(
 
 FooterLinkSection.displayName = "FooterLinkSection";
 
+const TrustSeal = ({
+  icon: Icon,
+  label,
+  detail,
+  color,
+  delay = 0,
+}: {
+  icon: LucideIcon;
+  label: string;
+  detail: string;
+  color: string;
+  delay?: number;
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      className="relative flex flex-col items-center group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay }}
+        viewport={{ once: true }}
+        className="relative cursor-help"
+      >
+        <div
+          className={`relative z-10 p-5 rounded-full bg-white shadow-xl transition-transform duration-300 group-hover:scale-110 ${color}`}
+        >
+          <Icon className="w-7 h-7" />
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5"
+          >
+            <CheckCircle2 className="w-3 h-3" />
+          </motion.div>
+        </div>
+        {/* Animated outer ring */}
+        <div className="absolute inset-0 rounded-full border-2 border-dashed border-white/30 animate-[spin_10s_linear_infinite]" />
+      </motion.div>
+
+      <span className="mt-3 text-xs font-bold text-blue-100 uppercase tracking-tighter opacity-80 group-hover:opacity-100 transition-opacity">
+        {label}
+      </span>
+
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="absolute bottom-full mb-4 z-50 w-64 p-4 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl backdrop-blur-xl"
+          >
+            <div className="text-white text-xs leading-relaxed font-medium">
+              <span className="block text-blue-400 font-bold mb-1 uppercase tracking-widest text-[10px]">
+                Security Verified
+              </span>
+              {detail}
+            </div>
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900 border-r border-b border-slate-700 rotate-45" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
@@ -97,6 +178,70 @@ const Footer = () => {
 
           {/* Subscribe Section */}
           <NewsletterSection />
+        </div>
+
+        {/* Official Verified Security Banner */}
+        <div className="mt-16 overflow-hidden rounded-3xl bg-[#0a1128] border border-blue-900/50 shadow-2xl relative">
+          {/* Subtle Background Glows */}
+          <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-emerald-600/10 rounded-full blur-3xl" />
+
+          <div className="px-8 py-10 relative z-10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-500/40">
+                  <Lock className="w-5 h-5 text-blue-400 animate-pulse" />
+                </div>
+                <div>
+                  <h4 className="text-white font-bold tracking-tight text-lg">
+                    Trust & Security Verified
+                  </h4>
+                  <p className="text-blue-200/50 text-[10px] uppercase tracking-[0.2em] font-medium">
+                    Official Platform Protection
+                  </p>
+                </div>
+              </div>
+              <div className="h-px flex-1 bg-linear-to-r from-blue-500/40 to-transparent hidden md:block" />
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+              <TrustSeal
+                icon={ShieldCheck}
+                label="SSL Encryption"
+                detail="Industry-standard TLS/SSL encryption for all data transport safely."
+                color="text-blue-600"
+                delay={0.1}
+              />
+              <TrustSeal
+                icon={CreditCard}
+                label="Stripe Secure"
+                detail="PCI-DSS Level 1 certified payments. No sensitive card data is ever stored on our servers."
+                color="text-slate-800"
+                delay={0.2}
+              />
+              <TrustSeal
+                icon={Database}
+                label="MongoDB Atlas"
+                detail="ISO 27001 & SOC 2 Type II compliant infrastructure. Enterprise-grade data protection."
+                color="text-emerald-600"
+                delay={0.3}
+              />
+              <TrustSeal
+                icon={Cloud}
+                label="Cloudinary Cloud"
+                detail="SOC 2 Type II compliant media hosting. Intelligent and secure asset storage."
+                color="text-sky-600"
+                delay={0.4}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white/3 border-t border-white/5 px-8 py-4">
+            <p className="text-center text-blue-200/40 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-semibold">
+              Security Stack: Stripe • MongoDB • Cloudinary • SSL/TLS Trusted
+              Infrastructure
+            </p>
+          </div>
         </div>
 
         {/* Bottom Section */}

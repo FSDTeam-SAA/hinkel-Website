@@ -145,7 +145,7 @@ const Faqs = () => {
         <Button
           onClick={form.handleSubmit(onSubmit)}
           disabled={isUpdating}
-          className="bg-primary hover:bg-primary/90"
+          className="bg-primary hover:bg-primary/90 text-white hover:scale-105 transition-all duration-300"
         >
           {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Save Changes
@@ -313,7 +313,7 @@ const Faqs = () => {
                 className="border-primary text-primary hover:bg-primary/5"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Item
+                Add FAQ Item
               </Button>
             </div>
 
