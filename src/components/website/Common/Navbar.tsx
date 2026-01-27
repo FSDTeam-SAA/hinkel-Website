@@ -4,7 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, User, LogOut, Package, Key } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  User,
+  LogOut,
+  Package,
+  Key,
+  LayoutDashboard,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useSession, signOut } from "next-auth/react";
@@ -31,59 +40,76 @@ const menuItems = [
 import { Session } from "next-auth";
 
 // Reusable User Profile Dropdown Component
-const UserProfile = ({ session }: { session: Session | null }) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button
-        variant="ghost"
-        className="relative h-10 w-10 rounded-full border border-primary/20 p-0 hover:bg-primary/10"
-      >
-        <Avatar className="h-9 w-9">
-          <AvatarImage
-            src={session?.user?.image || ""}
-            alt={session?.user?.name || "User"}
-          />
-          <AvatarFallback className="bg-primary/10 text-primary">
-            {session?.user?.name?.charAt(0) || <User size={18} />}
-          </AvatarFallback>
-        </Avatar>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent className="w-56 mt-2" align="end" forceMount>
-      <DropdownMenuLabel className="font-normal">
-        <div className="flex flex-col space-y-1">
-          <p className="text-sm font-medium leading-none">
-            {session?.user?.name}
-          </p>
-          <p className="text-xs leading-none text-muted-foreground">
-            {session?.user?.email}
-          </p>
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <Link href="/profile/orders">
-        <DropdownMenuItem className="cursor-pointer">
-          <Package className="mr-2 h-4 w-4" />
-          <span>Order History</span>
+const UserProfile = ({ session }: { session: Session | null }) => {
+  const isAdmin = session?.user?.role?.toLowerCase() === "admin";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="relative h-10 w-10 rounded-full border border-primary/20 p-0 hover:bg-primary/10"
+        >
+          <Avatar className="h-9 w-9">
+            <AvatarImage
+              src={session?.user?.image || ""}
+              alt={session?.user?.name || "User"}
+            />
+            <AvatarFallback className="bg-primary/10 text-primary">
+              {session?.user?.name?.charAt(0) || <User size={18} />}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56 mt-2" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">
+              {session?.user?.name}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {session?.user?.email}
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {isAdmin ? (
+          // Admin: Show only Dashboard
+          <Link href="/dashboard">
+            <DropdownMenuItem className="cursor-pointer">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <span>Dashboard</span>
+            </DropdownMenuItem>
+          </Link>
+        ) : (
+          // Regular User: Show Order History and Change Password
+          <>
+            <Link href="/profile/orders">
+              <DropdownMenuItem className="cursor-pointer">
+                <Package className="mr-2 h-4 w-4" />
+                <span>Order History</span>
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/profile/change-password">
+              <DropdownMenuItem className="cursor-pointer">
+                <Key className="mr-2 h-4 w-4" />
+                <span>Change Password</span>
+              </DropdownMenuItem>
+            </Link>
+          </>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="text-red-600 cursor-pointer focus:bg-red-50 focus:text-red-600"
+          onClick={() => signOut({ callbackUrl: "/" })}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log Out</span>
         </DropdownMenuItem>
-      </Link>
-      <Link href="/profile/change-password">
-        <DropdownMenuItem className="cursor-pointer">
-          <Key className="mr-2 h-4 w-4" />
-          <span>Change Password</span>
-        </DropdownMenuItem>
-      </Link>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
-        className="text-red-600 cursor-pointer focus:bg-red-50 focus:text-red-600"
-        onClick={() => signOut({ callbackUrl: "/" })}
-      >
-        <LogOut className="mr-2 h-4 w-4" />
-        <span>Log Out</span>
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
