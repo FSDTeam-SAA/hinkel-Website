@@ -18,10 +18,10 @@ import { useState } from "react";
 // Extract link data to reduce repetition and improve maintainability
 const FOOTER_LINKS = {
   product: [
-    { label: "Kids", href: "/kids" },
-    { label: "Seniors", href: "/seniors" },
-    { label: "Adults", href: "/adults" },
-    { label: "Pets", href: "/pets" },
+    { label: "Kids", href: "/category/kids" },
+    { label: "Seniors", href: "/category/seniors" },
+    { label: "Adults", href: "/category/adults" },
+    { label: "Pets", href: "/category/pets" },
   ],
   resources: [
     { label: "Contact", href: "/contact" },
