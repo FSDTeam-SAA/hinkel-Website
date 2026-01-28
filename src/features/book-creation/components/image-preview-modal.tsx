@@ -72,7 +72,7 @@ export default function ImagePreviewModal({
           )}
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0 space-x-2">
           <button
             type="button"
             onClick={onClose}
@@ -85,7 +85,7 @@ export default function ImagePreviewModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Generating..." : "Proceed"}
           </button>

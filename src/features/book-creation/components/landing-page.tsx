@@ -49,28 +49,52 @@ export default function LandingPage() {
 
   // Sync URL to State (Initial & URL changes)
   useEffect(() => {
-    if (currentTypeFromUrl && currentTypeFromUrl !== bookType) {
-      setBookType(currentTypeFromUrl);
-    } else if (!currentTypeFromUrl && bookType) {
+    const validUrlType =
+      currentTypeFromUrl && currentTypeFromUrl.toLowerCase() !== "home"
+        ? currentTypeFromUrl
+        : null;
+
+    if (validUrlType && validUrlType !== bookType) {
+      setBookType(validUrlType);
+    } else if (!validUrlType && bookType && bookType.toLowerCase() !== "home") {
       // If store has it but URL doesn't, sync store to URL
       const params = new URLSearchParams(searchParams.toString());
       params.set("type", bookType);
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    } else if (bookType && bookType.toLowerCase() === "home") {
+      // Clear invalid "home" type from store if it exists
+      setBookType("");
     }
-  }, [currentTypeFromUrl, bookType, setBookType, pathname, router, searchParams]);
+  }, [
+    currentTypeFromUrl,
+    bookType,
+    setBookType,
+    pathname,
+    router,
+    searchParams,
+  ]);
 
   // Handle manual selection
-  const handleStyleSelect = useCallback((type: string) => {
-    setBookType(type);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("type", type);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [setBookType, pathname, router, searchParams]);
+  const handleStyleSelect = useCallback(
+    (type: string) => {
+      setBookType(type);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("type", type);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [setBookType, pathname, router, searchParams],
+  );
 
   // Generate preview hook
   const { generatePreview, loading, error, reset } = useGeneratePreview();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!bookType || bookType.toLowerCase() === "home") {
+      toast.error("Please select a book style before uploading.");
+      e.target.value = "";
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -88,7 +112,7 @@ export default function LandingPage() {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setPendingImage(null);
-    setStep("cover");
+    // setStep("cover");
     //TODO:Turn off reset() for Testing purpose
     reset();
   };
@@ -171,7 +195,14 @@ export default function LandingPage() {
                 onChange={handleFileUpload}
                 className="hidden"
               />
-              <div className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors">
+              <div
+                className={cn(
+                  "w-full font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors",
+                  !bookType || bookType.toLowerCase() === "home"
+                    ? "bg-muted text-muted-foreground cursor-not-allowed"
+                    : "bg-primary hover:bg-primary/90 text-white cursor-pointer",
+                )}
+              >
                 <ArrowUpFromLine className="w-5 h-5" />
                 Upload Your Image
               </div>

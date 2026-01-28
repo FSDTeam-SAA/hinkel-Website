@@ -97,8 +97,15 @@ export function CategoryGrid() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="container mx-auto relative space-y-6">
-        <HeaderTitle title={headerData?.data?.data?.title || "Explore Categories"} />
-        <SubtitleCategory subtitle={headerData?.data?.data?.subtitle || "Browse our collection of books and other reading materials."} />
+        <HeaderTitle
+          title={headerData?.data?.data?.title || "Explore Categories"}
+        />
+        <SubtitleCategory
+          subtitle={
+            headerData?.data?.data?.subtitle ||
+            "Browse our collection of books and other reading materials."
+          }
+        />
         {showArrows && (
           <>
             <button
@@ -126,40 +133,42 @@ export function CategoryGrid() {
             msOverflowStyle: "none",
           }}
         >
-          {categories.map((category: CategoryContent) => (
-            <Link
-              key={category._id}
-              href={`/category/${category.type}`}
-              className="group relative rounded-4xl overflow-hidden bg-white shadow-lg  transition-all duration-500 shrink-0 w-[70%] sm:w-[40%] lg:w-[calc(20%-1rem)] snap-start border border-transparent hover:border-primary"
-            >
-              <div className="aspect-4/5 relative bg-accent">
-                {category.isSplit ? (
-                  <div className="relative h-full overflow-hidden">
+          {categories
+            .filter((c: CategoryContent) => c.type?.toLowerCase() !== "home")
+            .map((category: CategoryContent) => (
+              <Link
+                key={category._id}
+                href={`/category/${category.type}`}
+                className="group relative rounded-4xl overflow-hidden bg-white shadow-lg  transition-all duration-500 shrink-0 w-[70%] sm:w-[40%] lg:w-[calc(20%-1rem)] snap-start border border-transparent hover:border-primary"
+              >
+                <div className="aspect-4/5 relative bg-accent">
+                  {category.isSplit ? (
+                    <div className="relative h-full overflow-hidden">
+                      <Image
+                        src={category.image || "/no-image.jpg"}
+                        alt={`${category.title} Original`}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    </div>
+                  ) : (
                     <Image
                       src={category.image || "/no-image.jpg"}
-                      alt={`${category.title} Original`}
+                      alt={category.title}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                  </div>
-                ) : (
-                  <Image
-                    src={category.image || "/no-image.jpg"}
-                    alt={category.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                )}
-                {/* Decorative overlay for better "book" feel */}
-                <div className="absolute inset-0 bg-linear-to-t from-black/5 to-transparent pointer-events-none" />
-              </div>
-              <div className="bg-primary py-5 text-center transition-colors duration-300 group-hover:bg-[#e66a33]">
-                <span className="text-white font-medium text-2xl tracking-tight uppercase">
-                  {category.type}
-                </span>
-              </div>
-            </Link>
-          ))}
+                  )}
+                  {/* Decorative overlay for better "book" feel */}
+                  <div className="absolute inset-0 bg-linear-to-t from-black/5 to-transparent pointer-events-none" />
+                </div>
+                <div className="bg-primary py-5 text-center transition-colors duration-300 group-hover:bg-[#e66a33]">
+                  <span className="text-white font-medium text-2xl tracking-tight uppercase">
+                    {category.type}
+                  </span>
+                </div>
+              </Link>
+            ))}
         </div>
       </div>
     </section>

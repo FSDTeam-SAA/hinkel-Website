@@ -128,11 +128,10 @@ When login is required during book creation:
 
 ---
 
-🧑‍💻 Author
+## 🔒 Data Protection Policy
 
-Rashedul Haque Rasel
+**Image Privacy & Storage:**
 
-Built with ❤️ using Next.js, TypeScript, and Tailwind CSS.
-
-📧 [rashedulhaquerasel1@gmail.com](rashedulhaquerasel1@gmail.com)
-🌐 [Protfolio](https://rashedul-haque-rasel.vercel.app)
+- **Stored Temporarily:** All uploaded images and generated sketches are processed and stored **locally** within your browser (Client-side) using IndexedDB. They are NOT stored on our servers during the creation process.
+- **Defined Duration:** Images persist in your local browser storage **only** for the duration of your book creation session to allow you to resume work if interrupted.
+- **Automatic Removal:** Once you complete your order and choose to create a new book (or clear your browser cache), all local data is automatically removed. Your source images are never permanently stored on our infrastructure.

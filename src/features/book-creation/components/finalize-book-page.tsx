@@ -238,7 +238,7 @@ export default function FinalizeBookPage() {
             <Button
               onClick={handleComplete}
               disabled={isGenerating || isUploading}
-              className="w-48 bg-orange-500 hover:bg-orange-600 transition-all rounded-xl h-14 font-semibold text-lg gap-2"
+              className="w-48 bg-primary hover:bg-orange-600 text-white transition-all rounded-xl h-14 font-semibold text-lg gap-2"
             >
               {isGenerating || isUploading ? (
                 <>
