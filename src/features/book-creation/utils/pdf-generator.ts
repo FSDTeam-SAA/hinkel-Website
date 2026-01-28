@@ -13,6 +13,8 @@ export const generateBookPdf = async (state: BookState): Promise<Blob> => {
     includeDedicationPage,
     dedicationText,
     coverImage,
+    coverImageVariants,
+    selectedCoverVariantIndex,
   } = state;
 
   // A4 dimensions in points (72 points per inch)
@@ -29,48 +31,99 @@ export const generateBookPdf = async (state: BookState): Promise<Blob> => {
   const contentWidth = pageWidth - margin * 2;
 
   // 1. Cover Page
-  if (coverImage) {
-    try {
-      const props = doc.getImageProperties(coverImage);
-      const imgRatio = props.width / props.height;
-      const pageRatio = pageWidth / pageHeight;
+  // Use the sketch version (variant) if available, otherwise fall back to coverImage
+  const finalCoverImage =
+    coverImageVariants && coverImageVariants.length > 0
+      ? coverImageVariants[selectedCoverVariantIndex || 0]
+      : coverImage;
 
-      let finalW, finalH, finalX, finalY;
-      if (imgRatio > pageRatio) {
-        // Image is wider than page
-        finalW = pageWidth;
-        finalH = pageWidth / imgRatio;
-        finalX = 0;
-        finalY = (pageHeight - finalH) / 2;
+  // Render Cover Page
+  // Background/Border
+  doc.setDrawColor(255, 139, 54); // Brand orange #ff8b36
+  doc.setLineWidth(15);
+  doc.rect(20, 20, pageWidth - 40, pageHeight - 40);
+  doc.setLineWidth(2);
+  doc.rect(40, 40, pageWidth - 80, pageHeight - 80);
+
+  // Title Section
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(48);
+  doc.setTextColor(10, 10, 10);
+  const displayTitle = bookTitle || "My Coloring Book";
+  const titleLines = doc.splitTextToSize(
+    displayTitle.toUpperCase(),
+    contentWidth - 40,
+  );
+  doc.text(titleLines, pageWidth / 2, 120, { align: "center" });
+
+  // Subtitle
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(18);
+  doc.setTextColor(100, 100, 100);
+  doc.text("PERSONALIZED SKETCH BOOK", pageWidth / 2, 160, {
+    align: "center",
+  });
+
+  if (finalCoverImage) {
+    try {
+      const props = doc.getImageProperties(finalCoverImage as string);
+      const imgWidth = props.width;
+      const imgHeight = props.height;
+      const imgRatio = imgWidth / imgHeight;
+
+      // Image Area: Between title and footer
+      const imgYStart = 200;
+      const imgYEnd = pageHeight - 120;
+      const maxW = contentWidth - 80;
+      const maxH = imgYEnd - imgYStart;
+      const boxRatio = maxW / maxH;
+
+      let finalW, finalH;
+      if (imgRatio > boxRatio) {
+        finalW = maxW;
+        finalH = maxW / imgRatio;
       } else {
-        // Image is taller than page
-        finalH = pageHeight;
-        finalW = pageHeight * imgRatio;
-        finalX = (pageWidth - finalW) / 2;
-        finalY = 0;
+        finalH = maxH;
+        finalW = maxH * imgRatio;
       }
 
-      doc.addImage(coverImage, "JPEG", finalX, finalY, finalW, finalH);
+      const finalX = (pageWidth - finalW) / 2;
+      const finalY = imgYStart + (maxH - finalH) / 2;
 
-      // Title Overlay (Optional - usually on the image)
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(36);
-      doc.setTextColor(0, 0, 0);
-      // You could add text here if wanted: doc.text(bookTitle, pageWidth / 2, 100, { align: "center" });
+      // Image Frame
+      doc.setDrawColor(240, 240, 240);
+      doc.setLineWidth(1);
+      doc.rect(finalX - 5, finalY - 5, finalW + 10, finalH + 10);
 
-      doc.addPage();
+      doc.addImage(
+        finalCoverImage as string,
+        "JPEG",
+        finalX,
+        finalY,
+        finalW,
+        finalH,
+        undefined,
+        "FAST",
+      );
     } catch (e) {
       console.error("Error adding cover image:", e);
     }
   } else {
-    // Basic Title Page if no cover
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(40);
-    doc.text(bookTitle || "My Coloring Book", pageWidth / 2, pageHeight / 2, {
-      align: "center",
-    });
-    doc.addPage();
+    // Decorative Placeholder for image if missing
+    doc.setDrawColor(240, 240, 240);
+    doc.setLineWidth(1);
+    doc.rect(pageWidth / 4, pageHeight / 3, pageWidth / 2, pageHeight / 3);
   }
+
+  // Footer / Branding
+  doc.setFont("helvetica", "bold italic");
+  doc.setFontSize(14);
+  doc.setTextColor(255, 139, 54);
+  doc.text("https://sktchlabs.com/", pageWidth / 2, pageHeight - 65, {
+    align: "center",
+  });
+
+  doc.addPage();
 
   // 2. Dedication Page
   if (includeDedicationPage && dedicationText) {

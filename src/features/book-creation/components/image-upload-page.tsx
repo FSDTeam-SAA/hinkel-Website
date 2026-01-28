@@ -66,6 +66,49 @@ export default function ImageUploadPage() {
 
   const totalPages = pageCount + (includeDedicationPage ? 1 : 0);
 
+  const handleConvertToLineArt = async (pageNum: number, image: string) => {
+    // Check generation limit using store tracking (max 3 per page)
+    if (!canGeneratePage(pageNum)) {
+      toast.error(
+        `Maximum ${GENERATION_LIMITS.MAX_PER_PAGE} generations allowed per page. This limit cannot be reset.`,
+      );
+      return;
+    }
+
+    toast.info("Converting to line art...");
+
+    try {
+      const lineArtImage = await generatePreview(image, bookType);
+
+      if (lineArtImage) {
+        // Increment generation count BEFORE adding the image
+        incrementPageGeneration(pageNum);
+
+        // Find and remove the original uploaded image
+        const uploadIndex = (uploadedPageImages[pageNum] || []).indexOf(image);
+        if (uploadIndex !== -1) {
+          removeUploadedPageImage(pageNum, uploadIndex);
+        }
+
+        addConvertedPageImage(pageNum, lineArtImage);
+
+        // Auto-select the converted image as the page image
+        updatePageImage(pageNum, lineArtImage);
+
+        const remaining =
+          GENERATION_LIMITS.MAX_PER_PAGE - getPageGenerationCount(pageNum);
+        toast.success(
+          `Image converted! ${remaining} generation${remaining !== 1 ? "s" : ""} remaining.`,
+        );
+      } else {
+        toast.error("Failed to convert image. Please try again.");
+      }
+    } catch (err) {
+      console.error("Conversion error:", err);
+      toast.error("Failed to convert image. Please try again.");
+    }
+  };
+
   const handleFileUploadLogic = async (file: File, pageNum: number) => {
     // Check if limit reached (max 3 images)
     const currentImages = uploadedPageImages[pageNum] || [];
@@ -98,6 +141,9 @@ export default function ImageUploadPage() {
       updatePageImage(pageNum, imageData);
 
       toast.success("Image uploaded successfully!");
+
+      // Auto-trigger conversion to sketch version
+      await handleConvertToLineArt(pageNum, imageData);
     } catch (err) {
       console.error("Image processing error:", err);
       toast.error("Failed to process image. Please try again.");
@@ -159,49 +205,6 @@ export default function ImageUploadPage() {
           updatePageImage(pageNum, "");
         }
       }
-    }
-  };
-
-  const handleConvertToLineArt = async (pageNum: number, image: string) => {
-    // Check generation limit using store tracking (max 3 per page)
-    if (!canGeneratePage(pageNum)) {
-      toast.error(
-        `Maximum ${GENERATION_LIMITS.MAX_PER_PAGE} generations allowed per page. This limit cannot be reset.`,
-      );
-      return;
-    }
-
-    toast.info("Converting to line art...");
-
-    try {
-      const lineArtImage = await generatePreview(image, bookType);
-
-      if (lineArtImage) {
-        // Increment generation count BEFORE adding the image
-        incrementPageGeneration(pageNum);
-
-        // Find and remove the original uploaded image
-        const uploadIndex = (uploadedPageImages[pageNum] || []).indexOf(image);
-        if (uploadIndex !== -1) {
-          removeUploadedPageImage(pageNum, uploadIndex);
-        }
-
-        addConvertedPageImage(pageNum, lineArtImage);
-
-        // Auto-select the converted image as the page image
-        updatePageImage(pageNum, lineArtImage);
-
-        const remaining =
-          GENERATION_LIMITS.MAX_PER_PAGE - getPageGenerationCount(pageNum);
-        toast.success(
-          `Image converted! ${remaining} generation${remaining !== 1 ? "s" : ""} remaining.`,
-        );
-      } else {
-        toast.error("Failed to convert image. Please try again.");
-      }
-    } catch (err) {
-      console.error("Conversion error:", err);
-      toast.error("Failed to convert image. Please try again.");
     }
   };
 
@@ -376,7 +379,7 @@ export default function ImageUploadPage() {
                 <div className="relative mb-6">
                   <input
                     type="text"
-                    placeholder="CLICK TO ADD TOP TEXT..."
+                    placeholder="CLICK TO ADD TOP Captions..."
                     value={pageTexts[currentPage]?.topLine || ""}
                     onChange={(e) =>
                       updatePageText(
@@ -483,7 +486,7 @@ export default function ImageUploadPage() {
                 <div className="relative mt-6">
                   <input
                     type="text"
-                    placeholder="CLICK TO ADD BOTTOM TEXT..."
+                    placeholder="CLICK TO ADD BOTTOM Captions..."
                     value={pageTexts[currentPage]?.bottomLine || ""}
                     onChange={(e) =>
                       updatePageText(

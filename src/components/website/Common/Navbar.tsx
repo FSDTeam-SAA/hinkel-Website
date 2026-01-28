@@ -198,27 +198,32 @@ export default function Navbar() {
                     />
                   </Link>
                   {showDropdown && (
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[600px] bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl p-6 grid grid-cols-3 gap-4 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
-                      {categories.map((category: CategoryContent) => (
-                        <Link
-                          key={category._id}
-                          href={`/category/${category.type}`}
-                          onClick={() => setShowDropdown(false)}
-                          className="group flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors"
-                        >
-                          {/* <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-accent shrink-0 border border-black/5">
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 min-w-[150px] bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl p-4 gap-4 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                      {categories
+                        .filter(
+                          (c: CategoryContent) =>
+                            c.type?.toLowerCase() !== "home",
+                        )
+                        .map((category: CategoryContent) => (
+                          <Link
+                            key={category._id}
+                            href={`/category/${category.type}`}
+                            onClick={() => setShowDropdown(false)}
+                            className="group flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors"
+                          >
+                            {/* <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-accent shrink-0 border border-black/5">
                             <Image src={category.image || "/no-image.jpg"} alt={category.title} fill className="object-cover transition-transform duration-300 group-hover:scale-110" />
                           </div> */}
-                          <div className="flex flex-col">
-                            <span className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
+                            <div className="flex flex-col">
+                              {/* <span className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
                               {category.title}
-                            </span>
-                            <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">
-                              {category.type}
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
+                            </span> */}
+                              <span className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
+                                {category.type?.toUpperCase()}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
                     </div>
                   )}
                 </div>

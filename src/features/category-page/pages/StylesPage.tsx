@@ -4,13 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import {
-  Sparkles,
-  ArrowRight,
-  Paintbrush,
-  Stars,
-  MousePointer2,
-} from "lucide-react";
+import { ArrowRight, Paintbrush, Stars, MousePointer2 } from "lucide-react";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import { useCategoryHeader } from "@/features/category-page/hooks/use-categoryheader";
 import { CategoryContent } from "@/features/category-page/types";
@@ -151,79 +145,84 @@ export default function StylesPage() {
           viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 lg:gap-16"
         >
-          {categories.map((category: CategoryContent, index: number) => (
-            <motion.div
-              key={category._id}
-              variants={itemVariants}
-              className={cn(
-                "group relative flex flex-col",
-                index % 3 === 1 ? "md:mt-12" : "", // Offset every middle column for asymmetric feel
-                index % 3 === 2 ? "md:mt-24" : "", // Offset last column more
-              )}
-            >
-              {/* Card Container */}
-              <div className="relative bg-white rounded-[3rem] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] group-hover:shadow-[0_20px_50px_rgba(244,107,49,0.12)] transition-all duration-700 border border-gray-100/50 flex flex-col h-full">
-                {/* Image Section */}
-                <div className="relative aspect-[3/4] overflow-hidden p-4">
-                  <div className="relative w-full h-full rounded-[2rem] overflow-hidden shadow-inner bg-gray-50">
-                    <Image
-                      src={category.image || "/no-image.jpg"}
-                      alt={category.title}
-                      fill
-                      className="object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          {categories
+            .filter((c: CategoryContent) => c.type?.toLowerCase() !== "home")
+            .map((category: CategoryContent, index: number) => (
+              <motion.div
+                key={category._id}
+                variants={itemVariants}
+                className={cn(
+                  "group relative flex flex-col",
+                  index % 3 === 1 ? "md:mt-12" : "", // Offset every middle column for asymmetric feel
+                  index % 3 === 2 ? "md:mt-24" : "", // Offset last column more
+                )}
+              >
+                {/* Card Container */}
+                <div className="relative bg-white rounded-[3rem] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] group-hover:shadow-[0_20px_50px_rgba(244,107,49,0.12)] transition-all duration-700 border border-gray-100/50 flex flex-col h-full">
+                  {/* Image Section */}
+                  <div className="relative aspect-[3/4] overflow-hidden p-4">
+                    <div className="relative w-full h-full rounded-[2rem] overflow-hidden shadow-inner bg-gray-50">
+                      <Image
+                        src={category.image || "/no-image.jpg"}
+                        alt={category.title}
+                        fill
+                        className="object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    </div>
+
+                    {/* Category Type Badge */}
+                    <div className="absolute top-8 left-8">
+                      <span className="px-4 py-2 rounded-full bg-white/90 backdrop-blur-md shadow-sm text-[10px] font-black uppercase tracking-widest text-primary border border-primary/10">
+                        {category.type}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Category Type Badge */}
-                  <div className="absolute top-8 left-8">
-                    <span className="px-4 py-2 rounded-full bg-white/90 backdrop-blur-md shadow-sm text-[10px] font-black uppercase tracking-widest text-primary border border-primary/10">
-                      {category.type}
-                    </span>
-                  </div>
-                </div>
+                  {/* Content Section */}
+                  <div className="p-8 pt-2 flex flex-col flex-1">
+                    <div className="mb-8">
+                      <h3 className="text-3xl font-black text-gray-900 mb-3 tracking-tight group-hover:text-primary transition-colors">
+                        {category.title}
+                      </h3>
+                      <p className="text-gray-500 leading-relaxed font-medium">
+                        {category.subtitle ||
+                          "Bring your imagination to life with this beautiful, hand-crafted sketch style designed for perfect coloring results."}
+                      </p>
+                    </div>
 
-                {/* Content Section */}
-                <div className="p-8 pt-2 flex flex-col flex-1">
-                  <div className="mb-8">
-                    <h3 className="text-3xl font-black text-gray-900 mb-3 tracking-tight group-hover:text-primary transition-colors">
-                      {category.title}
-                    </h3>
-                    <p className="text-gray-500 leading-relaxed font-medium">
-                      {category.subtitle ||
-                        "Bring your imagination to life with this beautiful, hand-crafted sketch style designed for perfect coloring results."}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="mt-auto grid grid-cols-1 gap-4">
-                    <Link
-                      href={`/create-book?type=${category.type}`}
-                      className="block"
-                    >
-                      <Button className="w-full bg-gray-900 hover:bg-primary text-white rounded-2xl py-7 font-black shadow-xl hover:shadow-primary/30 transition-all duration-500 uppercase tracking-wider text-sm">
-                        Start Creating
-                        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
-                    <Link href={`/category/${category.type}`} className="block">
-                      <Button
-                        variant="ghost"
-                        className="w-full text-gray-900 hover:text-primary hover:bg-primary/5 rounded-2xl font-bold transition-all text-sm"
+                    {/* Actions */}
+                    <div className="mt-auto grid grid-cols-1 gap-4">
+                      <Link
+                        href={`/create-book?type=${category.type}`}
+                        className="block"
                       >
-                        View Sample Pages
-                      </Button>
-                    </Link>
+                        <Button className="w-full bg-gray-900 hover:bg-primary text-white rounded-2xl py-7 font-black shadow-xl hover:shadow-primary/30 transition-all duration-500 uppercase tracking-wider text-sm">
+                          Start Creating
+                          <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
+                      <Link
+                        href={`/category/${category.type}`}
+                        className="block"
+                      >
+                        <Button
+                          variant="ghost"
+                          className="w-full text-gray-900 hover:text-primary hover:bg-primary/5 rounded-2xl font-bold transition-all text-sm"
+                        >
+                          View Sample Pages
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Decorative Number for Gallery Feel */}
-              <div className="absolute -top-6 -right-4 text-8xl font-black text-gray-100 -z-10 select-none opacity-50 group-hover:text-primary/10 transition-colors">
-                {String(index + 1).padStart(2, "0")}
-              </div>
-            </motion.div>
-          ))}
+                {/* Decorative Number for Gallery Feel */}
+                <div className="absolute -top-6 -right-4 text-8xl font-black text-gray-100 -z-10 select-none opacity-50 group-hover:text-primary/10 transition-colors">
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+              </motion.div>
+            ))}
         </motion.div>
       </section>
 
