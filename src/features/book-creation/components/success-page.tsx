@@ -1,6 +1,13 @@
 "use client";
 
-import { CheckCircle, Home, Download, Loader2 } from "lucide-react";
+import {
+  CheckCircle,
+  Home,
+  Download,
+  Loader2,
+  Book,
+  BookOpenText,
+} from "lucide-react";
 import { useState } from "react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
@@ -86,7 +93,7 @@ export default function SuccessPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <button
+          {/* <button
             onClick={handleDownload}
             disabled={isGenerating}
             className="w-full bg-[#ff8b36] hover:bg-orange-600 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all hover:scale-105 shadow-lg shadow-orange-500/20"
@@ -97,13 +104,13 @@ export default function SuccessPage() {
               <Download className="w-6 h-6" />
             )}
             {isGenerating ? "Generating PDF..." : "Download color book"}
-          </button>
+          </button> */}
 
           <button
             onClick={handleCreateAnother}
-            className="w-full bg-muted hover:bg-muted/80 text-foreground font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors"
+            className="w-full bg-muted hover:bg-primary hover:text-white text-primary cursor-pointer duration-300 font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors"
           >
-            <Home className="w-5 h-5" />
+            <BookOpenText className="w-5 h-5" />
             Create Another Book
           </button>
         </div>

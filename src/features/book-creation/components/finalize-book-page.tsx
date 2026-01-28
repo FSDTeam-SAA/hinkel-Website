@@ -7,9 +7,17 @@ import { BookStore } from "../types";
 import { generateBookPdf } from "../utils/pdf-generator";
 import { useState } from "react";
 import { useUploadBook } from "@/features/book-creation/hooks/useUploadBook";
-import { Eye, Loader2, ArrowLeft, CheckCircle, Plus } from "lucide-react";
+import {
+  Eye,
+  Loader2,
+  ArrowLeft,
+  CheckCircle,
+  Plus,
+  PrinterCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import AddPagesModal from "./AddPagesModal";
+import { Badge } from "@/components/ui/badge";
 
 export default function FinalizeBookPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -117,7 +125,11 @@ export default function FinalizeBookPage() {
             Review all details before finalizing your book
           </p>
 
-          <div className="flex justify-end mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-white bg-primary rounded-full px-4 py-1">
+              <PrinterCheck className="inline-block mr-2 size-4" /> Optimized
+              for professional print-on-demand services like Lulu.
+            </span>
             <Button
               onClick={handlePreview}
               disabled={isGenerating}
