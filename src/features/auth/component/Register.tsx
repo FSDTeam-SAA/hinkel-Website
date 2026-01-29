@@ -2,10 +2,9 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { useRegister } from "../hooks/useregister";
-import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 const Register = () => {
@@ -15,6 +14,8 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,14 +25,14 @@ const Register = () => {
     const res = await handleRegister(name, email, password);
     if (res && !res.error) {
       toast.success("Check your inbox to verify");
-      router.push("/login");
+      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-6xl bg-white rounded-xl shadow-lg p-10 relative">
-        
+
 
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-5">
@@ -128,7 +129,7 @@ const Register = () => {
             <p className="text-sm text-gray-600 flex items-center gap-1">
               Already have an account?
               <Link
-                href="/login"
+                href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
                 className="text-primary font-semibold hover:text-primary/80 transition-all hover:underline"
               >
                 Sign In

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { useLogin } from "../hooks/uselogin";
-import { ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const { loading, error, handleLogin } = useLogin();
@@ -13,9 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // Get callback URL from search params (for redirecting after login)
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +26,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-6xl bg-white rounded-xl shadow-lg p-10 relative">
-        
+
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-5">
           <Link href="/">
@@ -95,7 +92,7 @@ const Login = () => {
             </label>
 
             <Link
-              href="/reset-password"
+              href={`/reset-password?callbackUrl=${encodeURIComponent(callbackUrl)}`}
               title="reset password"
               className="text-primary font-medium hover:text-primary/80 transition-all hover:underline"
             >
@@ -106,7 +103,7 @@ const Login = () => {
           <div className="text-center text-sm text-gray-600 mt-4">
             Don&apos;t have an account?{" "}
             <Link
-              href="/register"
+              href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
               className="text-primary font-semibold hover:text-primary/80 transition-all hover:underline"
             >
               Create an account
