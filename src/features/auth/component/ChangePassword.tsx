@@ -42,10 +42,7 @@ const ChangePassword = () => {
         });
 
         if (res) {
-            // potentially redirect or show success message
-            // For now, maybe just clear form or alert
-            alert("Password changed successfully");
-            router.push('/login'); // Assuming login route exists
+            router.push('/login');
         }
     };
 
