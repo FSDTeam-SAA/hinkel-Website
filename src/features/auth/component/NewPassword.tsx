@@ -10,8 +10,8 @@ import { useResetPassword } from "../hooks/useResetPassword";
 const NewPassword = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const email = searchParams.get("email"); 
-    const returnTo = searchParams.get("returnTo");
+    const email = searchParams.get("email");
+    const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
     const { handleResetPassword, loading, error: apiError } = useResetPassword();
 
@@ -48,13 +48,8 @@ const NewPassword = () => {
         });
 
 
-        // if (res) {
-        //     // If returnTo exists, go there; otherwise, go to the default homepage/dashboard
-        //     const destination = returnTo || "/"; 
-        //     router.push(destination);
-        // }
-
         if (res) {
+            // router.push(callbackUrl);
             router.push("/create-book");
         }
     };
@@ -62,7 +57,7 @@ const NewPassword = () => {
     return (
         <div className="min-h-screen flex items-center justify-center  px-4">
             <div className="w-full max-w-5xl bg-white rounded-xl shadow-md px-10 py-12 relative">
-                
+
                 {/* Logo */}
                 <div className="flex flex-col items-center justify-center gap-2 mb-6">
                     <Link href="/">

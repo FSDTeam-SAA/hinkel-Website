@@ -103,7 +103,7 @@ const Login = () => {
           <div className="text-center text-sm text-gray-600 mt-4">
             Don&apos;t have an account?{" "}
             <Link
-              href="/register"
+              href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
               className="text-primary font-semibold hover:text-primary/80 transition-all hover:underline"
             >
               Create an account

@@ -9,7 +9,11 @@ export const useNewsletterMutation = () => {
       toast.success(data?.message || "Successfully subscribed to newsletter!");
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to subscribe. Please try again.");
+      let message = error.message;
+      if (message.toLowerCase().includes("already") || message.toLowerCase().includes("exist")) {
+        message = "Already subscribed";
+      }
+      toast.error(message || "Failed to subscribe. Please try again.");
     },
   });
 };
