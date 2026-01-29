@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import AddPagesModal from "./AddPagesModal";
-import { Badge } from "@/components/ui/badge";
 
 export default function FinalizeBookPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -97,14 +96,25 @@ export default function FinalizeBookPage() {
     }
   };
 
-  const steps = [
-    "Book Setup",
-    "Cover & Preview",
-    "Checkout",
-    "Complete Book",
-    "Review",
-  ];
+  const steps = ["Cover Art", "Details", "Payment", "Content", "Review"];
   const currentStep = 4;
+
+  const handleStepClick = (index: number) => {
+    switch (index) {
+      case 0:
+        setStep("cover");
+        break;
+      case 1:
+        setStep("setup");
+        break;
+      case 3:
+        setStep("images");
+        break;
+      case 4:
+        // Already here
+        break;
+    }
+  };
 
   const handleTitleChange = (newTitle: string) => {
     setBookTitle(newTitle);
@@ -116,17 +126,21 @@ export default function FinalizeBookPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <StepIndicator steps={steps} currentStep={currentStep} />
+      <StepIndicator
+        steps={steps}
+        currentStep={currentStep}
+        onStepClick={handleStepClick}
+      />
 
       <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-sm p-8 md:p-12">
+        <div className="bg-white rounded-2xl shadow-sm p-5 md:p-12">
           <h1 className="text-3xl font-bold mb-2">Review Your Book</h1>
           <p className="text-gray-600 mb-8">
             Review all details before finalizing your book
           </p>
 
-          <div className="flex justify-between items-center mb-6">
-            <span className="text-white bg-primary rounded-full px-4 py-1">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
+            <span className="text-white bg-primary rounded-full px-4 py-1 text-sm md:text-base">
               <PrinterCheck className="inline-block mr-2 size-4" /> Optimized
               for professional print-on-demand services like Lulu.
             </span>
@@ -134,7 +148,7 @@ export default function FinalizeBookPage() {
               onClick={handlePreview}
               disabled={isGenerating}
               variant="outline"
-              className="group border-primary/20 text-primary hover:bg-primary/5 rounded-xl h-12 px-6 gap-2"
+              className="group border-primary/20 text-primary hover:bg-primary/5 rounded-xl h-12 px-6 gap-2 w-full md:w-auto"
             >
               {isGenerating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -238,7 +252,7 @@ export default function FinalizeBookPage() {
             </div>
           </div>
 
-          <div className="flex gap-4 justify-between">
+          <div className="flex flex-col-reverse md:flex-row gap-4 justify-between">
             <Button
               variant="outline"
               onClick={handleReturnToCreation}
@@ -250,7 +264,7 @@ export default function FinalizeBookPage() {
             <Button
               onClick={handleComplete}
               disabled={isGenerating || isUploading}
-              className="w-48 bg-primary hover:bg-orange-600 text-white transition-all rounded-xl h-14 font-semibold text-lg gap-2"
+              className="w-full md:w-48 bg-primary hover:bg-orange-600 text-white transition-all rounded-xl h-14 font-semibold text-lg gap-2"
             >
               {isGenerating || isUploading ? (
                 <>

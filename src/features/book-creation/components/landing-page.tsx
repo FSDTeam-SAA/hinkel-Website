@@ -213,7 +213,7 @@ export default function LandingPage() {
               </div>
             </label>
 
-            <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-border">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 pt-8 border-t border-border">
               <div className="text-center">
                 <div className="text-2xl mb-2">📷</div>
                 <p className="text-sm font-medium text-foreground">

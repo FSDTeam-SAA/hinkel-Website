@@ -57,14 +57,25 @@ export default function ImageUploadPage() {
   const state = useBookStore();
   const { generatePreview, loading: isConverting } = useGeneratePreview();
 
-  const steps = [
-    "Book Setup",
-    "Cover & Preview",
-    "Checkout",
-    "Complete Book",
-    "Review",
-  ];
+  const steps = ["Cover Art", "Details", "Payment", "Content", "Review"];
   const currentStep = 3;
+
+  const handleStepClick = (index: number) => {
+    switch (index) {
+      case 0:
+        setStep("cover");
+        break;
+      case 1:
+        setStep("setup");
+        break;
+      case 3:
+        // Already here
+        break;
+      case 4:
+        setStep("finalize");
+        break;
+    }
+  };
 
   const totalPages = pageCount + (includeDedicationPage ? 1 : 0);
 
@@ -277,10 +288,14 @@ export default function ImageUploadPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <StepIndicator steps={steps} currentStep={currentStep} />
+      <StepIndicator
+        steps={steps}
+        currentStep={currentStep}
+        onStepClick={handleStepClick}
+      />
 
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-sm p-8 md:p-12">
+      <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 md:py-12">
+        <div className="bg-white rounded-2xl shadow-sm p-4 md:p-8 lg:p-12">
           {/* Page selector */}
           <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-hide">
             {Array.from({ length: totalPages }).map((_, index) => {
@@ -346,12 +361,12 @@ export default function ImageUploadPage() {
           </div>
 
           {/* Main content grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-12 mt-12">
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-8 xl:gap-12 mt-8 md:mt-12">
             {/* Left Column: Paper Canvas (The actual page editor) */}
             <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
+                  <h2 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
                     Page {currentPage}
                     {hasMaxGenerations && (
                       <span className="text-sm font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center gap-1.5 animate-in fade-in zoom-in">
@@ -407,7 +422,7 @@ export default function ImageUploadPage() {
                         pageTexts[currentPage]?.bottomLine || "",
                       )
                     }
-                    className="w-full text-center text-2xl font-black placeholder:text-gray-200 text-gray-900 bg-transparent border-b-2 border-dashed border-transparent hover:border-gray-100 focus:border-primary focus:bg-primary/5 transition-all outline-none py-4"
+                    className="w-full text-center text-lg md:text-2xl font-black placeholder:text-gray-200 text-gray-900 bg-transparent border-b-2 border-dashed border-transparent hover:border-gray-100 focus:border-primary focus:bg-primary/5 transition-all outline-none py-2 md:py-4"
                   />
                 </div>
 
@@ -514,7 +529,7 @@ export default function ImageUploadPage() {
                         e.target.value,
                       )
                     }
-                    className="w-full text-center text-2xl font-black placeholder:text-gray-200 text-gray-900 bg-transparent border-t-2 border-dashed border-transparent hover:border-gray-100 focus:border-primary focus:bg-primary/5 transition-all outline-none py-4"
+                    className="w-full text-center text-lg md:text-2xl font-black placeholder:text-gray-200 text-gray-900 bg-transparent border-t-2 border-dashed border-transparent hover:border-gray-100 focus:border-primary focus:bg-primary/5 transition-all outline-none py-2 md:py-4"
                   />
                 </div>
 
@@ -657,7 +672,7 @@ export default function ImageUploadPage() {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex items-center justify-between mt-16 pt-10 border-t border-gray-100">
+          <div className="flex flex-col-reverse md:flex-row items-center justify-between mt-8 md:mt-16 pt-6 md:pt-10 gap-6 md:gap-0 border-t border-gray-100">
             {/* Back Button (Step Navigation) */}
             <Button
               variant="outline"
@@ -668,7 +683,7 @@ export default function ImageUploadPage() {
             </Button>
 
             {/* Page Navigation Controls (Center) */}
-            <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-2xl border border-gray-100">
+            <div className="flex items-center justify-center gap-4 bg-gray-50 p-2 rounded-2xl border border-gray-100 w-full md:w-auto">
               <Button
                 variant="ghost"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
@@ -697,7 +712,7 @@ export default function ImageUploadPage() {
             {/* Next Step Button */}
             <Button
               onClick={() => setStep("finalize")}
-              className="h-16 px-12 text-xl font-black bg-[#ff8b36] hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 border-none"
+              className="h-14 md:h-16 w-full md:w-auto px-8 md:px-12 text-lg md:text-xl font-black bg-[#ff8b36] hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 border-none"
             >
               REVIEW BOOK →
             </Button>
