@@ -48,7 +48,7 @@ export default function CoverPageTestPage() {
         <div className="flex h-[41.216px] items-center justify-between w-full">
           {/* Back Button */}
           <button
-            onClick={() => setStep("format")}
+            onClick={() => setStep("landing")}
             className="flex items-center gap-2 text-[#4a5565] font-Arial text-[18.318px] leading-[27.478px] hover:opacity-80 transition-opacity"
           >
             <ArrowLeft />

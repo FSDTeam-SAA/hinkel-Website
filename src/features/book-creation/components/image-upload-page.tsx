@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   Eye,
   Plus,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
@@ -359,14 +361,31 @@ export default function ImageUploadPage() {
                     )}
                   </h2>
                 </div>
-                <div
-                  className={`text-sm font-black rounded-xl px-5 py-2.5 border transition-all ${
-                    hasMaxGenerations
-                      ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
-                      : "bg-gray-50 border-gray-200 text-gray-600"
-                  }`}
-                >
-                  {generationsUsed}/{maxConversions} Sketches Created
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handlePreviewBook}
+                    disabled={isGeneratingPreview}
+                    variant="outline"
+                    className="h-10 px-4 text-sm font-bold border-2 border-primary/30 text-primary hover:bg-primary/5 rounded-xl transition-all flex items-center gap-2"
+                  >
+                    {isGeneratingPreview ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                    {isGeneratingPreview ? "Generating..." : "Preview Book"}
+                  </Button>
+
+                  <div
+                    className={`text-sm font-black rounded-xl px-5 py-2.5 border transition-all ${
+                      hasMaxGenerations
+                        ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
+                        : "bg-gray-50 border-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {generationsUsed}/{maxConversions} Sketches Created
+                  </div>
                 </div>
               </div>
 
@@ -638,35 +657,50 @@ export default function ImageUploadPage() {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex gap-4 justify-between mt-16 pt-10 border-t border-gray-100">
+          <div className="flex items-center justify-between mt-16 pt-10 border-t border-gray-100">
+            {/* Back Button (Step Navigation) */}
             <Button
               variant="outline"
               disabled
-              className="h-16 px-10 text-xl cursor-not-allowed font-black border-2 border-gray-200 text-gray-400 rounded-2xl"
+              className="h-16 px-8 text-xl cursor-not-allowed font-black border-2 border-gray-200 text-gray-400 rounded-2xl hidden md:flex"
             >
-              ← BACK
+              BACK
             </Button>
-            <div className="flex gap-4">
+
+            {/* Page Navigation Controls (Center) */}
+            <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-2xl border border-gray-100">
               <Button
-                onClick={handlePreviewBook}
-                disabled={isGeneratingPreview}
-                variant="outline"
-                className="h-16 px-8 text-xl font-black border-2 border-primary/30 text-primary hover:bg-primary/5 rounded-2xl transition-all flex items-center gap-2"
+                variant="ghost"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="h-12 w-12 rounded-xl hover:bg-white hover:shadow-sm disabled:opacity-30 p-0"
               >
-                {isGeneratingPreview ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-                {isGeneratingPreview ? "GENERATING..." : "PREVIEW BOOK"}
+                <ChevronLeft className="w-6 h-6" />
               </Button>
+
+              <span className="text-sm font-black text-gray-500 min-w-[100px] text-center">
+                PAGE {currentPage} / {totalPages}
+              </span>
+
               <Button
-                onClick={() => setStep("finalize")}
-                className="h-16 px-12 text-xl font-black bg-[#ff8b36] hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 border-none"
+                variant="ghost"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="h-12 w-12 rounded-xl hover:bg-white hover:shadow-sm disabled:opacity-30 p-0"
               >
-                REVIEW BOOK →
+                <ChevronRight className="w-6 h-6" />
               </Button>
             </div>
+
+            {/* Next Step Button */}
+            <Button
+              onClick={() => setStep("finalize")}
+              className="h-16 px-12 text-xl font-black bg-[#ff8b36] hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 border-none"
+            >
+              REVIEW BOOK →
+            </Button>
           </div>
         </div>
       </div>
