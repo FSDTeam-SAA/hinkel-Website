@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useState } from "react";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -10,7 +10,8 @@ import { useResetPassword } from "../hooks/useResetPassword";
 const NewPassword = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const email = searchParams.get("email"); // email from query params
+    const email = searchParams.get("email"); 
+    const returnTo = searchParams.get("returnTo");
 
     const { handleResetPassword, loading, error: apiError } = useResetPassword();
 
@@ -46,9 +47,15 @@ const NewPassword = () => {
             newPassword,
         });
 
+
+        // if (res) {
+        //     // If returnTo exists, go there; otherwise, go to the default homepage/dashboard
+        //     const destination = returnTo || "/"; 
+        //     router.push(destination);
+        // }
+
         if (res) {
-            alert("Password reset successfully");
-            router.push("/login");
+            router.push("/create-book");
         }
     };
 
