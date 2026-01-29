@@ -36,19 +36,19 @@ export default function CoverPageTestPage() {
   // };
 
   const handleContinue = () => {
-    setHasPaid(true);
+    // Only proceed to setup. Do NOT set hasPaid here (it should only be set after actual payment).
     setStep("setup");
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf4ea] flex flex-col items-center justify-start py-[36.637px] px-[300.537px]">
+    <div className="min-h-screen bg-[#fbf4ea] flex flex-col items-center justify-start py-8 px-4 md:py-[36px] lg:px-[15%] xl:px-[20%]">
       {/* Main Container */}
       <div className="flex flex-col gap-[36.637px] w-full max-w-6xl">
         {/* Header Container */}
         <div className="flex h-[41.216px] items-center justify-between w-full">
           {/* Back Button */}
           <button
-            onClick={() => setStep("format")}
+            onClick={() => setStep("landing")}
             className="flex items-center gap-2 text-[#4a5565] font-Arial text-[18.318px] leading-[27.478px] hover:opacity-80 transition-opacity"
           >
             <ArrowLeft />
@@ -60,12 +60,12 @@ export default function CoverPageTestPage() {
             Preview Your Sketch
           </h1>
 
-          {/* Spacer */}
-          <div className="w-[91.592px]" />
+          {/* Spacer - Hidden on mobile to allow space-between to work naturally or stack */}
+          <div className="hidden md:block w-[90px]" />
         </div>
 
         {/* Content Container */}
-        <div className="bg-white rounded-[27.478px] shadow-[0px_7px_25px_-13.739px_rgba(0,0,0,0.07)] flex flex-col gap-[27.478px] py-[36.637px] px-[36.637px]">
+        <div className="bg-white rounded-[27.478px] shadow-[0px_7px_25px_-13.739px_rgba(0,0,0,0.07)] flex flex-col gap-[27px] p-6 md:p-9">
           {/* Description Paragraph */}
           <div className="w-full text-center font-Arial text-[18.318px] leading-[27.478px] text-[#4a5565]">
             Here&apos;s how your image looks as a sketch. If you&apos;re happy
@@ -73,7 +73,7 @@ export default function CoverPageTestPage() {
           </div>
 
           {/* Images Grid */}
-          <div className="grid grid-cols-2 gap-[36.6368522644043px] w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
             {/* Original Image Column */}
             <div className="flex flex-col gap-[13.739px]">
               {/* Original Image Heading */}
@@ -81,7 +81,7 @@ export default function CoverPageTestPage() {
                 Original Image
               </h3>
               {/* Original Image Container */}
-              <div className="bg-[#f3f4f6] rounded-[18.318px] h-[604.508px] w-full overflow-hidden">
+              <div className="bg-[#f3f4f6] rounded-[18.318px] aspect-square w-full overflow-hidden relative">
                 {coverImage ? (
                   <Image
                     height={604}
@@ -103,7 +103,7 @@ export default function CoverPageTestPage() {
                 Sketch Version
               </h3>
               {/* Sketch Version Container with Orange Border */}
-              <div className="relative bg-[#f3f4f6] rounded-[18.318px] h-[604.508px] w-full overflow-hidden border-[4.58px] border-[#ff8b36]">
+              <div className="relative bg-[#f3f4f6] rounded-[18.318px] aspect-square w-full overflow-hidden border-[4.58px] border-[#ff8b36]">
                 {coverImageVariants && coverImageVariants.length > 0 ? (
                   <Image
                     height={595}
@@ -116,7 +116,7 @@ export default function CoverPageTestPage() {
                   <div className="w-full h-full bg-[#f3f4f6]" />
                 )}
                 {/* Preview Badge */}
-                <div className="absolute top-[18.32px] left-[472.18px] bg-[#ff8b36] rounded-full px-[10px] py-[2px] flex items-center gap-[5px]">
+                <div className="absolute top-4 right-4 bg-[#ff8b36] rounded-full px-[10px] py-[2px] flex items-center gap-[5px]">
                   <Eye />
                   <span className="font-Arial text-[16.029px] leading-[22.898px] text-white">
                     Preview
@@ -127,15 +127,18 @@ export default function CoverPageTestPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-[18.318px] w-full pt-[27.478px]">
+          <div className="flex flex-col md:flex-row gap-4 w-full pt-6">
             {/* Try Different Image Button */}
             <Button
               onClick={() => {
                 setCoverImage(null);
                 setCoverImageVariants([]);
+                // Ensure payment state is cleared if they go back to start
+                useBookStore.getState().setHasPaid(false);
+                useBookStore.getState().setOrderId(null);
                 setStep("landing");
               }}
-              className="flex-1 bg-[#e5e7eb] rounded-[16.029px] h-[64.114px] font-Arial text-[18.318px] leading-[27.478px] text-[#364153] font-normal hover:bg-[#d1d5db] transition-colors flex items-center justify-center"
+              className="flex-1 bg-[#e5e7eb] rounded-[16.029px] h-14 md:h-[64px] text-base md:text-[18px] text-[#364153] font-normal hover:bg-[#d1d5db] transition-colors flex items-center justify-center"
             >
               Try Different Image
             </Button>

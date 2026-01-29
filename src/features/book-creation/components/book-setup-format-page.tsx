@@ -22,7 +22,8 @@ export default function BookSetupFormatPage() {
   );
   const setBookTitle = useBookStore((state: BookStore) => state.setBookTitle);
   const setOrderId = useBookStore((state: BookStore) => state.setOrderId);
-  const { bookTitle, pageCount, outputFormat, bookType } = useBookStore();
+  const { bookTitle, pageCount, outputFormat, bookType, hasPaid } =
+    useBookStore();
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -36,13 +37,26 @@ export default function BookSetupFormatPage() {
   );
   const [errors, setErrors] = useState<{ title?: string }>({});
 
-  const steps = [
-    "Book Setup",
-    "Cover & Preview",
-    "Checkout",
-    "Complete Book",
-    "Review",
-  ];
+  const steps = ["Cover Art", "Details", "Payment", "Content", "Review"];
+
+  const handleStepClick = (index: number) => {
+    // Navigate based on step index
+    switch (index) {
+      case 0:
+        setStep("cover");
+        break;
+      case 1:
+        // Already here
+        break;
+      // Case 2 is Payment (skipped for navigation mostly)
+      case 3:
+        setStep("images");
+        break;
+      case 4:
+        setStep("finalize");
+        break;
+    }
+  };
 
   const deliveryTypeMap = useMemo<Record<OutputFormat, DeliveryType>>(
     () => ({
@@ -131,6 +145,14 @@ export default function BookSetupFormatPage() {
       "pdf&printed": "print&digital",
     };
 
+    // If already paid, skip payment and go to next step
+    if (hasPaid) {
+      // Optional: Logic to check if critical details changed could go here
+      // For now, we assume user is paying for specific session which is valid
+      setStep("images");
+      return;
+    }
+
     try {
       const response = await confirmPayment({
         userId: session.user.id,
@@ -165,10 +187,14 @@ export default function BookSetupFormatPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <StepIndicator steps={steps} currentStep={0} />
+      <StepIndicator
+        steps={steps}
+        currentStep={1}
+        onStepClick={handleStepClick}
+      />
 
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-12">
-        <div className="bg-white rounded-[16px] shadow-[0px_7px_25px_-13.739px_rgba(0,0,0,0.07)] p-8 md:p-12">
+        <div className="bg-white rounded-[16px] shadow-[0px_7px_25px_-13.739px_rgba(0,0,0,0.07)] p-5 md:p-12">
           {/* Book Title Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-medium font-poppins text-[#212121] mb-2">
@@ -205,8 +231,11 @@ export default function BookSetupFormatPage() {
               {pageOptions.map((option) => (
                 <button
                   key={option.count}
-                  onClick={() => setSelectedPages(option.count)}
+                  onClick={() => !hasPaid && setSelectedPages(option.count)}
+                  disabled={hasPaid}
                   className={`relative h-[160px] rounded-xl flex items-center justify-center transition-all ${
+                    hasPaid ? "opacity-50 cursor-not-allowed" : ""
+                  } ${
                     selectedPages === option.count
                       ? "border-2 border-[#ff8b36] bg-[#fffaf3]"
                       : "border-2 border-[#d5d5d5] bg-white hover:border-[#d5d5d5]"
@@ -251,6 +280,7 @@ export default function BookSetupFormatPage() {
                     selectedFormat={selectedFormat}
                     onSelect={handleFormatSelect}
                     prices={prices}
+                    disabled={hasPaid}
                   />
                 ))}
               </div>
@@ -259,7 +289,7 @@ export default function BookSetupFormatPage() {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex gap-6 justify-between mt-8">
+        <div className="flex flex-col-reverse md:flex-row gap-4 md:gap-6 justify-between mt-8">
           <button
             onClick={handleBack}
             className="flex items-center gap-3 bg-[#e5e7eb] text-[#364153] px-8 py-4 rounded-xl font-inter font-semibold text-base hover:bg-gray-300 transition-colors h-[56px] min-w-[120px]"

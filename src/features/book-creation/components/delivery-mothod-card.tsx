@@ -11,7 +11,8 @@ export const DeliveryMethodCard = ({
   selectedFormat,
   onSelect,
   prices,
-}: DeliveryMethodCardProps) => {
+  disabled,
+}: DeliveryMethodCardProps & { disabled?: boolean }) => {
   const methodPricing = prices?.find((p) => p.deliveryType === method.apiType);
   const tier = methodPricing?.pageTiers
     ?.sort((a, b) => a.pageLimit - b.pageLimit)
@@ -22,11 +23,14 @@ export const DeliveryMethodCard = ({
 
   return (
     <button
-      onClick={() => onSelect(method.id)}
+      onClick={() => !disabled && onSelect(method.id)}
+      disabled={disabled}
       className={`relative h-[280px] rounded-[24px] flex flex-col items-center justify-center py-6 px-[20px] transition-all ${
-        selectedFormat === method.id
-          ? "border-2 border-primary bg-primary/10"
-          : "border-2 border-[#e1e3e5] bg-white hover:border-primary/50"
+        disabled
+          ? "opacity-50 cursor-not-allowed border-gray-200 bg-gray-50"
+          : selectedFormat === method.id
+            ? "border-2 border-primary bg-primary/10"
+            : "border-2 border-[#e1e3e5] bg-white hover:border-primary/50"
       }`}
     >
       <div className="flex flex-col gap-[16px] items-center w-full max-w-[300px]">
