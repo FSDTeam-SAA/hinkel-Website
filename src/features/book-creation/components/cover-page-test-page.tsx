@@ -36,7 +36,7 @@ export default function CoverPageTestPage() {
   // };
 
   const handleContinue = () => {
-    setHasPaid(true);
+    // Only proceed to setup. Do NOT set hasPaid here (it should only be set after actual payment).
     setStep("setup");
   };
 
@@ -133,6 +133,9 @@ export default function CoverPageTestPage() {
               onClick={() => {
                 setCoverImage(null);
                 setCoverImageVariants([]);
+                // Ensure payment state is cleared if they go back to start
+                useBookStore.getState().setHasPaid(false);
+                useBookStore.getState().setOrderId(null);
                 setStep("landing");
               }}
               className="flex-1 bg-[#e5e7eb] rounded-[16.029px] h-14 md:h-[64px] text-base md:text-[18px] text-[#364153] font-normal hover:bg-[#d1d5db] transition-colors flex items-center justify-center"

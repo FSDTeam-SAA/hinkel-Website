@@ -25,8 +25,16 @@ export default function BookCreation() {
   useEffect(() => {
     if (hydrated) {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("success") === "true") {
+      const isSuccess = params.get("success") === "true";
+      const sessionId = params.get("session_id");
+
+      if (isSuccess) {
+        if (sessionId) {
+          useBookStore.getState().setOrderId(sessionId);
+        }
+        useBookStore.getState().setHasPaid(true);
         setStep("images");
+
         // Clear params from URL without refreshing
         window.history.replaceState({}, "", "/create-book");
       }

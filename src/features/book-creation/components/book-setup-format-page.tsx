@@ -22,7 +22,8 @@ export default function BookSetupFormatPage() {
   );
   const setBookTitle = useBookStore((state: BookStore) => state.setBookTitle);
   const setOrderId = useBookStore((state: BookStore) => state.setOrderId);
-  const { bookTitle, pageCount, outputFormat, bookType } = useBookStore();
+  const { bookTitle, pageCount, outputFormat, bookType, hasPaid } =
+    useBookStore();
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -144,6 +145,14 @@ export default function BookSetupFormatPage() {
       "pdf&printed": "print&digital",
     };
 
+    // If already paid, skip payment and go to next step
+    if (hasPaid) {
+      // Optional: Logic to check if critical details changed could go here
+      // For now, we assume user is paying for specific session which is valid
+      setStep("images");
+      return;
+    }
+
     try {
       const response = await confirmPayment({
         userId: session.user.id,
@@ -222,8 +231,11 @@ export default function BookSetupFormatPage() {
               {pageOptions.map((option) => (
                 <button
                   key={option.count}
-                  onClick={() => setSelectedPages(option.count)}
+                  onClick={() => !hasPaid && setSelectedPages(option.count)}
+                  disabled={hasPaid}
                   className={`relative h-[160px] rounded-xl flex items-center justify-center transition-all ${
+                    hasPaid ? "opacity-50 cursor-not-allowed" : ""
+                  } ${
                     selectedPages === option.count
                       ? "border-2 border-[#ff8b36] bg-[#fffaf3]"
                       : "border-2 border-[#d5d5d5] bg-white hover:border-[#d5d5d5]"
@@ -268,6 +280,7 @@ export default function BookSetupFormatPage() {
                     selectedFormat={selectedFormat}
                     onSelect={handleFormatSelect}
                     prices={prices}
+                    disabled={hasPaid}
                   />
                 ))}
               </div>

@@ -87,6 +87,7 @@ export default function FinalizeBookPage() {
       });
 
       if (response.success) {
+        useBookStore.getState().resetBook();
         setStep("success");
       }
     } catch (error) {

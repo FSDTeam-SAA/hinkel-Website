@@ -142,6 +142,12 @@ export default function LandingPage() {
       // 3. Set selected variant to the newly generated one
       setSelectedCoverVariant(0);
 
+      // Reset payment state for new book flow
+      useBookStore.getState().setHasPaid(false);
+      useBookStore.getState().setOrderId(null);
+      // Reset page selections just in case
+      useBookStore.getState().setPendingPageCount(null);
+
       const remaining =
         GENERATION_LIMITS.MAX_COVER - (coverGenerationCount + 1);
       toast.success(
