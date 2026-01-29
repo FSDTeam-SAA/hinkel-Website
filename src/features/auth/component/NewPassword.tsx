@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useState } from "react";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -10,7 +10,8 @@ import { useResetPassword } from "../hooks/useResetPassword";
 const NewPassword = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const email = searchParams.get("email"); // email from query params
+    const email = searchParams.get("email");
+    const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
     const { handleResetPassword, loading, error: apiError } = useResetPassword();
 
@@ -46,16 +47,17 @@ const NewPassword = () => {
             newPassword,
         });
 
+
         if (res) {
-            alert("Password reset successfully");
-            router.push("/login");
+            // router.push(callbackUrl);
+            router.push("/create-book");
         }
     };
 
     return (
         <div className="min-h-screen flex items-center justify-center  px-4">
             <div className="w-full max-w-5xl bg-white rounded-xl shadow-md px-10 py-12 relative">
-                
+
                 {/* Logo */}
                 <div className="flex flex-col items-center justify-center gap-2 mb-6">
                     <Link href="/">

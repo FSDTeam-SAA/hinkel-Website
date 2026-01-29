@@ -5,7 +5,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useVerifyCode } from '../hooks/useverifycode';
 import { useForgotPassword } from '../hooks/useforgotpassword';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { TimerIcon, ArrowLeft } from 'lucide-react';
+import { TimerIcon } from 'lucide-react';
 import Link from 'next/link';
 
 const Verifycode = () => {
@@ -17,6 +17,7 @@ const Verifycode = () => {
 
     // Get email from URL query parameters using useMemo to avoid cascading renders
     const email = useMemo(() => searchParams.get('email') || '', [searchParams]);
+    const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
     const { verifyCode, loading, error, success } = useVerifyCode();
     const {
@@ -36,7 +37,7 @@ const Verifycode = () => {
     }, [timer]);
 
     const handleChange = (value: string, index: number) => {
-        if (isNaN(Number(value))) return;
+        if (Number.isNaN(Number(value))) return;
 
         const newOtp = [...otp];
         newOtp[index] = value;
@@ -74,13 +75,13 @@ const Verifycode = () => {
 
     useEffect(() => {
         if (success) {
-            router.push(`/newpassword?email=${encodeURIComponent(email)}`);
+            router.push(`/newpassword?email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`);
         }
-    }, [success, router, email]);
+    }, [success, router, email, callbackUrl]);
     return (
         <div className="min-h-screen flex items-center justify-center  px-4">
             <div className=" max-w-3xl bg-white rounded-xl shadow-md px-10 py-12 relative">
-                
+
 
                 {/* Logo */}
                 <div className="flex justify-center mb-6">
