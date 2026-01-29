@@ -23,27 +23,27 @@ export const DeliveryMethodCard = ({
   return (
     <button
       onClick={() => onSelect(method.id)}
-      className={`relative h-[424px] rounded-[24px] flex flex-col items-center justify-center py-[40px] px-[20px] transition-all ${
+      className={`relative h-[280px] rounded-[24px] flex flex-col items-center justify-center py-6 px-[20px] transition-all ${
         selectedFormat === method.id
           ? "border-2 border-primary bg-primary/10"
           : "border-2 border-[#e1e3e5] bg-white hover:border-primary/50"
       }`}
     >
-      <div className="flex flex-col gap-[21px] items-center w-full max-w-[300px]">
+      <div className="flex flex-col gap-[16px] items-center w-full max-w-[300px]">
         <div className="bg-primary rounded-[50px] p-[8px] flex items-center justify-center">
-          <div className="w-[42px] h-[42px] flex items-center justify-center">
-            <DownloadIcon width={42} height={42} />
+          <div className="w-[32px] h-[32px] flex items-center justify-center">
+            <DownloadIcon width={32} height={32} />
           </div>
         </div>
 
-        <div className="flex flex-col gap-[8px] items-center text-center">
-          <h5 className="text-[24px] font-semibold font-inter text-[#0a0a0a]">
+        <div className="flex flex-col gap-[4px] items-center text-center">
+          <h5 className="text-lg font-semibold font-inter text-[#0a0a0a]">
             {method.title}
           </h5>
-          <p className="text-[16px] font-normal font-inter text-[#4a5565]">
+          <p className="text-sm font-normal font-inter text-[#4a5565]">
             {method.subtitle}
           </p>
-          <p className="text-[32px] font-bold font-inter text-[#ff8b36] mt-4">
+          <p className="text-xl font-bold font-inter text-[#ff8b36] mt-2">
             {displayPrice}
           </p>
         </div>

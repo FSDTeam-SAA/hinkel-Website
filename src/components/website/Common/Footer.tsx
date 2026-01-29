@@ -247,7 +247,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-400 text-sm">
-            © {currentYear} Untitled UI. All rights reserved.
+            © {currentYear} sktchLABS. All rights reserved.
           </p>
           <nav aria-label="Legal links">
             <ul className="flex gap-8">

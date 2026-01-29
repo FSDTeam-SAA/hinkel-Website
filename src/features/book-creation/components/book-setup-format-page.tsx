@@ -170,11 +170,11 @@ export default function BookSetupFormatPage() {
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-12">
         <div className="bg-white rounded-[16px] shadow-[0px_7px_25px_-13.739px_rgba(0,0,0,0.07)] p-8 md:p-12">
           {/* Book Title Section */}
-          <div className="mb-[73px]">
-            <h2 className="text-[36px] font-medium font-poppins text-[#212121] mb-[6px]">
+          <div className="mb-8">
+            <h2 className="text-2xl font-medium font-poppins text-[#212121] mb-2">
               Book Title
             </h2>
-            <div className="border-2 border-[#e1e3e5] rounded-[12px] flex items-center px-[16px] py-[8px] h-[73px]">
+            <div className="border-2 border-[#e1e3e5] rounded-xl flex items-center px-4 py-2 h-[50px]">
               <input
                 type="text"
                 value={title}
@@ -183,7 +183,7 @@ export default function BookSetupFormatPage() {
                   if (errors.title) setErrors({});
                 }}
                 placeholder="My Amazing Coloring Book"
-                className="w-full text-[20px] font-poppins text-[#6c757d] placeholder-[#6c757d] focus:outline-none bg-transparent"
+                className="w-full text-base font-poppins text-[#6c757d] placeholder-[#6c757d] focus:outline-none bg-transparent"
               />
             </div>
             {errors.title && (
@@ -192,38 +192,38 @@ export default function BookSetupFormatPage() {
           </div>
 
           {/* Choose Your Package Header */}
-          <h3 className="text-[36px] font-medium font-inter text-black mb-[23px]">
+          <h3 className="text-2xl font-medium font-inter text-black mb-6">
             Choose Your Package
           </h3>
 
           {/* Number of Pages Section */}
-          <div className="mb-[80px] pb-[40px]">
-            <h4 className="text-[32px] font-normal font-inter text-black mb-[16px]">
+          <div className="mb-8 pb-4">
+            <h4 className="text-xl font-normal font-inter text-black mb-4">
               Number of Pages
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-[24px]">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {pageOptions.map((option) => (
                 <button
                   key={option.count}
                   onClick={() => setSelectedPages(option.count)}
-                  className={`relative h-[208px] rounded-[12px] flex items-center justify-center transition-all ${
+                  className={`relative h-[160px] rounded-xl flex items-center justify-center transition-all ${
                     selectedPages === option.count
                       ? "border-2 border-[#ff8b36] bg-[#fffaf3]"
                       : "border-2 border-[#d5d5d5] bg-white hover:border-[#d5d5d5]"
                   }`}
                 >
                   <div className="flex flex-col items-center">
-                    <div className="text-[48px] font-medium font-inter text-black text-center">
+                    <div className="text-[32px] font-medium font-inter text-black text-center">
                       {option.count}
                     </div>
-                    <div className="text-[40px] font-normal font-inter text-black">
+                    <div className="text-base font-normal font-inter text-black">
                       Page
                     </div>
                   </div>
                   {option.popular && (
-                    <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2">
-                      <div className="bg-[#ff8b36] text-white text-[16px] font-semibold px-[32px] py-[10px] rounded-[12px]">
-                        Populer
+                    <div className="absolute bottom-[-14px] left-1/2 -translate-x-1/2">
+                      <div className="bg-[#ff8b36] text-white text-sm font-semibold px-4 py-2 rounded-lg">
+                        Popular
                       </div>
                     </div>
                   )}
@@ -232,13 +232,13 @@ export default function BookSetupFormatPage() {
             </div>
           </div>
           {/* Delivery Method Section */}
-          <div className="mt-[23px] relative">
-            <h4 className="text-[32px] font-normal font-inter text-black mb-[23px]">
+          <div className="mt-6 relative">
+            <h4 className="text-xl font-normal font-inter text-black mb-6">
               Delivery Method
             </h4>
 
             {pricingLoading ? (
-              <div className="flex justify-center items-center h-[424px]">
+              <div className="flex justify-center items-center h-[280px]">
                 <Loader2 className="w-12 h-12 animate-spin text-primary" />
               </div>
             ) : (
@@ -259,29 +259,29 @@ export default function BookSetupFormatPage() {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex gap-6 justify-between mt-[29px]">
+        <div className="flex gap-6 justify-between mt-8">
           <button
             onClick={handleBack}
-            className="flex items-center gap-[14.3px] bg-[#e5e7eb] text-[#364153] px-[32px] py-[17px] rounded-[14.3px] font-inter font-semibold text-[24px] leading-[42px] hover:bg-gray-300 transition-colors h-[78px] min-w-[150px]"
+            className="flex items-center gap-3 bg-[#e5e7eb] text-[#364153] px-8 py-4 rounded-xl font-inter font-semibold text-base hover:bg-gray-300 transition-colors h-[56px] min-w-[120px]"
           >
-            <ArrowLeft size={32} />
+            <ArrowLeft size={20} />
             <span>Back</span>
           </button>
 
           <button
             onClick={handleContinue}
             disabled={isConfirming}
-            className="flex items-center gap-[14.3px] bg-[#ff8b36] text-white px-[32px] py-[17px] rounded-[14.3px] font-inter font-semibold text-[24px] leading-[42px] hover:bg-orange-600 transition-colors h-[78px] min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-3 bg-[#ff8b36] text-white px-8 py-4 rounded-xl font-inter font-semibold text-base hover:bg-orange-600 transition-colors h-[56px] min-w-[150px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isConfirming ? (
               <>
-                <Loader2 className="w-8 h-8 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
                 <span>Processing...</span>
               </>
             ) : (
               <>
                 <span>Continue</span>
-                <ArrowLeft size={32} className="rotate-180" />
+                <ArrowLeft size={20} className="rotate-180" />
               </>
             )}
           </button>
