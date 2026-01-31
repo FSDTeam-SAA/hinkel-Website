@@ -2,8 +2,7 @@
 
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-const baseUrl =
-  process.env.NEXT_PUBLIC_API_URL;
+const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 declare module "next-auth" {
   interface Session {
@@ -40,6 +39,8 @@ declare module "next-auth/jwt" {
     refreshToken: string;
   }
 }
+
+import { refreshAccessToken } from "@/features/auth/api/refresh-token.api";
 
 const handler = NextAuth({
   providers: [
@@ -107,14 +108,17 @@ const handler = NextAuth({
     async jwt({ token, user, trigger, session }) {
       // Initial sign in
       if (user) {
-        console.log("JWT callback - Initial Sign In - User:", user);
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.image = user.image;
-        token.role = user.role;
-        token.accessToken = user.token;
-        token.refreshToken = user.refreshToken;
+        return {
+          ...token,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          role: user.role,
+          accessToken: user.token,
+          refreshToken: user.refreshToken,
+          accessTokenExpires: Date.now() + 60 * 60 * 1000, // Default 1 hour expiry
+        };
       }
 
       // Update session trigger
@@ -122,22 +126,47 @@ const handler = NextAuth({
         return { ...token, ...session.user };
       }
 
-      return token;
+      // Return previous token if the access token has not expired yet
+      if (Date.now() < token.accessTokenExpires) {
+        return token;
+      }
+
+      // Access token has expired, try to update it
+      try {
+        const refreshedTokens = await refreshAccessToken(token.refreshToken);
+
+        if (!refreshedTokens.success) {
+          throw refreshedTokens;
+        }
+
+        return {
+          ...token,
+          accessToken: refreshedTokens.data.accessToken,
+          accessTokenExpires: Date.now() + 60 * 60 * 1000, // Update expiration
+          refreshToken: refreshedTokens.data.refreshToken || token.refreshToken, // Fallback to old refresh token
+        };
+      } catch (error) {
+        console.error("Error refreshing access token", error);
+        return {
+          ...token,
+          error: "RefreshAccessTokenError",
+        };
+      }
     },
 
     async session({ session, token }) {
       if (token) {
-        console.log("Session callback - Token:", token);
         session.user = {
           ...session.user,
-          id: token.id as string,
-          name: token.name as string,
-          email: token.email as string,
-          image: token.image as string,
-          role: token.role as string,
+          id: token.id,
+          name: token.name,
+          email: token.email,
+          image: token.image,
+          role: token.role,
         };
-        session.accessToken = token.accessToken as string;
-        session.refreshToken = token.refreshToken as string;
+        session.accessToken = token.accessToken;
+        session.refreshToken = token.refreshToken;
+        session.error = token.error;
       }
       return session;
     },
