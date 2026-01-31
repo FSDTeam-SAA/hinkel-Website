@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner"; // or your preferred toast library
-import { ImagePlus, Type, AlignLeft, Layers, Zap } from "lucide-react";
+import { ImagePlus, Type, AlignLeft, Layers, Zap, X } from "lucide-react";
 import Image from "next/image";
 import { useCreateCategory } from "@/features/dashboard/hooks/useCategory";
 
@@ -31,10 +31,12 @@ const formSchema = z.object({
   type: z.string().min(2, "Type is required (e.g., adult, pet)"),
   prompt: z.string().optional(),
   image: z.any().refine((file) => file?.length > 0, "Image is required"),
+  gallery: z.any().optional(),
 });
 
 const AddCategory = () => {
   const [preview, setPreview] = useState<string | null>(null);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const { mutate: createCategory, isPending } = useCreateCategory();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,11 +54,18 @@ const AddCategory = () => {
     }
     formData.append("image", values.image[0]);
 
+    if (values.gallery && values.gallery.length > 0) {
+      Array.from(values.gallery as File[] | FileList).forEach((file) => {
+        formData.append("gallery", file);
+      });
+    }
+
     createCategory(formData, {
       onSuccess: () => {
         toast.success("Category created successfully");
         form.reset();
         setPreview(null);
+        setGalleryPreviews([]);
       },
       //eslint-disable-next-line
       onError: (error: any) => {
@@ -70,6 +79,34 @@ const AddCategory = () => {
     if (file) {
       setPreview(URL.createObjectURL(file));
       form.setValue("image", e.target.files);
+    }
+  };
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+
+      setGalleryPreviews((prev) => [...prev, ...newPreviews]);
+
+      const currentFiles = form.getValues("gallery") || [];
+      const updatedFiles = [
+        ...Array.from(currentFiles as File[] | FileList),
+        ...newFiles,
+      ];
+      form.setValue("gallery", updatedFiles);
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
+    const currentFiles = form.getValues("gallery") as File[];
+    if (currentFiles) {
+      const updatedFiles = Array.from(currentFiles).filter(
+        (_, i) => i !== index,
+      );
+      form.setValue("gallery", updatedFiles);
     }
   };
 
@@ -125,19 +162,13 @@ const AddCategory = () => {
                     Category New Category
                   </span>
                 </div>
-                {/* <div className="flex items-center gap-4">
-                  <h2 className="text-lg md:text-xl font-bold text-white/40 tracking-tight">
-                    New{" "}
-                    <span className="text-white italic">Classification</span>
-                  </h2>
-                </div> */}
               </div>
             </AccordionTrigger>
 
             <AccordionContent className="relative z-10 px-10 pb-10">
               <div className="space-y-10">
                 <p className="text-white text-sm font-medium max-w-lg border-l-2 border-[#ff7a00]/30 pl-4 py-1">
-                  Create a new category page for your books! 
+                  Create a new category page for your books!
                 </p>
 
                 <Form {...form}>
@@ -307,6 +338,45 @@ const AddCategory = () => {
                       </div>
                     </div>
 
+                    {/* Gallery Upload Area */}
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2 px-1">
+                        <ImagePlus size={12} /> Gallery Images
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {galleryPreviews.map((preview, index) => (
+                          <div
+                            key={index}
+                            className="relative aspect-square border-2 border-white/10 rounded-2xl overflow-hidden group/gallery"
+                          >
+                            <Image
+                              src={preview}
+                              alt={`Gallery ${index}`}
+                              fill
+                              className="object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeGalleryImage(index)}
+                              className="absolute top-2 right-2 p-1 bg-red-500 rounded-full opacity-0 group-hover/gallery:opacity-100 transition-opacity"
+                            >
+                              <X size={12} className="text-white" />
+                            </button>
+                          </div>
+                        ))}
+                        <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:bg-white/5 transition-all group/add-gallery">
+                          <ImagePlus className="w-6 h-6 text-white/40 group-hover/add-gallery:text-[#ff7a00] transition-colors" />
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            multiple
+                            onChange={handleGalleryChange}
+                          />
+                        </label>
+                      </div>
+                    </div>
+
                     <div className="flex justify-end pt-4 border-t border-white/5">
                       <button
                         type="submit"
@@ -339,7 +409,6 @@ const AddCategory = () => {
         </AccordionItem>
       </Accordion>
     </div>
-    // </div>
   );
 };
 

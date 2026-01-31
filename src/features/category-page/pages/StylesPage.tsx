@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, Variants } from "framer-motion";
 import { ArrowRight, Paintbrush, Stars, MousePointer2 } from "lucide-react";
 import { useContent } from "@/features/category-page/hooks/use-content";
-import { useCategoryHeader } from "@/features/category-page/hooks/use-categoryheader";
+import { useStyles } from "@/features/dashboard/hooks/useStyle";
 import { CategoryContent } from "@/features/category-page/types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,16 +41,17 @@ export default function StylesPage() {
   const { data: contentData, isLoading: isContentLoading } = useContent({
     limit: 24,
   });
-  const { data: headerData, isLoading: isHeaderLoading } = useCategoryHeader();
+  const { data: styleData, isLoading: isStyleLoading } = useStyles();
 
   const categories = contentData?.data || [];
-  const header = headerData?.data?.data || {
-    title: "Choose Your Artistic Style",
+  const style = styleData?.data?.[0] || {
+    title: "Unlock Your Creative Vision",
     subtitle:
       "Explore our curated collection of sketch styles. Each one is designed to transform your photos into a unique, printable coloring book experience.",
+    badgeText: "Curated Collection 2026",
   };
 
-  if (isContentLoading || isHeaderLoading) {
+  if (isContentLoading || isStyleLoading) {
     return <StylesSkeleton />;
   }
 
@@ -78,13 +79,13 @@ export default function StylesPage() {
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-primary font-bold text-xs uppercase tracking-widest mb-8"
             >
               <Stars className="w-3.5 h-3.5 fill-current" />
-              <span>Curated Collection 2026</span>
+              <span>{style.badgeText}</span>
             </motion.div>
 
             <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-8 tracking-tight leading-[1.1]">
-              Unlock Your <br />
+              {style.title.split(" ").slice(0, -2).join(" ")} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#ff8c42] relative">
-                Creative Vision
+                {style.title.split(" ").slice(-2).join(" ")}
                 <svg
                   className="absolute -bottom-2 left-0 w-full"
                   height="8"
@@ -114,11 +115,11 @@ export default function StylesPage() {
               </span>
             </h1>
 
-            <p className="text-xl text-gray-500 mb-12 leading-relaxed max-w-2xl mx-auto font-medium">
-              {header.subtitle}
+            <p className="text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto font-medium">
+              {style.subtitle}
             </p>
 
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -131,7 +132,7 @@ export default function StylesPage() {
               <span className="flex items-center gap-1.5">
                 <MousePointer2 className="w-4 h-4" /> Instant Preview
               </span>
-            </motion.div>
+            </motion.div> */}
           </motion.div>
         </div>
       </section>

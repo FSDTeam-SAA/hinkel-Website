@@ -1,21 +1,37 @@
 // features/dashboard/api/category.api.ts
 import { api } from "@/lib/api";
 
-export const createCategoryApi = (data: FormData) => {
-    return api.post("/content/upload", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-    });
+export interface CategoryData {
+  title: string;
+  subtitle: string;
+  type: string;
+  image: string | File;
+  gallery?: (string | File)[];
 }
 
-export const updateCategoryApi = ({ id, data }: { id: string; data: FormData }) => {
-    return api.patch(`/content/${id}`, data);
-}
+export const createCategoryApi = (data: FormData) => {
+  return api.post("/content/upload", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+export const updateCategoryApi = ({
+  id,
+  data,
+}: {
+  id: string;
+  data: FormData;
+}) => {
+  return api.patch(`/content/${id}`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
 
 export const deleteCategoryApi = (id: string) => {
-    return api.delete(`/content/${id}`);
-}
+  return api.delete(`/content/${id}`);
+};
 
 // get all categories
 export const getAllCategoriesApi = () => {
-    return api.get("/content/");
-}
+  return api.get("/content/");
+};
