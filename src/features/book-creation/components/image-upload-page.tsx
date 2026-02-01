@@ -80,10 +80,10 @@ export default function ImageUploadPage() {
   const totalPages = pageCount + (includeDedicationPage ? 1 : 0);
 
   const handleConvertToLineArt = async (pageNum: number, image: string) => {
-    // Check generation limit using store tracking (max 3 per page)
+    // Check daily conversion limit
     if (!canGeneratePage(pageNum)) {
       toast.error(
-        `Maximum ${GENERATION_LIMITS.MAX_PER_PAGE} generations allowed per page. This limit cannot be reset.`,
+        "Daily conversion limit reached! You can only convert one image for free every 24 hours. Complete your book creation to reset this limit, or try again tomorrow.",
       );
       return;
     }
@@ -108,10 +108,8 @@ export default function ImageUploadPage() {
         // Auto-select the converted image as the page image
         updatePageImage(pageNum, lineArtImage);
 
-        const remaining =
-          GENERATION_LIMITS.MAX_PER_PAGE - getPageGenerationCount(pageNum);
         toast.success(
-          `Image converted! ${remaining} generation${remaining !== 1 ? "s" : ""} remaining.`,
+          "Image converted! Your daily conversion is complete. You can unlock more by finishing your book or waiting until tomorrow.",
         );
       } else {
         toast.error("Failed to convert image. Please try again.");

@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { indexedDbStorage } from "@/lib/indexed-db-storage";
 import type { BookState, BookStore } from "../types";
-import { GENERATION_LIMITS } from "../types";
 
 export type BookStep =
   | "landing"
@@ -30,6 +29,7 @@ const initialState: BookState = {
   generationCounts: {
     cover: 0,
     pages: {},
+    lastGenerationDate: null,
   },
   dedicationText: "",
   hasPaid: false,
@@ -117,12 +117,12 @@ export const useBookStore = create<BookStore>()(
           };
         }),
 
-      // Generation count tracking
       incrementCoverGeneration: () =>
         set((state) => ({
           generationCounts: {
             ...state.generationCounts,
             cover: state.generationCounts.cover + 1,
+            lastGenerationDate: new Date().toISOString().split("T")[0],
           },
         })),
       incrementPageGeneration: (pageNum) =>
@@ -133,16 +133,32 @@ export const useBookStore = create<BookStore>()(
               ...state.generationCounts.pages,
               [pageNum]: (state.generationCounts.pages[pageNum] || 0) + 1,
             },
+            lastGenerationDate: new Date().toISOString().split("T")[0],
           },
         })),
       canGenerateCover: () => {
         const state = get();
-        return state.generationCounts.cover < GENERATION_LIMITS.MAX_COVER;
+        // If they've paid, they can generate as much as the MAX_COVER limit allows (or more? let's stick to MAX_COVER for now but allow reset)
+        if (state.hasPaid) return true;
+
+        const today = new Date().toISOString().split("T")[0];
+        if (state.generationCounts.lastGenerationDate === today) {
+          return false; // Already generated once today
+        }
+
+        return true;
       },
-      canGeneratePage: (pageNum) => {
+      canGeneratePage: (_pageNum) => {
         const state = get();
-        const count = state.generationCounts.pages[pageNum] || 0;
-        return count < GENERATION_LIMITS.MAX_PER_PAGE;
+        // If they've paid, they can generate more
+        if (state.hasPaid) return true;
+
+        const today = new Date().toISOString().split("T")[0];
+        if (state.generationCounts.lastGenerationDate === today) {
+          return false; // Already generated once today
+        }
+
+        return true;
       },
       getPageGenerationCount: (pageNum) => {
         const state = get();

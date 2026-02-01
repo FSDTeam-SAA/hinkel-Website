@@ -79,10 +79,18 @@ export async function proxy(request: NextRequest) {
   console.log(`[Proxy] Request: ${pathname}`);
   console.log(`[Proxy] User State: ${isGuest ? "Guest" : userRole}`);
 
-  // 2. Rule: Guests cannot see the Dashboard
-  if (isGuest && pathname.startsWith("/dashboard")) {
-    console.log("Action: Guest tried to enter Dashboard -> Redirect to Login");
-    return NextResponse.redirect(new URL("/login", request.url));
+  // 2. Rule: Guests cannot see the Dashboard or Create Book
+  if (
+    isGuest &&
+    (pathname.startsWith("/dashboard") || pathname.startsWith("/create-book"))
+  ) {
+    console.log(
+      `Action: Guest tried to enter ${pathname} -> Redirect to Login`,
+    );
+    const callbackUrl = encodeURIComponent(pathname);
+    return NextResponse.redirect(
+      new URL(`/login?callbackUrl=${callbackUrl}`, request.url),
+    );
   }
 
   // 3. Rule: Regular Users cannot see the Dashboard
