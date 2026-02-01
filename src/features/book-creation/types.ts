@@ -122,6 +122,7 @@ export type PageTexts = Record<number, { topLine: string; bottomLine: string }>;
 export interface GenerationCounts {
   cover: number;
   pages: Record<number, number>;
+  lastGenerationDate: string | null; // ISO date string (YYYY-MM-DD)
 }
 
 /**

@@ -120,10 +120,10 @@ export default function LandingPage() {
   const handleConfirmGeneration = async () => {
     if (!pendingImage) return;
 
-    // Check cover generation limit
+    // Check daily conversion limit
     if (!canGenerateCover()) {
       toast.error(
-        `Maximum ${GENERATION_LIMITS.MAX_COVER} cover generations allowed. This limit cannot be reset.`,
+        "Daily conversion limit reached! You can only convert one image for free every 24 hours. Complete your book creation to reset this limit, or try again tomorrow.",
       );
       return;
     }

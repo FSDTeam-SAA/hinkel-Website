@@ -17,6 +17,7 @@ export interface CategoryContent {
   type?: string;
   prompt?: string;
   isSplit?: boolean;
+  gallery?: string[];
 }
 
 export interface ContentResponse {
@@ -28,4 +29,3 @@ export interface CategoryHeader {
   title: string;
   subtitle: string;
 }
-
