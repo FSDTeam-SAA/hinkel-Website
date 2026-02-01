@@ -72,6 +72,8 @@ This project uses Husky and Lint-staged to enforce clean commits.
 npx husky add .husky/pre-commit "npm run lint"
 git add .husky/pre-commit
 
+For a detailed guide on the development workflow, committing, and testing, please read [CONTRIBUTING.md](./CONTRIBUTING.md).
+
 --
 
 ## 📚 Book Creation Flow
