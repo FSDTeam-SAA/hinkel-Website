@@ -3,7 +3,7 @@ import Login from "../Login";
 import { useLogin } from "../../hooks/uselogin";
 import { useRouter, useSearchParams } from "next/navigation";
 
-// Mock the hooks
+// Mock the hooks and navigation
 jest.mock("../../hooks/uselogin");
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
