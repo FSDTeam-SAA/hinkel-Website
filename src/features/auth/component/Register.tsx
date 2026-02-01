@@ -15,7 +15,8 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
+  const callbackUrl =
+    searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +33,6 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-6xl bg-white rounded-xl shadow-lg p-10 relative">
-
-
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-5">
           <Link href="/">
@@ -64,8 +63,11 @@ const Register = () => {
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-700">First Name</label>
+              <label htmlFor="firstName" className="text-sm text-gray-700">
+                First Name
+              </label>
               <input
+                id="firstName"
                 type="text"
                 placeholder="John"
                 className="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:bg-primary/5 focus:ring-primary"
@@ -76,8 +78,11 @@ const Register = () => {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-700">Last Name</label>
+              <label htmlFor="lastName" className="text-sm text-gray-700">
+                Last Name
+              </label>
               <input
+                id="lastName"
                 type="text"
                 placeholder="Doe"
                 className="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:bg-primary/5 focus:ring-primary"
@@ -88,10 +93,11 @@ const Register = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm text-gray-700 mb-1">
               Email Address
             </label>
             <input
+              id="email"
               type="email"
               placeholder="hello@example.com"
               className="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:bg-primary/5 focus:ring-primary"
@@ -102,8 +108,14 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-700 mb-1">Password</label>
+            <label
+              htmlFor="password"
+              className="block text-sm text-gray-700 mb-1"
+            >
+              Password
+            </label>
             <input
+              id="password"
               type="password"
               placeholder="********"
               className="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -115,14 +127,24 @@ const Register = () => {
 
           {/* Options */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm mt-4 px-1">
-            <label className="flex items-center gap-3 text-gray-600 cursor-pointer select-none">
+            <label
+              htmlFor="terms"
+              className="flex items-center gap-3 text-gray-600 cursor-pointer select-none"
+            >
               <input
+                id="terms"
                 type="checkbox"
                 className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary transition-all cursor-pointer"
                 required
               />
               <span className="text-sm">
-                I agree to the <Link href="/privacy-policy" className="text-primary font-medium hover:underline transition-all">Privacy Policy</Link>
+                I agree to the{" "}
+                <Link
+                  href="/privacy-policy"
+                  className="text-primary font-medium hover:underline transition-all"
+                >
+                  Privacy Policy
+                </Link>
               </span>
             </label>
 
