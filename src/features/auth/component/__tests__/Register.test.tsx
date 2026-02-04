@@ -82,7 +82,9 @@ describe("Register Component", () => {
         "test@example.com",
         "password123",
       );
-      expect(toast.success).toHaveBeenCalledWith("Check your inbox to verify");
+      expect(toast.success).toHaveBeenCalledWith(
+        "Account created successfully!",
+      );
       // Redirects to /login
       expect(mockPush).toHaveBeenCalledWith(expect.stringContaining("/login"));
     });

@@ -7,6 +7,56 @@ import HeroSkeleton from "@/features/category-page/components/hero.skeleton";
 import { MoveRightIcon } from "lucide-react";
 import { useDashboardStats } from "@/features/category-page/hooks/use-stats";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+const categoryStyles: Record<
+  string,
+  { bg: string; text: string; border: string }
+> = {
+  home: { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-200" },
+  sketch: {
+    bg: "bg-orange-50",
+    text: "text-orange-600",
+    border: "border-orange-200",
+  },
+  "line art": {
+    bg: "bg-green-50",
+    text: "text-green-600",
+    border: "border-green-200",
+  },
+  "oil painting": {
+    bg: "bg-purple-50",
+    text: "text-purple-600",
+    border: "border-purple-200",
+  },
+  watercolor: {
+    bg: "bg-cyan-50",
+    text: "text-cyan-600",
+    border: "border-cyan-200",
+  },
+  portrait: {
+    bg: "bg-pink-50",
+    text: "text-pink-600",
+    border: "border-pink-200",
+  },
+  nature: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-600",
+    border: "border-emerald-200",
+  },
+};
+
+function getCategoryStyle(type?: string) {
+  const normalizedType = type?.toLowerCase() || "default";
+  return (
+    categoryStyles[normalizedType] || {
+      bg: "bg-gray-50",
+      text: "text-gray-600",
+      border: "border-gray-200",
+    }
+  );
+}
 
 export function Hero({ type }: { type?: string }) {
   const { data, isLoading: isContentLoading, error } = useContent({ type });
@@ -26,11 +76,23 @@ export function Hero({ type }: { type?: string }) {
       </div>
     );
   }
+  console.log(heroContent);
 
   return (
     <section className="relative px-6 py-10 md:py-12 lg:px-12 bg-accent">
       <div className="container mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div className="space-y-6">
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-sm px-4 py-1.5 font-bold uppercase tracking-wider rounded-full border-2 transition-all duration-300",
+              getCategoryStyle(type || heroContent?.type).bg,
+              getCategoryStyle(type || heroContent?.type).text,
+              getCategoryStyle(type || heroContent?.type).border,
+            )}
+          >
+            {type || heroContent?.type || "Explore"}
+          </Badge>
           <h1 className="text-5xl md:text-6xl font-black tracking-tight text-secondary-foreground leading-tight">
             {heroContent?.title || "Turn Any Artwork Into Coloring Magic"}
           </h1>
@@ -49,7 +111,8 @@ export function Hero({ type }: { type?: string }) {
               size="lg"
               className="bg-primary text-white  px-8 h-12 text-base font-bold shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98]"
             >
-              Start creating NOW!<MoveRightIcon />
+              Start creating NOW!
+              <MoveRightIcon />
             </Button>
           </Link>
 
