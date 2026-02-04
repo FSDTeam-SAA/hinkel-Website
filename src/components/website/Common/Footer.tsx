@@ -24,13 +24,13 @@ const FOOTER_LINKS = {
     { label: "Pets", href: "/category/pets" },
   ],
   resources: [
-    { label: "Contact", href: "/contact" },
-    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact-us" },
+    { label: "About", href: "/about-us" },
   ],
   legal: [
     // { label: "Terms", href: "/terms" },
     { label: "Privacy", href: "/privacy-policy" },
-    { label: "Cookies", href: "/cookies" },
+    // { label: "Cookies", href: "/cookies" },
   ],
 } as const;
 
@@ -154,17 +154,17 @@ const Footer = () => {
               <Image
                 src="/images/logo.png"
                 alt="Company Logo"
-                width={150}
+                width={250}
                 height={40}
                 className="mb-8"
                 priority={false}
                 loading="lazy"
               />
             </Link>
-            <p className="text-gray-500 text-lg leading-relaxed max-w-sm">
+            {/* <p className="text-gray-500 text-lg leading-relaxed max-w-sm">
               Design amazing digital experiences that create more happy in the
               world.
-            </p>
+            </p> */}
           </div>
 
           {/* Product Links */}
@@ -181,13 +181,13 @@ const Footer = () => {
         </div>
 
         {/* Official Verified Security Banner */}
-        <div className="mt-16 overflow-hidden rounded-3xl bg-[#0a1128] border border-blue-900/50 shadow-2xl relative">
+        <div className="mt-16 overflow-hidden rounded-3xl bg-[#0a1128d0] border border-blue-900/50 shadow-2xl relative">
           {/* Subtle Background Glows */}
           <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-emerald-600/10 rounded-full blur-3xl" />
 
-          <div className="px-8 py-10 relative z-10">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
+          <div className="px-8 pt-14 pb-4 relative z-10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-500/40">
                   <Lock className="w-5 h-5 text-blue-400 animate-pulse" />
@@ -245,9 +245,9 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-8 pt-4 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-400 text-sm">
-            © {currentYear} sktchLABS. All rights reserved.
+            ©sktchLABS: Illustrating your world, one page at a time.
           </p>
           <nav aria-label="Legal links">
             <ul className="flex gap-8">

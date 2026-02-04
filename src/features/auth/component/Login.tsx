@@ -12,7 +12,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
+  const callbackUrl =
+    searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +27,6 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-6xl bg-white rounded-xl shadow-lg p-10 relative">
-
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-5">
           <Link href="/">
@@ -56,10 +56,11 @@ const Login = () => {
             </div>
           )}
           <div>
-            <label className="block text-sm text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm text-gray-700 mb-1">
               Email Address
             </label>
             <input
+              id="email"
               type="email"
               placeholder="hello@example.com"
               className="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:bg-primary/5 focus:ring-primary"
@@ -70,8 +71,14 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-700 mb-1">Password</label>
+            <label
+              htmlFor="password"
+              className="block text-sm text-gray-700 mb-1"
+            >
+              Password
+            </label>
             <input
+              id="password"
               type="password"
               placeholder="********"
               className="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -83,8 +90,12 @@ const Login = () => {
 
           {/* Options */}
           <div className="flex items-center justify-between text-base mt-2 px-1">
-            <label className="flex items-center gap-2 text-gray-600 cursor-pointer select-none">
+            <label
+              htmlFor="remember"
+              className="flex items-center gap-2 text-gray-600 cursor-pointer select-none"
+            >
               <input
+                id="remember"
                 type="checkbox"
                 className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary transition-all cursor-pointer"
               />

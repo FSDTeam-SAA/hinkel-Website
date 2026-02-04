@@ -107,10 +107,10 @@ const BookCreationFlow = () => {
                 )}
               >
                 {/* Content Side */}
-                <div className="flex-1 w-full lg:w-1/2">
+                <div className="flex-1 w-full lg:w-1/2 ">
                   <div
                     className={cn(
-                      "bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden group-hover:-translate-y-1",
+                      "bg-blue-100 p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden group-hover:-translate-y-1",
                       index % 2 === 0 ? "lg:text-left" : "lg:text-right",
                     )}
                   >
@@ -135,7 +135,7 @@ const BookCreationFlow = () => {
                       )}
                     >
                       <span className="text-sm font-bold tracking-wider text-gray-400 uppercase">
-                        Step 0{step.id}
+                        Step {step.id}
                       </span>
                       <div
                         className={cn(

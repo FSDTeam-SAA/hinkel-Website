@@ -108,9 +108,10 @@ export default function ImageUploadPage() {
         // Auto-select the converted image as the page image
         updatePageImage(pageNum, lineArtImage);
 
-        toast.success(
-          "Image converted! Your daily conversion is complete. You can unlock more by finishing your book or waiting until tomorrow.",
-        );
+        toast.success("Image converted!");
+        //  toast.success(
+        //   "Image converted! Your daily conversion is complete. You can unlock more by finishing your book or waiting until tomorrow.",
+        // );
       } else {
         toast.error("Failed to convert image. Please try again.");
       }
@@ -402,6 +403,10 @@ export default function ImageUploadPage() {
                 </div>
               </div>
 
+              <p className="text-sm font-bold text-gray-600 mb-2">
+                Upload upto 3 photos, then select which one you like best.
+              </p>
+
               {/* The "Paper" - Mockup of the A4 page */}
               <div className="relative bg-white aspect-[1/1.414] rounded-sm shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] border border-gray-100 p-8 flex flex-col items-stretch overflow-hidden group">
                 {/* Visual paper edge effect */}
@@ -495,7 +500,7 @@ export default function ImageUploadPage() {
                           ? "Processing..."
                           : hasMaxGenerations
                             ? "Page Complete"
-                            : "Add Your Drawing"}
+                            : "Add Your Photo"}
                       </h3>
                       <p className="text-gray-400 max-w-[280px]">
                         {hasMaxGenerations
@@ -553,7 +558,7 @@ export default function ImageUploadPage() {
                       <Wand2 className="w-6 h-6 mr-3" />
                     )}
                     {isConverting
-                      ? "MAGICAL SKETCHING..."
+                      ? "Convert Your photo!"
                       : "CONVERT TO LINE ART"}
                   </Button>
                 </div>
@@ -567,7 +572,7 @@ export default function ImageUploadPage() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-black flex items-center gap-3">
                     <Wand2 className="w-5 h-5 text-purple-600" />
-                    CONVERSIONS
+                    Converted Photos
                   </h3>
                   <span className="text-xs font-black text-gray-400 bg-white px-3 py-1 rounded-full shadow-xs">
                     {currentConvertedImages.length}/3
