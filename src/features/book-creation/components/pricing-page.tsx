@@ -30,7 +30,7 @@ export default function PricingPage({ onContinue, onBack }: PricingPageProps) {
 
   const pageCounts = [
     { count: 10, label: "10\nPage" },
-    { count: 20, label: "20\nPage", popular: true },
+    { count: 20, label: "20\nPage" },
     { count: 30, label: "30\nPage" },
     { count: 40, label: "40\nPage" },
   ];
@@ -105,13 +105,13 @@ export default function PricingPage({ onContinue, onBack }: PricingPageProps) {
                     <div className="text-sm font-medium text-foreground whitespace-pre-line">
                       {option.label}
                     </div>
-                    {option.popular && (
+                    {/* {option.popular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                         <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
                           Popular
                         </span>
                       </div>
-                    )}
+                    )} */}
                   </button>
                 ))}
               </div>

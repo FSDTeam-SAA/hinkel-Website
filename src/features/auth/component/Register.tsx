@@ -25,7 +25,7 @@ const Register = () => {
     const name = `${capitalize(firstName)} ${capitalize(lastName)}`;
     const res = await handleRegister(name, email, password);
     if (res && !res.error) {
-      toast.success("Check your inbox to verify");
+      toast.success("Account created successfully!");
       router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
   };

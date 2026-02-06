@@ -34,8 +34,8 @@ export const NewsletterSection = memo(() => {
 
   return (
     <div className="md:col-span-4 lg:col-span-3">
-      <h3 className="text-gray-900 font-semibold mb-6">Stay up to date</h3>
-      <div className="flex flex-col sm:flex-row gap-2">
+      <h3 className="text-gray-900 font-semibold mb-6">Newsletter Signup</h3>
+      <div className=" space-y-2">
         <label htmlFor="footer-email" className="sr-only">
           Email address
         </label>
@@ -53,7 +53,7 @@ export const NewsletterSection = memo(() => {
         <Button
           onClick={handleSubscribe}
           disabled={isPending}
-          className="bg-primary hover:bg-[#e67a2e] text-white px-6 h-11 font-semibold transition-all duration-300 focus:ring-2 focus:ring-primary focus:ring-offset-2 min-w-[120px]"
+          className="bg-primary hover:bg-[#e67a2e] text-white px-6 h-11 font-semibold transition-all duration-300 focus:ring-2 focus:ring-primary focus:ring-offset-2 w-full"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />

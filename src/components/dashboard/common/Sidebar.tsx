@@ -11,6 +11,7 @@ import {
   HelpCircle,
   ShieldCheck,
   Info,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -35,6 +36,7 @@ const navigation = [
   { name: "Set Pricing", href: "/dashboard/setPricing", icon: NotebookText },
   { name: "FAQs & CTA", href: "/dashboard/faqs", icon: HelpCircle },
   { name: "About Us", href: "/dashboard/about", icon: Info },
+  { name: "Subscribers", href: "/dashboard/subscribers", icon: Users },
   { name: "Privacy Policy", href: "/dashboard/privacy", icon: ShieldCheck },
 ];
 
