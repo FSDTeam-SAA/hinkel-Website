@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Info,
   Users,
+  Key,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -32,7 +33,7 @@ const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "All Categories", href: "/dashboard/AllCategories", icon: Book },
   { name: "All Books", href: "/dashboard/allbooks", icon: BookOpen },
-  // { name: "Products", href: "/dashboard/products", icon: ShoppingBasket },
+  { name: "Change Password", href: "/dashboard/change-password", icon: Key },
   { name: "Set Pricing", href: "/dashboard/setPricing", icon: NotebookText },
   { name: "FAQs & CTA", href: "/dashboard/faqs", icon: HelpCircle },
   { name: "About Us", href: "/dashboard/about", icon: Info },
