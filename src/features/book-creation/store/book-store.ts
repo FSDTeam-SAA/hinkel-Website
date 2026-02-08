@@ -148,7 +148,7 @@ export const useBookStore = create<BookStore>()(
 
         return true;
       },
-      canGeneratePage: (_pageNum) => {
+      canGeneratePage: () => {
         const state = get();
         // If they've paid, they can generate more
         if (state.hasPaid) return true;

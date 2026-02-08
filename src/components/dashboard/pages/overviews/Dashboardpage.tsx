@@ -1,7 +1,5 @@
-import { Search } from 'lucide-react'
-import React from 'react'
-import Overview from './Overview'
-import RecentOrders from './RecentOrders'
+import Overview from "./Overview";
+import RecentOrders from "./RecentOrders";
 
 const Dashboardpage = () => {
   return (
@@ -12,7 +10,8 @@ const Dashboardpage = () => {
           <div>
             <h1 className="text-3xl font-bold text-[#FF8B36] mb-1">Welcome!</h1>
             <p className="text-gray-500 font-medium">
-              Manage your orders, track shipments, and configure products easily.
+              Manage your orders, track shipments, and configure products
+              easily.
             </p>
           </div>
 
@@ -31,7 +30,7 @@ const Dashboardpage = () => {
         <RecentOrders />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboardpage
+export default Dashboardpage;

@@ -1,10 +1,8 @@
-import Addbooks from '@/components/dashboard/pages/addbooks/Addbooks'
-import React from 'react'
+import Addbooks from "@/components/dashboard/pages/addbooks/Addbooks";
+import React from "react";
 
 const page = () => {
-  return (
-    <Addbooks />
-  )
-}
+  return <Addbooks />;
+};
 
-export default page
+export default page;

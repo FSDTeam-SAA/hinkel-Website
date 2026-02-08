@@ -1,6 +1,5 @@
-import PriceSet from '@/components/dashboard/pages/setPricing/PriceSet'
-import SetPricing from '@/components/dashboard/pages/setPricing/SetPricing'
-import React from 'react'
+import SetPricing from "@/components/dashboard/pages/setPricing/SetPricing";
+import React from "react";
 
 const page = () => {
   return (
@@ -8,7 +7,7 @@ const page = () => {
       <SetPricing />
       {/* <PriceSet /> */}
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

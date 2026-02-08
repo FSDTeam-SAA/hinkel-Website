@@ -7,14 +7,17 @@ import {
   usePostCategoryHeader,
 } from "@/features/category-page/hooks/use-categoryheader";
 import { CategoryContent } from "@/features/category-page/types";
-import { ShieldCheck, Database, Type, Activity, MonitorX } from "lucide-react";
+import { ShieldCheck, Database, Type, MonitorX, Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import CategoryCard from "./CategoryCard";
 import AddCategory from "../addbooks/AddCategory";
 import CategoryHeaderForm from "./CategoryHeaderForm";
@@ -37,7 +40,6 @@ export function CategoryShow() {
     };
 
     checkResolution();
-    // Debounced resize listener could be better, but simple check on mount/resize works for now
     window.addEventListener("resize", checkResolution);
     return () => window.removeEventListener("resize", checkResolution);
   }, []);
@@ -46,130 +48,118 @@ export function CategoryShow() {
 
   if (error) {
     return (
-      <section className="py-24 px-6 bg-slate-950 flex justify-center items-center min-h-[50vh]">
+      <div className="py-16 flex justify-center items-center">
         <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-6 rounded-2xl flex items-center gap-4 backdrop-blur-md">
           <ShieldCheck className="w-6 h-6 animate-pulse" />
           <span className="font-mono tracking-widest uppercase text-xs">
             System Failure: Could not load categories.
           </span>
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="min-h-screen bg-slate-50 relative overflow-hidden py-10 selection:bg-[#ff7a00]/30 selection:text-[#ff7a00]">
-      <div className="container mx-auto px-6 space-y-12 relative z-10">
-        {/* Global Command Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
-
-          <div className="space-y-3 relative z-10">
-            <div className="flex items-center gap-3">
-              <span className="flex h-2 w-2 rounded-full bg-[#ff7a00] shadow-[0_0_10px_#ff7a00] animate-pulse"></span>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                Cybernetic Control Hub
-              </span>
-            </div>
-            <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter">
-              Category{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff7a00] to-orange-400">
-                Command
-              </span>
-            </h1>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 relative z-10">
-            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-1 group/stat hover:border-[#ff7a00]/30 transition-colors duration-300">
-              <div className="text-slate-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                <Database size={12} className="text-[#ff7a00]" /> Indices
-              </div>
-              <div className="text-2xl font-mono text-slate-900 tracking-widest group-hover/stat:text-[#ff7a00] transition-colors">
-                {isLoading
-                  ? "..."
-                  : categories.length.toString().padStart(2, "0")}
-              </div>
-            </div>
-
-            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-1 group/stat hover:border-green-500/30 transition-colors duration-300">
-              <div className="text-slate-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                <Activity size={12} className="text-green-500" /> Status
-              </div>
-              <div className="text-2xl font-mono text-green-600 tracking-widest group-hover/stat:text-green-500 transition-colors animate-pulse">
-                active
-              </div>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Category Actions Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-100">
+          <Database size={14} className="text-[#ff7a00]" />
+          <span className="text-xs font-bold text-slate-600">
+            {isLoading ? "..." : categories.length} Categories
+          </span>
         </div>
 
-        {/* Category Header Settings & Add Category */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Settings Accordion */}
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="system-parameters" className="border-none">
-              <div className="group/settings relative rounded-[2rem] bg-white border border-slate-200 transition-all duration-500 hover:border-[#ff7a00]/30 hover:shadow-lg overflow-hidden">
-                <AccordionTrigger className="relative z-10 px-8 py-6 cursor-pointer hover:no-underline group/trigger">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-[#ff7a00]/10 text-[#ff7a00]">
-                      <Type size={18} />
-                    </div>
-                    <div className="text-left">
-                      <h2 className="text-lg font-bold text-slate-900 tracking-tight group-hover/trigger:text-[#ff7a00] transition-colors">
-                        Header Parameters
-                      </h2>
-                    </div>
-                  </div>
-                </AccordionTrigger>
+        <div className="flex items-center gap-2">
+          {/* Header Settings Dialog */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 rounded-lg border-slate-200 hover:bg-[#ff7a00]/5 hover:text-[#ff7a00] hover:border-[#ff7a00]/30 transition-all"
+              >
+                <Type size={14} />
+                <span className="hidden sm:inline">Settings</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md bg-white border-slate-100">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-slate-900">
+                  Category Header Settings
+                </DialogTitle>
+                <DialogDescription className="text-slate-500">
+                  Configure the public category page header.
+                </DialogDescription>
+              </DialogHeader>
+              <CategoryHeaderForm
+                key={headerData?.data?.data ? "loaded" : "loading"}
+                initialTitle={headerData?.data?.data?.title || ""}
+                initialSubtitle={headerData?.data?.data?.subtitle || ""}
+                isPending={isPending}
+                onSubmit={(data) => {
+                  postHeader(data, {
+                    onSuccess: () => toast.success("Header settings updated"),
+                    onError: (err) =>
+                      toast.error("Update failed: " + err.message),
+                  });
+                }}
+              />
+            </DialogContent>
+          </Dialog>
 
-                <AccordionContent className="relative z-10 px-8 pb-8">
-                  <CategoryHeaderForm
-                    key={headerData?.data?.data ? "loaded" : "loading"}
-                    initialTitle={headerData?.data?.data?.title || ""}
-                    initialSubtitle={headerData?.data?.data?.subtitle || ""}
-                    isPending={isPending}
-                    onSubmit={(data) => {
-                      postHeader(data, {
-                        onSuccess: () =>
-                          toast.success("System parameters updated"),
-                        onError: (error) =>
-                          toast.error("Update failed: " + error.message),
-                      });
-                    }}
-                  />
-                </AccordionContent>
-              </div>
-            </AccordionItem>
-          </Accordion>
-
-          {/* Add Category Card */}
-          <AddCategory />
+          {/* Add Category Button */}
+          <AddCategory
+            trigger={
+              <Button
+                size="sm"
+                className="gap-2 rounded-lg bg-[#ff7a00] hover:bg-[#ff8a00] text-white shadow-md shadow-[#ff7a00]/20 font-bold"
+              >
+                <Plus size={14} strokeWidth={3} />
+                <span className="hidden sm:inline">New Category</span>
+              </Button>
+            }
+          />
         </div>
-
-        {/* Content Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="aspect-square rounded-[1.75rem] bg-slate-100 border border-slate-200 animate-pulse"
-              ></div>
-            ))}
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
-            <Database className="mx-auto h-10 w-10 text-slate-400 mb-4 opacity-50" />
-            <p className="text-lg font-bold text-slate-400 uppercase tracking-widest">
-              No Category Found
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {categories.map((category: CategoryContent) => (
-              <CategoryCard key={category._id} category={category} />
-            ))}
-          </div>
-        )}
       </div>
-    </section>
+
+      {/* Content Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className="aspect-square rounded-2xl bg-slate-100 border border-slate-200 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : categories.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-200 text-center">
+          <div className="p-4 rounded-full bg-slate-50 mb-4">
+            <Database className="w-8 h-8 text-slate-300" />
+          </div>
+          <h3 className="text-slate-900 font-bold text-lg">
+            No Categories Found
+          </h3>
+          <p className="text-slate-500 text-sm max-w-xs mt-2 mb-6">
+            Get started by creating your first category.
+          </p>
+          <AddCategory
+            trigger={
+              <Button className="rounded-xl bg-[#ff7a00] hover:bg-[#ff8a00] text-white gap-2 font-bold">
+                <Plus size={16} />
+                Create Category
+              </Button>
+            }
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {categories.map((category: CategoryContent) => (
+            <CategoryCard key={category._id} category={category} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

@@ -36,7 +36,7 @@ const itemVariants = {
   },
 };
 
-export function GallerySection({ images, title }: GallerySectionProps) {
+export function GallerySection({ images }: GallerySectionProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 

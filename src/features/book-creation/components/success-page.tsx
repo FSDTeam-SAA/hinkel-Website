@@ -1,53 +1,46 @@
 "use client";
 
-import {
-  CheckCircle,
-  Home,
-  Download,
-  Loader2,
-  Book,
-  BookOpenText,
-} from "lucide-react";
-import { useState } from "react";
+import { CheckCircle, BookOpenText } from "lucide-react";
+// import { useState } from "react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 
-import { generateBookPdf } from "../utils/pdf-generator";
+// import { generateBookPdf } from "../utils/pdf-generator";
 
 export default function SuccessPage() {
   const resetBook = useBookStore((state: BookStore) => state.resetBook);
   const state = useBookStore();
   const { pageCount } = state;
-  const [isGenerating, setIsGenerating] = useState(false);
+  // const [isGenerating, setIsGenerating] = useState(false);
 
   const handleCreateAnother = () => {
     resetBook();
   };
 
-  const handleDownload = async () => {
-    try {
-      setIsGenerating(true);
-      toast.success("Creating your PDF coloring book...");
+  // const handleDownload = async () => {
+  //   try {
+  //     setIsGenerating(true);
+  //     toast.success("Creating your PDF coloring book...");
 
-      const pdfBlob = await generateBookPdf(state);
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${state.bookTitle || "My-Coloring-Book"}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+  //     const pdfBlob = await generateBookPdf(state);
+  //     const url = URL.createObjectURL(pdfBlob);
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     link.download = `${state.bookTitle || "My-Coloring-Book"}.pdf`;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //     URL.revokeObjectURL(url);
 
-      toast.success("Download started!");
-    } catch (error) {
-      console.error("PDF generation failed:", error);
-      toast.error("Failed to generate PDF. Please try again.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  //     toast.success("Download started!");
+  //   } catch (error) {
+  //     console.error("PDF generation failed:", error);
+  //     toast.error("Failed to generate PDF. Please try again.");
+  //   } finally {
+  //     setIsGenerating(false);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-background/80 flex items-center justify-center px-4 py-12">
