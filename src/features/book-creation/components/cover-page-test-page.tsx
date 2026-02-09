@@ -16,7 +16,7 @@ export default function CoverPageTestPage() {
   //   (state: BookStore) => state.setSelectedCoverVariant,
   // );
 
-  const setHasPaid = useBookStore((state: BookStore) => state.setHasPaid);
+  // const setHasPaid = useBookStore((state: BookStore) => state.setHasPaid);
   const { coverImage, coverImageVariants, selectedCoverVariantIndex } =
     useBookStore();
 

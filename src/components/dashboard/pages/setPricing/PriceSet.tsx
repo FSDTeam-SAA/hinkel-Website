@@ -20,7 +20,6 @@ import {
   Layers,
   Loader2,
   ArrowUpRight,
-  ShieldCheck,
   Plus,
   Trash2,
 } from "lucide-react";

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CategoryShow } from "./CategoryShow";
 import OrderedBooks from "./OrderedBooks";
 import { Button } from "@/components/ui/button";
 import { InfoIcon } from "lucide-react";
@@ -36,20 +35,27 @@ const Allbooks = () => {
             <div className="group relative flex items-center">
               {/* The Info Trigger */}
               <div className="p-2 rounded-full hover:bg-gray-100 transition-all duration-300 cursor-help border border-transparent hover:border-gray-200">
-                <InfoIcon size={18} className="text-gray-400 group-hover:text-[#FF8B36] transition-colors" />
+                <InfoIcon
+                  size={18}
+                  className="text-gray-400 group-hover:text-[#FF8B36] transition-colors"
+                />
               </div>
 
               {/* Tooltip: Appearing from the Left */}
-              <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 w-64 p-4 bg-gray-900/95 backdrop-blur-md text-white rounded-2xl 
+              <div
+                className="absolute right-full mr-3 top-1/2 -translate-y-1/2 w-64 p-4 bg-gray-900/95 backdrop-blur-md text-white rounded-2xl 
                 opacity-0 invisible group-hover:opacity-100 group-hover:visible 
                 transition-all duration-300 z-50 shadow-2xl border border-white/10 
-                pointer-events-none translate-x-3 group-hover:translate-x-0">
-
+                pointer-events-none translate-x-3 group-hover:translate-x-0"
+              >
                 <div className="flex flex-col gap-1">
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-1">System Info</span>
+                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-1">
+                    System Info
+                  </span>
                   <p className="text-[10px] leading-relaxed font-bold uppercase tracking-wider">
                     {/* Adjust the <span className="text-[#FF8B36] italic tracking-widest">&quot;Configurator&quot;</span> in the header to change page count impact. */}
-                    This Button will take you to the add new book page. Where you can create books as an Admin.
+                    This Button will take you to the add new book page. Where
+                    you can create books as an Admin.
                   </p>
                 </div>
 
