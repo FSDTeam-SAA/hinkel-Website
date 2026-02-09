@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   useGetCms,
   useDeleteCms,
@@ -15,15 +15,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  Filter,
-  Image as ImageIcon,
-  Layout,
-} from "lucide-react";
+import { Plus, Edit, Trash2, Search, Filter, Layout } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -33,7 +25,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import AddCmsContent from "./AddCmsContent";
-import Image from "next/image";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -162,68 +153,85 @@ const StyleContentManager = () => {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           {filteredContents.map((item: CmsContent) => (
             <div
               key={item._id}
-              className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 hover:border-[#ff7a00]/30 transition-all duration-300 flex flex-col relative"
+              className="group bg-white rounded-3xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-slate-200/60 hover:border-[#ff7a00]/40 transition-all duration-500 flex flex-col relative"
             >
-              {/* Image Preview */}
-              <div className="relative  bg-slate-100 overflow-hidden">
+              {/* Image Preview / Header Section */}
+              <div className="relative aspect-video bg-linear-to-br from-slate-50 to-slate-100 overflow-hidden border-b border-slate-100">
+                <div className="absolute inset-0 flex items-center justify-center opacity-20 group-hover:scale-110 transition-transform duration-700">
+                  <Layout className="w-12 h-12 text-slate-400" />
+                </div>
+
                 {/* ID Badge overlay */}
-                {/* <div className="absolute top-3 left-3">
-                  <Badge className="bg-white/90 text-slate-800 hover:bg-white backdrop-blur-md shadow-sm border border-slate-200/50 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5">
+                <div className="absolute top-4 left-4">
+                  <Badge
+                    variant="secondary"
+                    className="bg-white/90 text-[#ff7a00] hover:bg-white backdrop-blur-md shadow-sm border border-slate-200/50 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
+                  >
                     {item.type}
                   </Badge>
-                </div> */}
+                </div>
 
                 {/* Actions Overlay */}
-                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-[-10px] group-hover:translate-y-0 transition-all duration-300">
+                <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
                   <Button
                     size="icon"
                     onClick={() => setEditingContent(item)}
-                    className="h-8 w-8 rounded-lg bg-white/90 text-slate-700 hover:text-[#ff7a00] hover:bg-white shadow-sm backdrop-blur-md"
+                    className="h-10 w-10 rounded-xl bg-white text-slate-700 hover:text-[#ff7a00] hover:scale-110 shadow-xl transition-all duration-200"
                   >
-                    <Edit className="w-3.5 h-3.5" />
+                    <Edit className="w-4 h-4" />
                   </Button>
                   <Button
                     size="icon"
                     onClick={() => handleDelete(item._id)}
-                    className="h-8 w-8 rounded-lg bg-white/90 text-red-500 hover:bg-red-500 hover:text-white shadow-sm backdrop-blur-md"
+                    className="h-10 w-10 rounded-xl bg-white text-red-500 hover:bg-red-500 hover:text-white hover:scale-110 shadow-xl transition-all duration-200"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
               {/* Content Info */}
-              <div className="p-5 flex-1 flex flex-col space-y-3">
-                <div>
-                  <Badge
-                    className="font-bold text-white line-clamp-1 text-base transition-colors"
-                    title={item.type}
-                  >
-                    {item.type.toUpperCase() || "Untitled Type"}
-                  </Badge>
-                  {item.plainText && (
-                    <p className="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+              <div className="p-6 flex-1 flex flex-col space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-bold text-slate-900 line-clamp-1 text-lg group-hover:text-[#ff7a00] transition-colors">
+                      {item.type.charAt(0).toUpperCase() + item.type.slice(1)}{" "}
+                      Content
+                    </h3>
+                  </div>
+                  {item.plainText ? (
+                    <p className="text-sm text-slate-500 line-clamp-3 leading-relaxed">
                       {item.plainText}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-slate-400 italic">
+                      No description available
                     </p>
                   )}
                 </div>
 
-                <div className="pt-3 mt-auto border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`flex h-2 w-2 rounded-full ${item.isActive ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-slate-300"}`}
-                    />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      {item.isActive ? "Active" : "Inactive"}
+                <div className="pt-4 mt-auto border-t border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="relative">
+                      <span
+                        className={`flex h-2.5 w-2.5 rounded-full ${item.isActive ? "bg-green-500" : "bg-slate-300"}`}
+                      />
+                      {item.isActive && (
+                        <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-40" />
+                      )}
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      {item.isActive ? "Active" : "Disabled"}
                     </span>
                   </div>
-                  <span className="text-[10px] font-medium text-slate-400">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-slate-300" />
                     {format(new Date(item.updatedAt), "MMM d, yyyy")}
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>

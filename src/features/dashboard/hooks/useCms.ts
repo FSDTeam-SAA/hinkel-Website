@@ -4,6 +4,7 @@ import {
   deleteCmsContentApi,
   getCmsContentApi,
   getCmsContentByIdApi,
+  getCmsContentByTypeApi,
   getCmsTypesApi,
   updateCmsContentApi,
   uploadImageApi,
@@ -66,6 +67,14 @@ export const useGetCmsTypes = () => {
   return useQuery({
     queryKey: ["cms-types"],
     queryFn: getCmsTypesApi,
+  });
+};
+
+export const useGetCmsByType = (type: string, page = 1, limit = 10) => {
+  return useQuery({
+    queryKey: ["cms-content-type", type, page, limit],
+    queryFn: () => getCmsContentByTypeApi(type, page, limit),
+    enabled: !!type,
   });
 };
 
