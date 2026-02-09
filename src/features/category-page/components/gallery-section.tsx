@@ -159,7 +159,7 @@ export function GallerySection({ images }: GallerySectionProps) {
                     "relative w-full overflow-hidden rounded-2xl bg-gray-100",
                     images.length >= 5 && index === 0
                       ? "aspect-square"
-                      : "aspect-[4/5]",
+                      : "aspect-4/5",
                   )}
                 >
                   <Image

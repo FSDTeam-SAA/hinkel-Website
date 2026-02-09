@@ -137,7 +137,7 @@ const StyleContentManager = () => {
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="aspect-[4/3] rounded-2xl bg-slate-100 animate-pulse"
+              className="aspect-4/3 rounded-2xl bg-slate-100 animate-pulse"
             />
           ))}
         </div>
@@ -169,26 +169,13 @@ const StyleContentManager = () => {
               className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 hover:border-[#ff7a00]/30 transition-all duration-300 flex flex-col relative"
             >
               {/* Image Preview */}
-              <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
-                {item.image ? (
-                  <Image
-                    src={item.image}
-                    alt={item.title || "Content"}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full text-slate-300 bg-slate-50">
-                    <ImageIcon className="w-10 h-10 opacity-50" />
-                  </div>
-                )}
-
+              <div className="relative  bg-slate-100 overflow-hidden">
                 {/* ID Badge overlay */}
-                <div className="absolute top-3 left-3">
+                {/* <div className="absolute top-3 left-3">
                   <Badge className="bg-white/90 text-slate-800 hover:bg-white backdrop-blur-md shadow-sm border border-slate-200/50 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5">
                     {item.type}
                   </Badge>
-                </div>
+                </div> */}
 
                 {/* Actions Overlay */}
                 <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-[-10px] group-hover:translate-y-0 transition-all duration-300">
@@ -212,12 +199,12 @@ const StyleContentManager = () => {
               {/* Content Info */}
               <div className="p-5 flex-1 flex flex-col space-y-3">
                 <div>
-                  <h4
-                    className="font-bold text-slate-900 line-clamp-1 text-base group-hover:text-[#ff7a00] transition-colors"
-                    title={item.title}
+                  <Badge
+                    className="font-bold text-white line-clamp-1 text-base transition-colors"
+                    title={item.type}
                   >
-                    {item.title || "Untitled Content"}
-                  </h4>
+                    {item.type.toUpperCase() || "Untitled Type"}
+                  </Badge>
                   {item.plainText && (
                     <p className="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
                       {item.plainText}
