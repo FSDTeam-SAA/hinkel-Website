@@ -52,8 +52,8 @@ function getCategoryStyle(type?: string) {
   return (
     categoryStyles[normalizedType] || {
       bg: "bg-gray-50",
-      text: "text-gray-600",
-      border: "border-gray-200",
+      text: "text-blue-600",
+      border: "border-blue-200",
     }
   );
 }
@@ -82,17 +82,26 @@ export function Hero({ type }: { type?: string }) {
     <section className="relative px-6 py-10 md:py-12 lg:px-12 bg-accent">
       <div className="container mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div className="space-y-6">
-          <Badge
-            variant="outline"
-            className={cn(
-              "text-sm px-4 py-1.5 font-bold uppercase tracking-wider rounded-full border-2 transition-all duration-300",
-              getCategoryStyle(type || heroContent?.type).bg,
-              getCategoryStyle(type || heroContent?.type).text,
-              getCategoryStyle(type || heroContent?.type).border,
-            )}
-          >
-            {type || heroContent?.type || "Explore"}
-          </Badge>
+          {type?.toLowerCase() !== "home" && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-base px-4 py-1.5 font-semibold uppercase tracking-wider rounded-full border-2 transition-all duration-300",
+                getCategoryStyle(type || heroContent?.type).bg,
+                getCategoryStyle(type || heroContent?.type).text,
+                getCategoryStyle(type || heroContent?.type).border,
+              )}
+            >
+              {type || heroContent?.type || "Explore"}
+              {/* {type
+              ?.split(" ")
+              .filter((item: string) =>
+                item.toLowerCase() !== "home" ? item : "",
+              ) ||
+              heroContent?.type ||
+              "Explore"} */}
+            </Badge>
+          )}
           <h1 className="text-5xl md:text-6xl font-black tracking-tight text-secondary-foreground leading-tight">
             {heroContent?.title || "Turn Any Artwork Into Coloring Magic"}
           </h1>
