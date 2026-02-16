@@ -26,10 +26,12 @@ const FOOTER_LINKS = {
   resources: [
     { label: "Contact", href: "/contact-us" },
     { label: "About", href: "/about-us" },
+    { label: "Terms of Conditions", href: "/terms-conditions" },
+    { label: "Refund Policy", href: "/refund" },
   ],
   legal: [
-    // { label: "Terms", href: "/terms" },
-    { label: "Privacy", href: "/privacy-policy" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
+    { label: "Refund Policy", href: "/refund" },
     // { label: "Cookies", href: "/cookies" },
   ],
 } as const;

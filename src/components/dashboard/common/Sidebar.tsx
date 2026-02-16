@@ -10,9 +10,11 @@ import {
   BookOpen,
   HelpCircle,
   ShieldCheck,
+  RotateCcw,
   Info,
   Users,
   Key,
+  FileSignature,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -39,6 +41,12 @@ const navigation = [
   { name: "About Us", href: "/dashboard/about", icon: Info },
   { name: "Subscribers", href: "/dashboard/subscribers", icon: Users },
   { name: "Privacy Policy", href: "/dashboard/privacy", icon: ShieldCheck },
+  { name: "Return Policy", href: "/dashboard/return-policy", icon: RotateCcw },
+  {
+    name: "Terms & Conditions",
+    href: "/dashboard/terms-conditions",
+    icon: FileSignature,
+  },
 ];
 
 export default function Sidebar() {
