@@ -362,8 +362,8 @@ export default function Navbar() {
           {status === "unauthenticated" ? (
             <>
               <Link href="/register">
-                <Button className="border-primary text-white hover:bg-primary/80 px-8 rounded-lg font-semibold transition-all">
-                  Create an Account
+                <Button className="border-primary text-white hover:bg-primary/80 px-8 rounded-lg font-semibold transition-all bg-black">
+                  Create an Free ccount
                 </Button>
               </Link>
               <Link href="/login">
@@ -457,8 +457,8 @@ export default function Navbar() {
                 {status === "unauthenticated" && (
                   <div className="flex flex-col px-5 pt-6 mt-4 border-t space-y-2">
                     <Link href="/register">
-                      <Button className="border-primary text-white hover:bg-primary/80 px-8 rounded-lg font-semibold transition-all w-full">
-                        Create an Account
+                      <Button className="border-primary text-white hover:bg-primary/80 px-8 rounded-lg font-semibold transition-all w-full bg-black">
+                        Create an Free ccount
                       </Button>
                     </Link>
                     <Link href="/login">
