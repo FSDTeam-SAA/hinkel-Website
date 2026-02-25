@@ -73,10 +73,10 @@ export function AuthModal({ isOpen, onClose, redirectUrl }: AuthModalProps) {
           <Button
             variant="outline"
             onClick={handleSignUp}
-            className="w-full h-12 text-base font-semibold border-primary/20 hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+            className="w-full h-12 text-base font-semibold border-primary/20  hover:bg-primary/5 transition-all flex items-center justify-center gap-2 bg-black"
           >
             <UserPlus className="w-5 h-5 text-primary" />
-            Create an Account
+            Create an Free ccount
           </Button>
         </div>
 
