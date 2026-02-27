@@ -363,7 +363,7 @@ export default function Navbar() {
             <>
               <Link href="/register">
                 <Button className="border-primary text-white hover:bg-primary/80 px-8 rounded-lg font-semibold transition-all bg-black">
-                  Create an Free ccount
+                  Create a Free Account
                 </Button>
               </Link>
               <Link href="/login">
@@ -458,7 +458,7 @@ export default function Navbar() {
                   <div className="flex flex-col px-5 pt-6 mt-4 border-t space-y-2">
                     <Link href="/register">
                       <Button className="border-primary text-white hover:bg-primary/80 px-8 rounded-lg font-semibold transition-all w-full bg-black">
-                        Create an Free ccount
+                        Create a Free Account
                       </Button>
                     </Link>
                     <Link href="/login">
