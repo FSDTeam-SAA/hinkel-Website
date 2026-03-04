@@ -48,7 +48,18 @@ export async function deleteCoupon(couponId: string) {
     );
     return res.data;
   } catch (error) {
-    console.error("Error deleting coupon:", error);
+    throw error;
+  }
+}
+
+export async function validateCoupon(codeName: string) {
+  try {
+    const res = await api.get<SingleCouponResponse>("coupon/validate/check", {
+      params: { codeName },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error validating coupon:", error);
     throw error;
   }
 }
