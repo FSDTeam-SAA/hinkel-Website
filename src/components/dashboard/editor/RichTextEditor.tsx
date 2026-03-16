@@ -14,6 +14,8 @@ import {
   COMMON_EXTENSIONS,
   FONT_FAMILIES,
   FONT_SIZES,
+  LINE_HEIGHTS,
+  PARAGRAPH_SPACINGS,
 } from "@/components/shared/editor-extensions";
 import { useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -46,6 +48,7 @@ import {
   ChevronDown,
   Type,
   Maximize2,
+  ListRestart,
 } from "lucide-react";
 
 // Custom FontSize Extension is now imported from @/components/shared/editor-extensions
@@ -658,6 +661,61 @@ const RichTextEditor = ({
         >
           <AlignJustify size={16} />
         </Button>
+
+        <div className="w-px h-6 bg-white/10 mx-1" />
+
+        {/* Spacing Controls */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-white/60 hover:text-white flex items-center gap-2 px-2"
+              title="Spacing"
+            >
+              <ListRestart size={14} />
+              <ChevronDown size={10} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-slate-900 border-white/10 text-white p-2 min-w-[200px]">
+            <div className="px-2 py-1.5 text-xs font-semibold text-white/40 uppercase tracking-wider">
+              Line Height
+            </div>
+            {LINE_HEIGHTS.map((lh) => (
+              <DropdownMenuItem
+                key={lh}
+                onClick={() => editor.chain().focus().setLineHeight(lh).run()}
+                className={cn(
+                  "hover:bg-white/5 cursor-pointer text-xs",
+                  editor.isActive({ lineHeight: lh }) &&
+                    "text-[#ff7a00] font-bold",
+                )}
+              >
+                {lh}
+              </DropdownMenuItem>
+            ))}
+            <div className="h-px bg-white/10 my-1" />
+            <div className="px-2 py-1.5 text-xs font-semibold text-white/40 uppercase tracking-wider">
+              Paragraph Spacing (Margin Bottom)
+            </div>
+            {PARAGRAPH_SPACINGS.map((ps) => (
+              <DropdownMenuItem
+                key={ps}
+                onClick={() =>
+                  editor.chain().focus().setParagraphSpacing(ps).run()
+                }
+                className={cn(
+                  "hover:bg-white/5 cursor-pointer text-xs",
+                  editor.isActive({ marginBottom: ps }) &&
+                    "text-[#ff7a00] font-bold",
+                )}
+              >
+                {ps}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="w-px h-6 bg-white/10 mx-1" />
         <Button

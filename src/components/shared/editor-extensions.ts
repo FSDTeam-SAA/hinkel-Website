@@ -15,8 +15,71 @@ declare module "@tiptap/core" {
        */
       unsetFontSize: () => ReturnType;
     };
+    spacing: {
+      setLineHeight: (lineHeight: string) => ReturnType;
+      setParagraphSpacing: (marginBottom: string) => ReturnType;
+    };
   }
 }
+
+export const Spacing = Extension.create({
+  name: "spacing",
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: ["paragraph", "heading"],
+        attributes: {
+          lineHeight: {
+            default: null,
+            parseHTML: (element) => element.style.lineHeight,
+            renderHTML: (attributes) => {
+              if (!attributes.lineHeight) {
+                return {};
+              }
+              return {
+                style: `line-height: ${attributes.lineHeight}`,
+              };
+            },
+          },
+          marginBottom: {
+            default: null,
+            parseHTML: (element) => element.style.marginBottom,
+            renderHTML: (attributes) => {
+              if (!attributes.marginBottom) {
+                return {};
+              }
+              return {
+                style: `margin-bottom: ${attributes.marginBottom}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+
+  addCommands() {
+    return {
+      setLineHeight:
+        (lineHeight: string) =>
+        ({ chain }) => {
+          return chain()
+            .updateAttributes("paragraph", { lineHeight })
+            .updateAttributes("heading", { lineHeight })
+            .run();
+        },
+      setParagraphSpacing:
+        (marginBottom: string) =>
+        ({ chain }) => {
+          return chain()
+            .updateAttributes("paragraph", { marginBottom })
+            .updateAttributes("heading", { marginBottom })
+            .run();
+        },
+    };
+  },
+});
 
 // Custom Image Extension with width support
 export const CustomImage = Image.extend({
@@ -112,10 +175,22 @@ export const FONT_SIZES = [
   "72px",
 ];
 
+export const LINE_HEIGHTS = ["1.0", "1.15", "1.2", "1.5", "2.0"];
+
+export const PARAGRAPH_SPACINGS = [
+  "0px",
+  "8px",
+  "16px",
+  "24px",
+  "32px",
+  "48px",
+];
+
 export const COMMON_EXTENSIONS = [
   TextStyle,
   FontFamily,
   FontSize,
+  Spacing,
   CustomImage.configure({
     inline: true,
     allowBase64: false,
