@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import LandingPage from "@/features/book-creation/components/landing-page";
+import FreeGenerationPage from "@/features/book-creation/components/free-generation-page";
 import BookSetupFormatPage from "@/features/book-creation/components/book-setup-format-page";
 import CoverPageTestPage from "@/features/book-creation/components/cover-page-test-page";
+import DedicationPage from "@/features/book-creation/components/dedication-page";
 import ImageUploadPage from "@/features/book-creation/components/image-upload-page";
 import FinalizeBookPage from "@/features/book-creation/components/finalize-book-page";
 import SuccessPage from "@/features/book-creation/components/success-page";
 import { useBookStore } from "@/features/book-creation/store/book-store";
-import { BookStore } from "../types";
+import { BookStore, BookStep } from "../types";
 
 export default function BookCreation() {
   const step = useBookStore((state: BookStore) => state.step);
@@ -16,9 +17,31 @@ export default function BookCreation() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    // Ensure store is hydrated from localStorage
+    // Ensure store is hydrated from IndexedDB
     useBookStore.persist.rehydrate();
-    setTimeout(() => setHydrated(true), 0);
+
+    // Give a bit of time for the async storage to finish rehydrating
+    // and then handle migrations
+    const timer = setTimeout(() => {
+      // Migrate old step names from previous flow stored in IndexedDB
+      const OLD_STEP_MAP: Record<string, string> = {
+        landing: "free-generation",
+        format: "setup",
+        images: "pages",
+        finalize: "review",
+      };
+
+      const currentStep = useBookStore.getState().step;
+      const mapped = OLD_STEP_MAP[currentStep];
+
+      if (mapped) {
+        useBookStore.getState().setStep(mapped as BookStep);
+      }
+
+      setHydrated(true);
+    }, 100); // 100ms is usually enough for idb-keyval
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Handle successful payment return from Stripe
@@ -30,10 +53,15 @@ export default function BookCreation() {
 
       if (isSuccess) {
         if (sessionId) {
-          useBookStore.getState().setOrderId(sessionId);
+          useBookStore.getState().setStripeSessionId(sessionId);
         }
         useBookStore.getState().setHasPaid(true);
-        setStep("images");
+        // After initial payment, go to Cover step.
+        // If adding pages (current step is pages/review), stay where we are.
+        const currentStep = useBookStore.getState().step;
+        if (currentStep === "setup" || currentStep === "free-generation") {
+          setStep("cover");
+        }
 
         // Clear params from URL without refreshing
         window.history.replaceState({}, "", "/create-book");
@@ -52,11 +80,12 @@ export default function BookCreation() {
   return (
     <div className="flex flex-col min-h-screen bg-background md:pb-10">
       <main className="flex-1">
-        {step === "landing" && <LandingPage />}
-        {step === "cover" && <CoverPageTestPage />}
+        {step === "free-generation" && <FreeGenerationPage />}
         {step === "setup" && <BookSetupFormatPage />}
-        {step === "images" && <ImageUploadPage />}
-        {step === "finalize" && <FinalizeBookPage />}
+        {step === "cover" && <CoverPageTestPage />}
+        {step === "dedication" && <DedicationPage />}
+        {step === "pages" && <ImageUploadPage />}
+        {step === "review" && <FinalizeBookPage />}
         {step === "success" && <SuccessPage />}
       </main>
     </div>

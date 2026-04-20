@@ -4,16 +4,16 @@ import { indexedDbStorage } from "@/lib/indexed-db-storage";
 import type { BookState, BookStore } from "../types";
 
 export type BookStep =
-  | "landing"
+  | "free-generation"
   | "setup"
-  | "format"
   | "cover"
-  | "images"
-  | "finalize"
+  | "dedication"
+  | "pages"
+  | "review"
   | "success";
 
 const initialState: BookState = {
-  step: "landing",
+  step: "free-generation",
   returnStep: null,
   bookTitle: "",
   pageCount: 20,
@@ -34,8 +34,9 @@ const initialState: BookState = {
   dedicationText: "",
   hasPaid: false,
   orderId: null,
+  stripeSessionId: null,
   pendingPageCount: null,
-  bookType: "",
+  bookType: "kids",
 };
 
 export const useBookStore = create<BookStore>()(
@@ -138,15 +139,10 @@ export const useBookStore = create<BookStore>()(
         })),
       canGenerateCover: () => {
         const state = get();
-        // If they've paid, they can generate as much as the MAX_COVER limit allows (or more? let's stick to MAX_COVER for now but allow reset)
+        // After payment: unlimited
         if (state.hasPaid) return true;
-
-        const today = new Date().toISOString().split("T")[0];
-        if (state.generationCounts.lastGenerationDate === today) {
-          return false; // Already generated once today
-        }
-
-        return true;
+        // Free tier: 2 generations before payment
+        return state.generationCounts.cover < 2;
       },
       canGeneratePage: () => {
         const state = get();
@@ -168,6 +164,7 @@ export const useBookStore = create<BookStore>()(
       setDedicationText: (dedicationText) => set({ dedicationText }),
       setHasPaid: (hasPaid) => set({ hasPaid }),
       setOrderId: (orderId) => set({ orderId }),
+      setStripeSessionId: (stripeSessionId) => set({ stripeSessionId }),
       setPendingPageCount: (pendingPageCount) => set({ pendingPageCount }),
       setBookType: (bookType) => set({ bookType }),
       resetBook: () => set(initialState),

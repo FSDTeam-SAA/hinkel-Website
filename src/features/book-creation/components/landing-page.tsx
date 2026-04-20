@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, useEffect } from "react";
-import { ArrowUpFromLine, PrinterCheck } from "lucide-react";
+import { ArrowUpFromLine } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import { useGeneratePreview } from "@/features/book-creation/hooks/useGeneratePreview";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -179,10 +179,10 @@ export default function LandingPage() {
             Picture to Sketch Book Creator
           </h1>
 
-          <span className="text-white bg-primary rounded-full px-4 py-1 mb-4 inline-block ">
+          {/* <span className="text-white bg-primary rounded-full px-4 py-1 mb-4 inline-block ">
             <PrinterCheck className="inline-block mr-2 size-4" /> Optimized for
             professional print-on-demand services like Lulu.
-          </span>
+          </span> */}
 
           <p className="text-lg text-muted-foreground mb-12">
             Transform your images into beautiful sketch coloring books. Upload

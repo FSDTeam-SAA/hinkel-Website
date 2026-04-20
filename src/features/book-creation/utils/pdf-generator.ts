@@ -217,18 +217,6 @@ export const generateBookPdf = async (state: BookState): Promise<Blob> => {
     }
   }
 
-  // Branding Footer
-  doc.setFont(FONTS.primary, "bold italic");
-  doc.setFontSize(FONT_Sizes.meta);
-  doc.text(
-    "https://sktchlabs.com/",
-    p1CenterX,
-    MARGIN_TOP + CONTENT_HEIGHT - 20,
-    {
-      align: "center",
-    },
-  );
-
   // --- 2. DEDICATION PAGE (Optional) ---
   if (includeDedicationPage && dedicationText) {
     doc.addPage();
@@ -253,11 +241,16 @@ export const generateBookPdf = async (state: BookState): Promise<Blob> => {
   }
 
   // --- 3. CONTENT PAGES ---
+  let displayPageNum = 1;
   for (let i = 1; i <= pageCount; i++) {
-    doc.addPage();
-    const currentPageNum = doc.getNumberOfPages();
     const image = pageImages[i];
     const text = pageTexts[i];
+
+    // Skip unused pages (no image and no text)
+    if (!image && !text?.topLine && !text?.bottomLine) continue;
+
+    doc.addPage();
+    const currentPageNum = doc.getNumberOfPages();
 
     // Determine margins for this specific page
     const currentLeftMargin = getX(currentPageNum);
@@ -270,9 +263,16 @@ export const generateBookPdf = async (state: BookState): Promise<Blob> => {
     doc.setFont(FONTS.primary, "normal");
     doc.setFontSize(FONT_Sizes.pageNumber);
     doc.setTextColor(0, 0, 0);
-    doc.text(`Page ${i}`, centerX, PAGE_HEIGHT - MARGIN_BOTTOM + 15, {
-      align: "center",
-    });
+    doc.text(
+      `Page ${displayPageNum}`,
+      centerX,
+      PAGE_HEIGHT - MARGIN_BOTTOM + 15,
+      {
+        align: "center",
+      },
+    );
+
+    displayPageNum++;
 
     // Top Text
     if (text?.topLine) {
@@ -294,12 +294,6 @@ export const generateBookPdf = async (state: BookState): Promise<Blob> => {
       const imgX = currentLeftMargin + SPACING.imagePadding;
 
       addScaledImage(image, imgX, imgYStart, availableW, availableH);
-    } else {
-      // Empty placeholder text
-      doc.setFont(FONTS.primary, "italic");
-      doc.setFontSize(FONT_Sizes.meta);
-      doc.setTextColor(150, 150, 150);
-      doc.text("Blank Page", centerX, PAGE_HEIGHT / 2, { align: "center" });
     }
 
     // Bottom Text
@@ -311,18 +305,6 @@ export const generateBookPdf = async (state: BookState): Promise<Blob> => {
         align: "center",
       });
     }
-  }
-
-  // --- 4. EVEN PAGE COUNT FORCE ---
-  const finalPageCount = doc.getNumberOfPages();
-  if (finalPageCount % 2 !== 0) {
-    doc.addPage();
-    // Blank page to make it even
-    const endPage = doc.getNumberOfPages();
-    const endCenterX = getX(endPage) + CONTENT_WIDTH / 2;
-    doc.setFontSize(FONT_Sizes.pageNumber);
-    doc.setTextColor(200, 200, 200);
-    doc.text("Notes", endCenterX, PAGE_HEIGHT / 2, { align: "center" });
   }
 
   return doc.output("blob");

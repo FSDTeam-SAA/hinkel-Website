@@ -19,6 +19,7 @@ import Image from "next/image";
 import { useUpdateCategory } from "@/features/dashboard/hooks/useCategory";
 
 import { CategoryContent } from "@/features/category-page/types";
+import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title is required"),
@@ -147,7 +148,7 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
                   render={({ field }) => (
                     <FormItem className="space-y-0">
                       <FormControl>
-                        <Input
+                        <Textarea
                           placeholder="e.g. Premium Selection"
                           {...field}
                           className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-6 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
@@ -193,7 +194,7 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
                   render={({ field }) => (
                     <FormItem className="space-y-0">
                       <FormControl>
-                        <Input
+                        <Textarea
                           placeholder="Brief description of the category..."
                           {...field}
                           className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-6 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
@@ -216,7 +217,7 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
                   render={({ field }) => (
                     <FormItem className="space-y-0">
                       <FormControl>
-                        <Input
+                        <Textarea
                           placeholder="Describe this category node..."
                           {...field}
                           className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-6 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"

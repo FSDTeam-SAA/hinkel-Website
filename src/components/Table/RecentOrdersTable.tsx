@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
+import { PdfViewerModal } from "../dashboard/PdfViewerModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -62,6 +63,8 @@ const RecentOrdersTable = () => {
   const { updateStatus } = useStatusUpdate();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeUpdatingId, setActiveUpdatingId] = useState<string | null>(null);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerTitle, setViewerTitle] = useState("");
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setActiveUpdatingId(orderId);
@@ -184,12 +187,15 @@ const RecentOrdersTable = () => {
               </td>
               <td className="py-4 px-4 text-right">
                 <div className="flex items-center justify-end gap-2">
-                  {order.book && (
+                  {order.hasBook && order.bookViewUrl && (
                     <div>
-                      <a
-                        href={order.book}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => {
+                          setViewerUrl(
+                            `${process.env.NEXT_PUBLIC_API_URL}${order.bookViewUrl}`,
+                          );
+                          setViewerTitle(order.title || "Coloring Book");
+                        }}
                         className="
       inline-flex items-center gap-1
       p-2 rounded-md
@@ -198,11 +204,11 @@ const RecentOrdersTable = () => {
       transition-colors
     "
                         title="View Book"
-                        aria-label="View book (opens in a new tab)"
+                        aria-label="View book (opens in modal)"
                       >
                         <ExternalLink size={16} aria-hidden="true" />
                         <span className="hidden sm:inline">View Book</span>
-                      </a>
+                      </button>
                     </div>
                   )}
                   <Button
@@ -356,12 +362,12 @@ const RecentOrdersTable = () => {
                 </div>
               </div>
 
-              {(selectedOrder.book || selectedOrder.title) && (
+              {(selectedOrder.hasBook || selectedOrder.title) && (
                 <div className="flex gap-4 p-4 bg-orange-50/50 rounded-xl border border-orange-100">
                   <div className="relative h-20 w-16 flex-shrink-0 bg-white rounded-lg overflow-hidden border border-orange-200 flex items-center justify-center text-orange-200">
-                    {selectedOrder.book ? (
+                    {selectedOrder.bookThumbnail ? (
                       <Image
-                        src={selectedOrder.book}
+                        src={selectedOrder.bookThumbnail}
                         alt={selectedOrder.title || "Book cover"}
                         fill
                         className="object-cover"
@@ -380,16 +386,21 @@ const RecentOrdersTable = () => {
                     <p className="text-xs text-gray-500 mt-1 italic">
                       {selectedOrder.deliveryType}
                     </p>
-                    {selectedOrder.book && (
-                      <a
-                        href={selectedOrder.book}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {selectedOrder.hasBook && selectedOrder.bookViewUrl && (
+                      <button
+                        onClick={() => {
+                          setViewerUrl(
+                            `${process.env.NEXT_PUBLIC_API_URL}${selectedOrder.bookViewUrl}`,
+                          );
+                          setViewerTitle(
+                            selectedOrder.title || "Coloring Book",
+                          );
+                        }}
                         className="mt-2 flex items-center gap-1.5 w-fit px-3 py-1.5 bg-[#FF8B36] text-white rounded-lg text-xs font-bold hover:bg-[#e67a00] transition-colors"
                       >
                         <ExternalLink size={14} />
                         View Document
-                      </a>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -420,6 +431,12 @@ const RecentOrdersTable = () => {
           )}
         </DialogContent>
       </Dialog>
+      <PdfViewerModal
+        isOpen={!!viewerUrl}
+        onClose={() => setViewerUrl(null)}
+        pdfUrl={viewerUrl}
+        title={viewerTitle}
+      />
     </div>
   );
 };

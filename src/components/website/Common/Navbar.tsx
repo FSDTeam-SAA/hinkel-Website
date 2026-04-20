@@ -214,7 +214,7 @@ const DesktopCategoryDropdown = memo(
         />
       </Link>
       {showDropdown && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 min-w-[250px] w-auto bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl p-4 gap-4 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 min-w-[250px] w-auto bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl p-4 gap-4 z-10 animate-in fade-in slide-in-from-top-2 duration-300">
           {categories.map((category) => (
             <Link
               key={category._id}
@@ -240,7 +240,7 @@ DesktopCategoryDropdown.displayName = "DesktopCategoryDropdown";
 const Logo = memo(() => (
   <Link href="/" className="flex items-center">
     <Image
-      src="/images/logo.png"
+      src="/images/new-logo.png"
       alt="Logo"
       width={150}
       height={150}
@@ -325,7 +325,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 transition-all duration-300 backdrop-blur-md bg-blue-100 border-b border-gray-100">
+    <nav className="sticky top-0 z-10 transition-all duration-300 backdrop-blur-md bg-blue-100 border-b border-gray-100">
       <div className="container mx-auto px-4 sm:px-8 flex justify-between items-center py-4">
         <Logo />
 

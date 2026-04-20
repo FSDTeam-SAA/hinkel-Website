@@ -24,8 +24,10 @@ export function CouponTable() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  const { coupons, totalCount, totalPages, loading, refetch, deleteCoupon } =
-    useCoupon({ page, limit });
+  const { coupons, totalPages, loading, refetch, deleteCoupon } = useCoupon({
+    page,
+    limit,
+  });
 
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
