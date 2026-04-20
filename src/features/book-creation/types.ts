@@ -98,12 +98,12 @@ export interface ConfirmPaymentResponse {
  * Step names in the book creation workflow
  */
 export type BookStep =
-  | "landing"
-  | "cover"
+  | "free-generation"
   | "setup"
-  | "format"
-  | "images"
-  | "finalize"
+  | "cover"
+  | "dedication"
+  | "pages"
+  | "review"
   | "success";
 
 /**
@@ -159,6 +159,7 @@ export interface BookState {
   outputFormat: OutputFormat | null;
   hasPaid: boolean;
   orderId: string | null;
+  stripeSessionId: string | null;
   pendingPageCount: number | null;
 }
 
@@ -210,6 +211,7 @@ export interface BookActions {
   setOutputFormat: (format: OutputFormat) => void;
   setHasPaid: (paid: boolean) => void;
   setOrderId: (orderId: string | null) => void;
+  setStripeSessionId: (id: string | null) => void;
   setPendingPageCount: (count: number | null) => void;
   setBookType: (type: string) => void;
 

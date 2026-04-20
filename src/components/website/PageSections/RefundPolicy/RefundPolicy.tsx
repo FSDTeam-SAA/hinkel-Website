@@ -25,11 +25,11 @@ const RefundPolicy = () => {
   return (
     <section className="min-h-screen bg-secondary flex justify-center px-6 py-16">
       <div className="max-w-4xl w-full text-gray-700">
-        <div className="flex justify-center mb-8">
+        {/* <div className="flex justify-center mb-8">
           <span className="px-4 py-1 text-sm rounded-full bg-[#FFE5D2] text-gray-600">
             Return &amp; Refund Policy
           </span>
-        </div>
+        </div> */}
 
         <h1 className="text-center text-3xl md:text-4xl font-semibold text-gray-600 mb-8">
           {hasDynamicContent ? policy.title : "Return & Refund Policy"}

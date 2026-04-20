@@ -27,15 +27,17 @@ export default function PaymentSuccessPage() {
         setPageCount(pendingPageCount);
         setPendingPageCount(null);
 
-        // If we were in setup, go to images. Otherwise (extra pages), return to where we were.
+        // If we were in setup, go to cover. Otherwise (extra pages), return to where we were.
         if (step === "setup") {
-          setStep("images");
+          setStep("cover");
+        } else if (step === "pages") {
+          setStep("pages");
         } else {
           // If they added pages from finalize or images, stay there
           setStep(step);
         }
       } else {
-        setStep("images");
+        setStep("pages");
       }
     }
 
@@ -56,9 +58,12 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     if (countdown <= 0) {
-      router.push("/create-book");
+      const targetUrl = sessionId
+        ? `/create-book?success=true&session_id=${sessionId}`
+        : "/create-book";
+      router.push(targetUrl);
     }
-  }, [countdown, router]);
+  }, [countdown, router, sessionId]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -87,7 +92,7 @@ export default function PaymentSuccessPage() {
           <div className="bg-gray-50 rounded-2xl p-6 mb-10 border border-gray-100">
             <div className="flex items-center justify-center gap-3 text-gray-600 mb-2">
               <Loader2 className="w-5 h-5 animate-spin text-green-500" />
-              <span className="font-medium">Redirecting to images step...</span>
+              <span className="font-medium">Redirecting to your book...</span>
             </div>
             <p className="text-sm text-gray-400">
               Taking you back in{" "}
@@ -98,7 +103,12 @@ export default function PaymentSuccessPage() {
           </div>
 
           <button
-            onClick={() => router.push("/create-book")}
+            onClick={() => {
+              const targetUrl = sessionId
+                ? `/create-book?success=true&session_id=${sessionId}`
+                : "/create-book";
+              router.push(targetUrl);
+            }}
             className="group w-full bg-[#ff8b36] hover:bg-orange-600 text-white font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-lg shadow-orange-500/20"
           >
             <span>Continue Now</span>

@@ -20,6 +20,7 @@ import {
 import OrderedBooksSkeleton from "./OrderedBooksSkeleton";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
 import { useArchiveOrder } from "@/features/dashboard/hooks/useArchiveOrder";
+import { PdfViewerModal } from "../../PdfViewerModal";
 import {
   Select,
   SelectContent,
@@ -43,6 +44,8 @@ const OrderedBooks = () => {
   const [sortOrder, setSortOrder] = React.useState("desc");
   const [page, setPage] = React.useState(1);
   const limit = 9;
+  const [viewerUrl, setViewerUrl] = React.useState<string | null>(null);
+  const [viewerTitle, setViewerTitle] = React.useState("");
 
   // Debounce search
   React.useEffect(() => {
@@ -328,9 +331,9 @@ const OrderedBooks = () => {
                 >
                   {/* Book Image Section */}
                   <div className="relative w-full h-56 bg-gray-50 overflow-hidden">
-                    {order.book ? (
+                    {order.bookThumbnail ? (
                       <Image
-                        src={order.book}
+                        src={order.bookThumbnail}
                         alt={order.title || "Book Cover"}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -465,11 +468,16 @@ const OrderedBooks = () => {
                                 </>
                               )}
                             </button>
-                            {order.book && (
-                              <a
-                                href={order.book}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            {order.hasBook && order.bookViewUrl && (
+                              <button
+                                onClick={() => {
+                                  setViewerUrl(
+                                    `${process.env.NEXT_PUBLIC_API_URL}${order.bookViewUrl}`,
+                                  );
+                                  setViewerTitle(
+                                    order.title || "Coloring Book",
+                                  );
+                                }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-colors"
                               >
                                 <ExternalLink
@@ -477,7 +485,7 @@ const OrderedBooks = () => {
                                   className="text-orange-600"
                                 />
                                 View Book
-                              </a>
+                              </button>
                             )}
                             <Select
                               defaultValue={order.deliveryStatus || "pending"}
@@ -581,6 +589,12 @@ const OrderedBooks = () => {
           </button>
         </div>
       )}
+      <PdfViewerModal
+        isOpen={!!viewerUrl}
+        onClose={() => setViewerUrl(null)}
+        pdfUrl={viewerUrl}
+        title={viewerTitle}
+      />
     </div>
   );
 };

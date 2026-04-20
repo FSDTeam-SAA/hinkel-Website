@@ -62,22 +62,25 @@ export default function ImageUploadPage() {
   const state = useBookStore();
   const { generatePreview, loading: isConverting } = useGeneratePreview();
 
-  const steps = ["Cover Art", "Details", "Payment", "Content", "Review"];
+  const steps = ["Setup & Pay", "Cover", "Dedication", "Pages", "Review"];
   const currentStep = 3;
 
   const handleStepClick = (index: number) => {
     switch (index) {
       case 0:
-        setStep("cover");
+        setStep("setup");
         break;
       case 1:
-        setStep("setup");
+        setStep("cover");
+        break;
+      case 2:
+        setStep("dedication");
         break;
       case 3:
         // Already here
         break;
       case 4:
-        setStep("finalize");
+        setStep("review");
         break;
     }
   };
@@ -278,8 +281,11 @@ export default function ImageUploadPage() {
       toast.success("Generating preview...");
       const pdfBlob = await generateBookPdf(state);
       const url = URL.createObjectURL(pdfBlob);
+      // Open in a new tab instead of using the modal, which was causing layout issues
       window.open(url, "_blank");
-      toast.success("Preview PDF opened in new tab!");
+
+      // Clean up the URL after a short delay to ensure it opened
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
     } catch (error) {
       console.error("Preview failed:", error);
       toast.error("Failed to generate preview.");
@@ -303,7 +309,7 @@ export default function ImageUploadPage() {
 
       {/* Top Preview Button Popup - Only on last page */}
       {currentPage === totalPages && (
-        <div className="sticky top-0 z-50 w-full flex justify-center pt-4 pointer-events-none animate-in slide-in-from-top-full duration-500">
+        <div className="sticky top-0 z-[500] w-full flex justify-center pt-4 pointer-events-none animate-in slide-in-from-top-full duration-500">
           <Button
             onClick={handlePreviewBook}
             disabled={isGeneratingPreview}
@@ -319,7 +325,7 @@ export default function ImageUploadPage() {
         </div>
       )}
 
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 md:py-12">
+      <div className="flex-1 max-w-6xl mx-auto w-full px-4 py-6 md:py-12">
         <div className="bg-white rounded-2xl shadow-sm p-4 md:p-8 lg:p-12">
           {/* Page selector */}
           <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-hide">
@@ -711,8 +717,8 @@ export default function ImageUploadPage() {
             {/* Back Button (Step Navigation) */}
             <Button
               variant="outline"
-              disabled
-              className="h-16 px-8 text-xl cursor-not-allowed font-black border-2 border-gray-200 text-gray-400 rounded-2xl hidden md:flex"
+              onClick={() => setStep("dedication")}
+              className="h-16 px-8 text-xl font-black border-2 border-gray-200 text-gray-600 rounded-2xl hidden md:flex hover:bg-gray-50"
             >
               BACK
             </Button>
@@ -747,7 +753,7 @@ export default function ImageUploadPage() {
             {/* Next Step Button - Only on last page */}
             {currentPage === totalPages ? (
               <Button
-                onClick={() => setStep("finalize")}
+                onClick={() => setStep("review")}
                 className="h-14 md:h-16 w-full md:w-auto px-8 md:px-12 text-lg md:text-xl font-black bg-[#ff8b36] hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 border-none"
               >
                 REVIEW BOOK →

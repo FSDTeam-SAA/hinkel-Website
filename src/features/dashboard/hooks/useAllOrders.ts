@@ -21,7 +21,9 @@ export interface Order {
   updatedAt: string;
   __v: number;
   approvalStatus?: string;
-  book?: string;
+  hasBook?: boolean;
+  bookViewUrl?: string | null;
+  bookThumbnail?: string | null;
   title?: string;
   refundStatus?: string;
   stripePaymentIntentId?: string;

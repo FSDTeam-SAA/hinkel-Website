@@ -11,7 +11,7 @@ export function useGeneratePreview() {
     mutationFn: async ({ image, type }: { image: string; type?: string }) => {
       const response = await generatePreviewApi({
         image,
-        type: type || "",
+        type: type || "kids",
       });
 
       console.log("Generate Preview Response:", response);

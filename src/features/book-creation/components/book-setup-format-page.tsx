@@ -9,7 +9,6 @@ import { useConfirmPayment } from "@/features/book-creation/hooks/usePayment";
 import { DeliveryMethodCard } from "./delivery-mothod-card";
 import { BookStore, OutputFormat, DeliveryType } from "../types";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AuthModal } from "@/components/shared/AuthModal";
 import { cn } from "@/lib/utils";
@@ -25,46 +24,29 @@ export default function BookSetupFormatPage() {
   const setOutputFormat = useBookStore(
     (state: BookStore) => state.setOutputFormat,
   );
-  const setBookTitle = useBookStore((state: BookStore) => state.setBookTitle);
   const setOrderId = useBookStore((state: BookStore) => state.setOrderId);
-  const { bookTitle, pageCount, outputFormat, bookType, hasPaid } =
-    useBookStore();
+  const { pageCount, outputFormat, bookType, hasPaid } = useBookStore();
   const { data: session } = useSession();
-  const router = useRouter();
 
   const { prices, loading: pricingLoading } = usePricing();
   const { confirmPayment, isLoading: isConfirming } = useConfirmPayment();
 
-  const [title, setTitle] = useState(bookTitle || "");
   const [selectedPages, setSelectedPages] = useState(pageCount || 20);
   const [selectedFormat, setSelectedFormat] = useState<OutputFormat>(
     outputFormat || "pdf",
   );
-  const [errors, setErrors] = useState<{ title?: string }>({});
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponError, setCouponError] = useState("");
 
-  const steps = ["Cover Art", "Details", "Payment", "Content", "Review"];
+  const steps = ["Setup & Pay", "Cover", "Dedication", "Pages", "Review"];
 
   const handleStepClick = (index: number) => {
-    // Navigate based on step index
     switch (index) {
       case 0:
-        setStep("cover");
-        break;
-      case 1:
-        // Already here
-        break;
-      // Case 2 is Payment (skipped for navigation mostly)
-      case 3:
-        setStep("images");
-        break;
-      case 4:
-        setStep("finalize");
-        break;
+        break; // Already here
     }
   };
 
@@ -165,17 +147,6 @@ export default function BookSetupFormatPage() {
   };
 
   const handleContinue = async () => {
-    const newErrors: { title?: string } = {};
-    if (!title.trim()) {
-      newErrors.title = "Book title is required";
-      toast.error(newErrors.title);
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
     if (!session?.user?.id) {
       setIsAuthModalOpen(true);
       return;
@@ -188,11 +159,9 @@ export default function BookSetupFormatPage() {
       "pdf&printed": "print&digital",
     };
 
-    // If already paid, skip payment and go to next step
+    // If already paid, skip payment and resume from cover step
     if (hasPaid) {
-      // Optional: Logic to check if critical details changed could go here
-      // For now, we assume user is paying for specific session which is valid
-      setStep("images");
+      setStep("cover");
       return;
     }
 
@@ -206,13 +175,12 @@ export default function BookSetupFormatPage() {
       });
 
       if (response.success && response.sessionUrl) {
-        setBookTitle(title);
         setPendingPageCount(selectedPages);
         setOutputFormat(selectedFormat);
         setOrderId(response.orderId);
 
         // Redirect to Stripe
-        router.push(response.sessionUrl);
+        window.location.href = response.sessionUrl;
       } else {
         toast.error("Failed to create payment session");
       }
@@ -226,7 +194,7 @@ export default function BookSetupFormatPage() {
   };
 
   const handleBack = () => {
-    setStep("landing");
+    setStep("free-generation");
   };
 
   return (
@@ -239,28 +207,6 @@ export default function BookSetupFormatPage() {
 
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-12">
         <div className="bg-white rounded-[16px] shadow-[0px_7px_25px_-13.739px_rgba(0,0,0,0.07)] p-5 md:p-12">
-          {/* Book Title Section */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-medium font-poppins text-[#212121] mb-2">
-              Book Title
-            </h2>
-            <div className="border-2 border-[#e1e3e5] rounded-xl flex items-center px-4 py-2 h-[50px]">
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (errors.title) setErrors({});
-                }}
-                placeholder="My Amazing Coloring Book"
-                className="w-full text-base font-poppins text-[#6c757d] placeholder-[#6c757d] focus:outline-none bg-transparent"
-              />
-            </div>
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-2">{errors.title}</p>
-            )}
-          </div>
-
           {/* Choose Your Package Header */}
           <h3 className="text-2xl font-medium font-inter text-black mb-6">
             Choose Your Package

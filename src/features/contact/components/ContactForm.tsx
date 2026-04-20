@@ -35,8 +35,12 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z
     .string()
-    .min(10, "Phone number must be at least 10 digits")
-    .max(15, "Phone number is too long"),
+    .optional()
+    .refine(
+      (val) => !val || val.length >= 10,
+      "Phone number must be at least 10 digits",
+    )
+    .refine((val) => !val || val.length <= 15, "Phone number is too long"),
   message: z.string().min(1, "Message is required"),
   privacyPolicy: z.boolean().refine((val) => val === true, {
     message: "You must agree to the privacy policy",
@@ -155,7 +159,8 @@ const PhoneField = memo(
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-slate-700 font-medium">
-              Phone number
+              Phone number{" "}
+              <span className="text-slate-500 font-normal">(Optional)</span>
             </FormLabel>
             <div className="flex gap-0">
               <Select value={countryCode} onValueChange={onCountryCodeChange}>
@@ -284,7 +289,7 @@ export const ContactForm = memo(() => {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
-        phone: `${dialCode} ${values.phone}`, // Combine country code with phone number
+        phone: values.phone ? `${dialCode} ${values.phone}` : "", // Combine country code with phone number
         message: values.message,
       };
 

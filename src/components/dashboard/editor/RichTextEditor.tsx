@@ -606,6 +606,34 @@ const RichTextEditor = ({
         >
           <Strikethrough size={16} />
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            const previousUrl = editor.getAttributes("link").href;
+            const url = window.prompt("Enter URL", previousUrl);
+            if (url === null) return;
+            if (url === "") {
+              editor.chain().focus().extendMarkRange("link").unsetLink().run();
+              return;
+            }
+            editor
+              .chain()
+              .focus()
+              .extendMarkRange("link")
+              .setLink({ href: url })
+              .run();
+          }}
+          className={
+            editor.isActive("link")
+              ? "bg-white/10 text-[#ff7a00]"
+              : "text-white/60"
+          }
+          title="Add Link"
+        >
+          <LinkIcon size={16} />
+        </Button>
         <div className="w-px h-6 bg-white/10 mx-1" />
 
         {/* Alignment */}

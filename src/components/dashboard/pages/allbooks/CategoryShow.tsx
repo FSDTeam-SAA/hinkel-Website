@@ -85,7 +85,7 @@ export function CategoryShow() {
                 className="gap-2 rounded-lg border-slate-200 hover:bg-[#ff7a00]/5 hover:text-[#ff7a00] hover:border-[#ff7a00]/30 transition-all"
               >
                 <Type size={14} />
-                <span className="hidden sm:inline">Settings</span>
+                <span className="hidden sm:inline">Category Intro</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md bg-white border-slate-100">

@@ -13,11 +13,12 @@ import {
   ArrowLeft,
   CheckCircle,
   Plus,
-  PrinterCheck,
   Pencil,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import AddPagesModal from "./AddPagesModal";
+import { Badge } from "@/components/ui/badge";
 
 export default function FinalizeBookPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -43,10 +44,10 @@ export default function FinalizeBookPage() {
   const handleReturnToCreation = () => {
     if (returnStep) {
       const stepToReturn = returnStep;
-      setReturnStep(null); // Clear the return step
+      setReturnStep(null);
       setStep(stepToReturn);
     } else {
-      setStep("images");
+      setStep("pages");
     }
   };
 
@@ -59,7 +60,9 @@ export default function FinalizeBookPage() {
       const pdfBlob = await generateBookPdf(state);
       const url = URL.createObjectURL(pdfBlob);
       window.open(url, "_blank");
-      // Note: We don't revoke here because it's opened in a new tab
+
+      // Clean up the URL after a short delay
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
     } catch (error) {
       console.error("Preview failed:", error);
       toast.error("Failed to generate preview.");
@@ -98,19 +101,22 @@ export default function FinalizeBookPage() {
     }
   };
 
-  const steps = ["Cover Art", "Details", "Payment", "Content", "Review"];
+  const steps = ["Setup & Pay", "Cover", "Dedication", "Pages", "Review"];
   const currentStep = 4;
 
   const handleStepClick = (index: number) => {
     switch (index) {
       case 0:
-        setStep("cover");
-        break;
-      case 1:
         setStep("setup");
         break;
+      case 1:
+        setStep("cover");
+        break;
+      case 2:
+        setStep("dedication");
+        break;
       case 3:
-        setStep("images");
+        setStep("pages");
         break;
       case 4:
         // Already here
@@ -142,10 +148,10 @@ export default function FinalizeBookPage() {
           </p>
 
           <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
-            <span className="text-white bg-primary rounded-full px-4 py-1 text-sm md:text-base">
+            {/* <span className="text-white bg-primary rounded-full px-4 py-1 text-sm md:text-base">
               <PrinterCheck className="inline-block mr-2 size-4" /> Optimized
               for professional print-on-demand services like Lulu.
-            </span>
+            </span> */}
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <Button
                 onClick={handlePreview}
@@ -261,6 +267,10 @@ export default function FinalizeBookPage() {
                 </p>
               </div>
             </div>
+            <Badge variant="outline" className="text-orange-600 bg-orange-100 ">
+              <Info className="w-4 h-4 mr-2" />
+              Be sure to click the preview button before finalizing.
+            </Badge>
           </div>
 
           <div className="flex flex-col-reverse md:flex-row gap-4 justify-between">
@@ -296,6 +306,21 @@ export default function FinalizeBookPage() {
         isOpen={isAddPagesOpen}
         onClose={() => setIsAddPagesOpen(false)}
       />
+
+      {/* Finalizing Overlay */}
+      {isUploading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center max-w-xs w-full">
+            <Loader2 className="w-12 h-12 text-[#ff8b36] animate-spin mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Finalizing Book
+            </h3>
+            <p className="text-gray-500 text-center">
+              Please don&apos;t close this window while we finalize your book.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -159,7 +159,7 @@ export default function StylesPage() {
             </h2>
             <p className="text-gray-400 text-xl md:text-2xl font-medium max-w-2xl mx-auto">
               Join thousands of creators who&apos;ve turned their favorite
-              moments into timeless coloring books.
+              moments into timeless sketch and coloring books
             </p>
             <div className="pt-8">
               <Link href="/create-book">

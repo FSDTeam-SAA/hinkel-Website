@@ -1,0 +1,30 @@
+
+/home/khalid/Desktop/work-space/hinkle/hinkel-Website/src/components/dashboard/pages/manage-coupon/CouponTable.tsx
+  27:20  warning  'totalCount' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/khalid/Desktop/work-space/hinkle/hinkel-Website/src/features/book-creation/components/book-setup-format-page.tsx
+  31:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/khalid/Desktop/work-space/hinkle/hinkel-Website/src/features/book-creation/components/cover-page-test-page.tsx
+   39:5   warning  'coverImage' is assigned a value but never used                  @typescript-eslint/no-unused-vars
+  150:38  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/khalid/Desktop/work-space/hinkle/hinkel-Website/src/features/book-creation/components/finalize-book-page.tsx
+  10:10  warning  'PdfViewerModal' is defined but never used         @typescript-eslint/no-unused-vars
+  17:3   warning  'PrinterCheck' is defined but never used           @typescript-eslint/no-unused-vars
+  44:10  warning  'viewerUrl' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  44:21  warning  'setViewerUrl' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/khalid/Desktop/work-space/hinkle/hinkel-Website/src/features/book-creation/components/image-upload-page.tsx
+  29:10  warning  'PdfViewerModal' is defined but never used         @typescript-eslint/no-unused-vars
+  60:10  warning  'viewerUrl' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  60:21  warning  'setViewerUrl' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/khalid/Desktop/work-space/hinkle/hinkel-Website/src/features/book-creation/components/landing-page.tsx
+  4:27  warning  'PrinterCheck' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/khalid/Desktop/work-space/hinkle/hinkel-Website/src/features/book-creation/pages/BookCreation.tsx
+  38:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 13 problems (2 errors, 11 warnings)
+

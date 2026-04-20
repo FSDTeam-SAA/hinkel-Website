@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { ImagePlus, Type, Layers, Zap, X, Plus } from "lucide-react";
 import Image from "next/image";
 import { useCreateCategory } from "@/features/dashboard/hooks/useCategory";
+import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title is required"),
@@ -192,7 +193,7 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
                           Label
                         </label>
                         <FormControl>
-                          <Input
+                          <Textarea
                             placeholder="e.g. Premium Selection"
                             {...field}
                             className="h-12 bg-white/5 border-white/10 rounded-xl px-4 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-[#ff7a00] focus-visible:border-[#ff7a00]/50 transition-all font-medium"
@@ -234,10 +235,10 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
                           Descriptor
                         </label>
                         <FormControl>
-                          <Input
+                          <Textarea
                             placeholder="Brief description of the category..."
                             {...field}
-                            className="h-12 bg-white/5 border-white/10 rounded-xl px-4 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-[#ff7a00] focus-visible:border-[#ff7a00]/50 transition-all font-medium"
+                            className="min-h-[40px] max-h-[150px] bg-white/5 border-white/10 rounded-xl px-4 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-[#ff7a00] focus-visible:border-[#ff7a00]/50 transition-all font-medium"
                           />
                         </FormControl>
                         <FormMessage className="text-[10px] text-red-400 font-medium" />
@@ -268,7 +269,7 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
                         <textarea
                           {...field}
                           placeholder="Define the generation logic..."
-                          className="w-full min-h-[100px] bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/20 focus:ring-1 focus:ring-[#ff7a00] focus:border-[#ff7a00]/50 outline-none transition-all resize-none text-sm font-medium leading-relaxed"
+                          className="w-full min-h-[40px] max-h-[150px] bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/20 focus:ring-1 focus:ring-[#ff7a00] focus:border-[#ff7a00]/50 outline-none transition-all resize-none text-sm font-medium leading-relaxed"
                         />
                       </FormControl>
                     </FormItem>
