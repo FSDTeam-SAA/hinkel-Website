@@ -2,7 +2,6 @@
 import { useAllOrders, Order } from "@/features/dashboard/hooks/useAllOrders";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
 import {
-  ChevronDown,
   Loader2,
   Package,
   ExternalLink,
@@ -10,6 +9,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import React, { useState } from "react";
 import { PdfViewerModal } from "../dashboard/PdfViewerModal";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -168,32 +174,34 @@ const RecentOrdersTable = () => {
                       <Loader2 className="h-3 w-3 animate-spin" /> Updating...
                     </div>
                   ) : (
-                    <div className="group/select relative">
-                      <select
-                        value={order.deliveryStatus || "pending"}
-                        onChange={(e) =>
-                          handleStatusChange(order._id, e.target.value)
-                        }
-                        className={`appearance-none cursor-pointer outline-none border-none pr-8 ${getStatusStyles(order.deliveryStatus || "pending")}`}
+                    <Select
+                      value={order.deliveryStatus || "pending"}
+                      onValueChange={(value) =>
+                        handleStatusChange(order._id, value)
+                      }
+                      disabled={activeUpdatingId !== null}
+                    >
+                      <SelectTrigger
+                        className={`appearance-none cursor-pointer outline-none border-none w-auto ${getStatusStyles(order.deliveryStatus || "pending")}`}
                       >
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                      <ChevronDown className="h-3 w-3 absolute right-2 top-1/2 -translate-y-1/2 text-current pointer-events-none opacity-50" />
-                    </div>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
               </td>
               <td className="py-4 px-4 text-right">
                 <div className="flex items-center justify-end gap-2">
-                  {order.hasBook && order.bookViewUrl && (
+                  {order.hasBook && order.bookThumbnail && (
                     <div>
                       <button
                         onClick={() => {
-                          setViewerUrl(
-                            `${process.env.NEXT_PUBLIC_API_URL}${order.bookViewUrl}`,
-                          );
+                          setViewerUrl(order.bookThumbnail);
                           setViewerTitle(order.title || "Coloring Book");
                         }}
                         className="
@@ -386,12 +394,10 @@ const RecentOrdersTable = () => {
                     <p className="text-xs text-gray-500 mt-1 italic">
                       {selectedOrder.deliveryType}
                     </p>
-                    {selectedOrder.hasBook && selectedOrder.bookViewUrl && (
+                    {selectedOrder.hasBook && selectedOrder.bookThumbnail && (
                       <button
                         onClick={() => {
-                          setViewerUrl(
-                            `${process.env.NEXT_PUBLIC_API_URL}${selectedOrder.bookViewUrl}`,
-                          );
+                          setViewerUrl(selectedOrder.bookThumbnail);
                           setViewerTitle(
                             selectedOrder.title || "Coloring Book",
                           );
