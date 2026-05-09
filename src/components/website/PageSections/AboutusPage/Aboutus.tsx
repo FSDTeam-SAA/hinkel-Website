@@ -57,7 +57,7 @@ const Aboutus = () => {
         </h1>
 
         <div
-          className="prose prose-lg max-w-none text-gray-700 leading-relaxed mb-8"
+          className="content-prose prose prose-lg max-w-none text-gray-700 leading-relaxed mb-8"
           dangerouslySetInnerHTML={{ __html: content }}
         />
 

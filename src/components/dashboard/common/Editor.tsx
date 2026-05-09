@@ -7,6 +7,7 @@ import {
 } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import { Table } from "@tiptap/extension-table";
@@ -575,12 +576,19 @@ const MenuBar = ({ editor }: { editor: TiptapEditor | null }) => {
   );
 };
 
-const Editor = ({ value, onChange }: Omit<EditorProps, "placeholder">) => {
+const Editor = ({
+  value,
+  onChange,
+  placeholder = "Start writing...",
+}: EditorProps) => {
   const { mutateAsync: uploadImage } = useUploadImage();
 
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Placeholder.configure({
+        placeholder,
+      }),
       Underline,
       Link.configure({
         openOnClick: false,
@@ -699,6 +707,28 @@ const Editor = ({ value, onChange }: Omit<EditorProps, "placeholder">) => {
   return (
     <div className="border border-slate-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 transition-all bg-white relative">
       <style>{`
+        /* Paragraph spacing support */
+        .ProseMirror p[style*="margin-bottom"],
+        .ProseMirror h1[style*="margin-bottom"],
+        .ProseMirror h2[style*="margin-bottom"],
+        .ProseMirror h3[style*="margin-bottom"],
+        .ProseMirror h4[style*="margin-bottom"],
+        .ProseMirror h5[style*="margin-bottom"],
+        .ProseMirror h6[style*="margin-bottom"] {
+          margin-bottom: inherit !important;
+        }
+
+        /* Line height support */
+        .ProseMirror p[style*="line-height"],
+        .ProseMirror h1[style*="line-height"],
+        .ProseMirror h2[style*="line-height"],
+        .ProseMirror h3[style*="line-height"],
+        .ProseMirror h4[style*="line-height"],
+        .ProseMirror h5[style*="line-height"],
+        .ProseMirror h6[style*="line-height"] {
+          line-height: inherit !important;
+        }
+
         .prose table {
           border-collapse: collapse;
           table-layout: fixed;

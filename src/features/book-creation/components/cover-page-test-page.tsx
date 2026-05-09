@@ -17,6 +17,8 @@ import ImagePreviewModal from "./image-preview-modal";
 import Image from "next/image";
 import { BookStore } from "../types";
 import { toast } from "sonner";
+import { useContent } from "@/features/category-page/hooks/use-content";
+import { getCategoryPromptForType } from "../utils/prompt";
 
 const STEPS = ["Setup & Pay", "Cover", "Dedication", "Pages", "Review"];
 
@@ -40,6 +42,9 @@ export default function CoverPageTestPage() {
 
   const { data: session } = useSession();
   const isAdmin = session?.user?.role?.toLowerCase() === "admin";
+  const { data: contentData } = useContent({ limit: 12 });
+  const categories = contentData?.data || [];
+  const selectedStylePrompt = getCategoryPromptForType(categories, bookType);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
@@ -81,7 +86,11 @@ export default function CoverPageTestPage() {
       return;
     }
 
-    const previewResult = await generatePreview(pendingImage, bookType);
+    const previewResult = await generatePreview(
+      pendingImage,
+      bookType,
+      selectedStylePrompt,
+    );
     if (previewResult) {
       incrementCoverGeneration();
       const updatedVariants = [...coverImageVariants, previewResult];

@@ -5,6 +5,7 @@
 export interface GeneratePreviewRequest {
   image: string; // Base64 encoded image
   type: string;
+  prompt?: string;
 }
 
 export interface GeneratePreviewResponse {

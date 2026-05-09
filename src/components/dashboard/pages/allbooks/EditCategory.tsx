@@ -22,6 +22,7 @@ import { CategoryContent } from "@/features/category-page/types";
 import { Textarea } from "@/components/ui/textarea";
 import RichTextEditor from "@/components/dashboard/editor/RichTextEditor";
 import { getPlainTextFromRichText, toRichTextContent } from "@/lib/rich-text";
+import { normalizePrompt } from "@/features/book-creation/utils/prompt";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title is required"),
@@ -61,12 +62,12 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
+    const normalizedPrompt = normalizePrompt(values.prompt);
+
     formData.append("title", values.title);
     formData.append("subtitle", values.subtitle);
     formData.append("type", values.type);
-    if (values.prompt) {
-      formData.append("prompt", values.prompt);
-    }
+    formData.append("prompt", normalizedPrompt);
 
     if (values.image && values.image[0]) {
       formData.append("image", values.image[0]);

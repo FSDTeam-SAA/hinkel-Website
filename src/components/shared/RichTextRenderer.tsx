@@ -67,7 +67,7 @@ const RichTextRenderer = ({ content, className }: RichTextRendererProps) => {
     editorProps: {
       attributes: {
         class:
-          "prose dark:prose-invert prose-sm sm:prose mx-auto focus:outline-none",
+          "content-prose prose dark:prose-invert prose-sm sm:prose mx-auto focus:outline-none",
       },
     },
   });

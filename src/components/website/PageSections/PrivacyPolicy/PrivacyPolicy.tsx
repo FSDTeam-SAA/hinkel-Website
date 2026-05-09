@@ -109,7 +109,7 @@ const PrivacyPolicy = () => {
 
         {hasDynamicContent ? (
           <div
-            className="prose prose-lg max-w-none text-gray-700 leading-relaxed mb-12"
+            className="content-prose prose prose-lg max-w-none text-gray-700 leading-relaxed mb-12"
             dangerouslySetInnerHTML={{ __html: privacyData.data.content }}
           />
         ) : (

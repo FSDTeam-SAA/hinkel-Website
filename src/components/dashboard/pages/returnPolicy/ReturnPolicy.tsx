@@ -59,7 +59,6 @@ const ReturnPolicy = () => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [policyToDelete, setPolicyToDelete] = useState<string | null>(null);
-
   // Check if a policy already exists
   const existingPolicy =
     policyData?.data && policyData.data.length > 0 ? policyData.data[0] : null;
@@ -76,11 +75,16 @@ const ReturnPolicy = () => {
   useEffect(() => {
     if (existingPolicy) {
       form.reset({
-        title: existingPolicy.title,
-        content: existingPolicy.content,
+        title: existingPolicy.title || "",
+        content: existingPolicy.content || "",
       });
     }
   }, [existingPolicy, form]);
+
+  const handleEditorChange = (value: string) => {
+    form.setValue("content", value);
+    form.trigger("content");
+  };
 
   const onSubmit = (data: ReturnPolicySchemaType) => {
     if (isEditMode && existingPolicy) {
@@ -255,11 +259,15 @@ const ReturnPolicy = () => {
                       Policy Content
                     </FormLabel>
                     <span className="text-xs text-slate-400">
-                      Supports rich text formatting
+                      Supports rich text formatting, spacing, and styling
                     </span>
                   </div>
                   <FormControl>
-                    <Editor value={field.value} onChange={field.onChange} />
+                    <Editor
+                      value={field.value}
+                      onChange={handleEditorChange}
+                      placeholder="Write your return policy content here..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

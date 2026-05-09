@@ -13,6 +13,7 @@ import { useContent } from "@/features/category-page/hooks/use-content";
 import { cn } from "@/lib/utils";
 import { BookStyleSelector } from "./BookStyleSelector";
 import { AuthPromptModal } from "./auth-prompt-modal";
+import { getCategoryPromptForType } from "../utils/prompt";
 
 export default function LandingPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -45,6 +46,7 @@ export default function LandingPage() {
   // State for categories
   const { data: contentData } = useContent({ limit: 12 });
   const categories = contentData?.data || [];
+  const selectedStylePrompt = getCategoryPromptForType(categories, bookType);
 
   // Dropdown persistence logic (extracted but local state management for sync)
   const currentTypeFromUrl = searchParams.get("type");
@@ -130,7 +132,11 @@ export default function LandingPage() {
       return;
     }
 
-    const previewResult = await generatePreview(pendingImage, bookType);
+    const previewResult = await generatePreview(
+      pendingImage,
+      bookType,
+      selectedStylePrompt,
+    );
 
     if (previewResult) {
       // Increment cover generation count

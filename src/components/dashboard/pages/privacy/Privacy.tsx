@@ -41,7 +41,6 @@ type PrivacySchemaType = z.infer<typeof privacySchema>;
 const Privacy = () => {
   const { data: privacyData, isLoading: isFetching } = usePrivacy();
   const { mutate: updatePrivacy, isPending: isUpdating } = useUpdatePrivacy();
-
   const form = useForm<PrivacySchemaType>({
     resolver: zodResolver(privacySchema),
     defaultValues: {
@@ -54,12 +53,17 @@ const Privacy = () => {
   useEffect(() => {
     if (privacyData?.data) {
       form.reset({
-        title: privacyData.data.title,
-        content: privacyData.data.content,
-        status: privacyData.data.status,
+        title: privacyData.data.title || "",
+        content: privacyData.data.content || "",
+        status: privacyData.data.status || "draft",
       });
     }
   }, [privacyData, form]);
+
+  const handleEditorChange = (value: string) => {
+    form.setValue("content", value);
+    form.trigger("content");
+  };
 
   const onSubmit = (data: PrivacySchemaType) => {
     updatePrivacy(data, {
@@ -179,11 +183,15 @@ const Privacy = () => {
                       Policy Content
                     </FormLabel>
                     <span className="text-xs text-slate-400">
-                      Supports plain text and basic formatting
+                      Supports rich text formatting, spacing, and styling
                     </span>
                   </div>
                   <FormControl>
-                    <Editor value={field.value} onChange={field.onChange} />
+                    <Editor
+                      value={field.value}
+                      onChange={handleEditorChange}
+                      placeholder="Write your privacy policy content here..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

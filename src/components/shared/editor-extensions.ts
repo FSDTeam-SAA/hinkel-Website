@@ -26,32 +26,46 @@ export const Spacing = Extension.create({
   name: "spacing",
 
   addGlobalAttributes() {
+    const getSpacingStyles = (attributes: {
+      lineHeight?: string | null;
+      marginBottom?: string | null;
+    }) => {
+      const styles = [
+        attributes.lineHeight ? `line-height: ${attributes.lineHeight}` : null,
+        attributes.marginBottom
+          ? `margin-bottom: ${attributes.marginBottom}`
+          : null,
+      ].filter(Boolean);
+
+      return styles.length > 0 ? { style: styles.join("; ") } : {};
+    };
+
     return [
       {
-        types: ["paragraph", "heading"],
+        types: ["paragraph", "heading", "listItem"],
         attributes: {
           lineHeight: {
             default: null,
-            parseHTML: (element) => element.style.lineHeight,
+            parseHTML: (element) => {
+              const styleAttr = element.getAttribute("style");
+              if (!styleAttr) return null;
+              const match = styleAttr.match(/line-height:\s*([^;]+)/);
+              return match ? match[1].trim() : null;
+            },
             renderHTML: (attributes) => {
-              if (!attributes.lineHeight) {
-                return {};
-              }
-              return {
-                style: `line-height: ${attributes.lineHeight}`,
-              };
+              return getSpacingStyles(attributes);
             },
           },
           marginBottom: {
             default: null,
-            parseHTML: (element) => element.style.marginBottom,
+            parseHTML: (element) => {
+              const styleAttr = element.getAttribute("style");
+              if (!styleAttr) return null;
+              const match = styleAttr.match(/margin-bottom:\s*([^;]+)/);
+              return match ? match[1].trim() : null;
+            },
             renderHTML: (attributes) => {
-              if (!attributes.marginBottom) {
-                return {};
-              }
-              return {
-                style: `margin-bottom: ${attributes.marginBottom}`,
-              };
+              return getSpacingStyles(attributes);
             },
           },
         },
@@ -67,6 +81,7 @@ export const Spacing = Extension.create({
           return chain()
             .updateAttributes("paragraph", { lineHeight })
             .updateAttributes("heading", { lineHeight })
+            .updateAttributes("listItem", { lineHeight })
             .run();
         },
       setParagraphSpacing:
@@ -75,6 +90,7 @@ export const Spacing = Extension.create({
           return chain()
             .updateAttributes("paragraph", { marginBottom })
             .updateAttributes("heading", { marginBottom })
+            .updateAttributes("listItem", { marginBottom })
             .run();
         },
     };

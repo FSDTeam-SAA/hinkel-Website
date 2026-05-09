@@ -26,6 +26,8 @@ import { useGeneratePreview } from "../hooks/useGeneratePreview";
 import { generateBookPdf } from "../utils/pdf-generator";
 import { cn } from "@/lib/utils";
 import AddPagesModal from "./AddPagesModal";
+import { useContent } from "@/features/category-page/hooks/use-content";
+import { getCategoryPromptForType } from "../utils/prompt";
 
 export default function ImageUploadPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -61,6 +63,9 @@ export default function ImageUploadPage() {
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const state = useBookStore();
   const { generatePreview, loading: isConverting } = useGeneratePreview();
+  const { data: contentData } = useContent({ limit: 12 });
+  const categories = contentData?.data || [];
+  const selectedStylePrompt = getCategoryPromptForType(categories, bookType);
 
   const steps = ["Setup & Pay", "Cover", "Dedication", "Pages", "Review"];
   const currentStep = 3;
@@ -99,7 +104,11 @@ export default function ImageUploadPage() {
     toast.info("Converting to line art...");
 
     try {
-      const lineArtImage = await generatePreview(image, bookType);
+      const lineArtImage = await generatePreview(
+        image,
+        bookType,
+        selectedStylePrompt,
+      );
 
       if (lineArtImage) {
         // Increment generation count BEFORE adding the image

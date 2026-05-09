@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { BookStyleSelector } from "./BookStyleSelector";
 import { AuthPromptModal } from "./auth-prompt-modal";
 import Image from "next/image";
+import { getCategoryPromptForType } from "../utils/prompt";
 
 const MAX_FREE_GENERATIONS = 2;
 
@@ -55,6 +56,7 @@ export default function FreeGenerationPage() {
 
   const { data: contentData } = useContent({ limit: 12 });
   const categories = contentData?.data || [];
+  const selectedStylePrompt = getCategoryPromptForType(categories, bookType);
 
   const freeGenerationsUsed = generationCounts.cover;
   const canGenerate = isAdmin || canGenerateCover();
@@ -133,7 +135,11 @@ export default function FreeGenerationPage() {
       return;
     }
 
-    const previewResult = await generatePreview(pendingImage, bookType);
+    const previewResult = await generatePreview(
+      pendingImage,
+      bookType,
+      selectedStylePrompt,
+    );
 
     if (previewResult) {
       incrementCoverGeneration();

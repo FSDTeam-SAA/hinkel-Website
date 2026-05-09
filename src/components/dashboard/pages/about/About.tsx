@@ -33,7 +33,6 @@ type AboutSchemaType = z.infer<typeof aboutSchema>;
 const About = () => {
   const { data: aboutData, isLoading: isFetching } = useAbout();
   const { mutate: updateAbout, isPending: isUpdating } = useUpdateAbout();
-
   const form = useForm<AboutSchemaType>({
     resolver: zodResolver(aboutSchema),
     defaultValues: {
@@ -45,8 +44,8 @@ const About = () => {
   useEffect(() => {
     if (aboutData?.data) {
       form.reset({
-        title: aboutData.data.title,
-        content: aboutData.data.content,
+        title: aboutData.data.title || "",
+        content: aboutData.data.content || "",
       });
     }
   }, [aboutData, form]);
@@ -60,6 +59,11 @@ const About = () => {
         toast.error("Failed to update About Us content: " + error.message);
       },
     });
+  };
+
+  const handleEditorChange = (value: string) => {
+    form.setValue("content", value);
+    form.trigger("content");
   };
 
   if (isFetching) {
@@ -80,6 +84,8 @@ const About = () => {
           </h1>
           <p className="text-slate-500 mt-1">
             Update and manage your website&apos;s &quot;About Us&quot; content.
+            Use the formatting tools to enhance your text with proper spacing
+            and styling.
           </p>
         </div>
         <Button
@@ -131,11 +137,15 @@ const About = () => {
                       Page Content
                     </FormLabel>
                     <span className="text-xs text-slate-400">
-                      Supports rich text formatting
+                      Supports rich text formatting, spacing, and styling
                     </span>
                   </div>
                   <FormControl>
-                    <Editor value={field.value} onChange={field.onChange} />
+                    <Editor
+                      value={field.value}
+                      onChange={handleEditorChange}
+                      placeholder="Write your About Us content here..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
