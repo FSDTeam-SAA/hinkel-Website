@@ -10,6 +10,7 @@ import HeroSkeleton from "@/features/category-page/components/hero.skeleton";
 import { memo, useMemo } from "react";
 import { CategoryContent } from "@/features/category-page/api/category.api";
 import { useRouter } from "next/navigation";
+import RichTextRenderer from "@/components/shared/RichTextRenderer";
 
 // Types
 interface HeroProps {
@@ -125,9 +126,10 @@ const HeroContent = memo(
           {heroContent?.title || DEFAULT_CONTENT.title}
         </h1>
 
-        <p className="text-base md:text-lg text-gray-600 max-w-2xl leading-relaxed">
-          {heroContent?.subtitle || DEFAULT_CONTENT.subtitle}
-        </p>
+        <RichTextRenderer
+          content={heroContent?.subtitle || DEFAULT_CONTENT.subtitle}
+          className="max-w-2xl text-gray-600 [&_.ProseMirror]:max-w-none [&_.ProseMirror]:text-base md:[&_.ProseMirror]:text-lg [&_.ProseMirror]:leading-relaxed [&_.ProseMirror_p]:my-0 [&_.ProseMirror]:space-y-3 [&_.ProseMirror_strong]:text-gray-900"
+        />
 
         <Button
           size="lg"

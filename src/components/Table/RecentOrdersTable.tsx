@@ -204,13 +204,7 @@ const RecentOrdersTable = () => {
                           setViewerUrl(order.bookThumbnail ?? null);
                           setViewerTitle(order.title || "Coloring Book");
                         }}
-                        className="
-      inline-flex items-center gap-1
-      p-2 rounded-md
-      text-[#FF8B36]
-      hover:bg-[#FFF7ED]
-      transition-colors
-    "
+                        className="inline-flex items-center gap-1 p-2 rounded-md text-[#FF8B36] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
                         title="View Book"
                         aria-label="View book (opens in modal)"
                       >

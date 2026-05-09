@@ -20,6 +20,7 @@ import { CategoryContent } from "@/features/category-page/types";
 import { useDeleteCategory } from "@/features/dashboard/hooks/useCategory";
 // import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
 import EditCategory from "./EditCategory";
+import { getPlainTextFromRichText } from "@/lib/rich-text";
 
 interface CategoryCardProps {
   category: CategoryContent;
@@ -89,9 +90,9 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
                 <Edit className="w-3.5 h-3.5" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-white text-slate-900 max-w-lg p-6">
+            <DialogContent className="bg-white text-slate-900 w-[min(96vw,72rem)] max-h-[92vh] overflow-hidden p-0">
               <DialogHeader>
-                <DialogTitle>Edit Category</DialogTitle>
+                <DialogTitle className="px-6 pt-6">Edit Category</DialogTitle>
               </DialogHeader>
               <EditCategory
                 category={category}
@@ -156,7 +157,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
           </CardTitle>
           {category.subtitle && (
             <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed font-medium">
-              {category.subtitle}
+              {getPlainTextFromRichText(category.subtitle)}
             </p>
           )}
           {category.prompt && (

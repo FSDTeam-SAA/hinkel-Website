@@ -20,10 +20,17 @@ import { useUpdateCategory } from "@/features/dashboard/hooks/useCategory";
 
 import { CategoryContent } from "@/features/category-page/types";
 import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/dashboard/editor/RichTextEditor";
+import { getPlainTextFromRichText, toRichTextContent } from "@/lib/rich-text";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title is required"),
-  subtitle: z.string().min(2, "Subtitle is required"),
+  subtitle: z
+    .string()
+    .refine(
+      (value) => getPlainTextFromRichText(value).trim().length >= 2,
+      "Subtitle is required",
+    ),
   type: z.string().min(2, "Type is required"),
   prompt: z.string().optional(),
   image: z.any().optional(),
@@ -46,7 +53,7 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: category.title || "",
-      subtitle: category.subtitle || "",
+      subtitle: toRichTextContent(category.subtitle || ""),
       type: category.type || "",
       prompt: category.prompt || "",
     },
@@ -121,7 +128,7 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
   };
 
   return (
-    <div className="relative overflow-hidden p-6 rounded-3xl">
+    <div className="relative flex max-h-[calc(92vh-4rem)] flex-col overflow-hidden rounded-3xl p-4 sm:p-6">
       {/* Animated Background Layers */}
       <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-3xl" />
       <div className="absolute inset-0 bg-linear-to-br from-[#ff7a00]/5 via-transparent to-blue-500/5" />
@@ -133,9 +140,12 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
         style={{ animationDelay: "2s" }}
       />
 
-      <div className="relative z-10">
+      <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1 custom-scrollbar">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex min-h-full flex-col gap-8"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Title Input */}
               <div className="group/field relative space-y-2">
@@ -151,7 +161,7 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
                         <Textarea
                           placeholder="e.g. Premium Selection"
                           {...field}
-                          className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-6 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
+                          className="min-h-[3rem] resize-y bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
                         />
                       </FormControl>
                       <FormMessage className="text-[10px] pt-1" />
@@ -194,12 +204,19 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
                   render={({ field }) => (
                     <FormItem className="space-y-0">
                       <FormControl>
-                        <Textarea
-                          placeholder="Brief description of the category..."
-                          {...field}
-                          className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-6 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
-                        />
+                        <div className="overflow-hidden rounded-xl border border-white/10 bg-black/40 backdrop-blur-md shadow-xl">
+                          <RichTextEditor
+                            content={field.value}
+                            onChange={(json) => field.onChange(json)}
+                            placeholder="Add the category descriptor. Bold, italic, lists, and links are supported."
+                            className="border-0 bg-transparent"
+                          />
+                        </div>
                       </FormControl>
+                      <p className="pt-2 text-[10px] text-white/45">
+                        This descriptor supports formatting and appears in
+                        category collection displays.
+                      </p>
                       <FormMessage className="text-[10px] pt-1" />
                     </FormItem>
                   )}
@@ -220,7 +237,7 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
                         <Textarea
                           placeholder="Describe this category node..."
                           {...field}
-                          className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-6 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
+                          className="min-h-[8rem] resize-y bg-black/10 backdrop-blur-md border border-white/10 rounded-xl px-4 py-4 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
                         />
                       </FormControl>
                       <FormMessage className="text-[10px] pt-1" />
@@ -320,19 +337,21 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="w-full h-14 bg-linear-to-r from-[#ff7a00] to-[#ff9d42] hover:from-[#ff8a20] hover:to-[#ffad5a] text-white font-black uppercase tracking-[0.2em] rounded-xl shadow-[0_10px_20px_-10px_rgba(255,122,0,0.5)] transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
-            >
-              {isPending ? (
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 animate-spin" /> Updating Node...
-                </div>
-              ) : (
-                "Update Category"
-              )}
-            </Button>
+            <div className="sticky bottom-0 z-20 -mx-4 mt-auto px-4 pt-4 pb-1 sm:-mx-6 sm:px-6">
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="w-full h-14 bg-linear-to-r from-[#ff7a00] to-[#ff9d42] hover:from-[#ff8a20] hover:to-[#ffad5a] text-white font-black uppercase tracking-[0.2em] rounded-xl shadow-[0_10px_20px_-10px_rgba(255,122,0,0.5)] transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
+              >
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4 animate-spin" /> Updating Node...
+                  </div>
+                ) : (
+                  "Update Category"
+                )}
+              </Button>
+            </div>
           </form>
         </Form>
       </div>

@@ -11,6 +11,7 @@ import { CategoryContent } from "@/features/category-page/types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import RichTextRenderer from "@/components/shared/RichTextRenderer";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -282,10 +283,13 @@ function StyleCard({
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">
             {category.title}
           </h2>
-          <p className="text-lg md:text-xl text-gray-500 leading-relaxed font-medium max-w-xl">
-            {category.subtitle ||
-              "Transform your photos into this distinctive artistic style. Perfect for creating memorable coloring pages with high-quality lines and details."}
-          </p>
+          <RichTextRenderer
+            content={
+              category.subtitle ||
+              "Transform your photos into this distinctive artistic style. Perfect for creating memorable coloring pages with high-quality lines and details."
+            }
+            className="max-w-xl text-gray-500 font-medium [&_.ProseMirror]:max-w-none [&_.ProseMirror]:text-lg md:[&_.ProseMirror]:text-xl [&_.ProseMirror]:leading-relaxed [&_.ProseMirror_p]:my-0 [&_.ProseMirror]:space-y-3 [&_.ProseMirror_strong]:text-gray-900"
+          />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4">

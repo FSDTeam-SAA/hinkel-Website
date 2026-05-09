@@ -64,6 +64,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUploadImage } from "@/features/dashboard/hooks/useCms";
 import { toast } from "sonner";
+import { toRichTextContent } from "@/lib/rich-text";
 
 interface RichTextEditorProps {
   content: string;
@@ -117,7 +118,7 @@ const RichTextEditor = ({
     immediatelyRender: false,
     content:
       typeof content === "string" && content
-        ? JSON.parse(content)
+        ? JSON.parse(toRichTextContent(content))
         : content || "",
     onUpdate: ({ editor }) => {
       const json = JSON.stringify(editor.getJSON());
