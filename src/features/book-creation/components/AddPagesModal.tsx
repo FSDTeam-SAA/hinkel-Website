@@ -62,7 +62,6 @@ export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
 
     try {
       const response = await confirmPayment({
-        userId: session.user.id,
         pageCount: extraCount,
         deliveryType,
         orderId: orderId,

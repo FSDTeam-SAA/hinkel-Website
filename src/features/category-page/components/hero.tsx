@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { MoveRightIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, toTitleCase } from "@/lib/utils";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import HeroSkeleton from "@/features/category-page/components/hero.skeleton";
 import { memo, useMemo } from "react";
@@ -112,13 +112,13 @@ const HeroContent = memo(
           <Badge
             variant="outline"
             className={cn(
-              "text-base px-4 py-1.5 font-semibold uppercase tracking-wider rounded-full border-2 transition-all duration-300",
+              "text-base px-4 py-1.5 font-semibold tracking-wider rounded-full border-2 transition-all duration-300",
               categoryStyle.bg,
               categoryStyle.text,
               categoryStyle.border,
             )}
           >
-            {type || heroContent?.type || "Explore"}
+            {toTitleCase(type || heroContent?.type || "Explore")}
           </Badge>
         )}
 

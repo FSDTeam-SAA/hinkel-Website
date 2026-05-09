@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { CategoryContent } from "@/features/category-page/types";
-import { cn } from "@/lib/utils";
+import { cn, toTitleCase } from "@/lib/utils";
 
 interface BookStyleSelectorProps {
   selectedType: string;
@@ -52,11 +52,11 @@ export function BookStyleSelector({
         >
           <span
             className={cn(
-              "font-bold text-lg capitalize",
+              "font-bold text-lg",
               selectedType ? "text-foreground" : "text-primary/70",
             )}
           >
-            {displayLabel}
+            {toTitleCase(displayLabel)}
           </span>
           <ChevronDown
             className={cn(
@@ -95,8 +95,8 @@ export function BookStyleSelector({
                                     >
                                         {category.title}
                                     </span> */}
-                    <span className="text-sm font-bold text-gray-900 capitalize">
-                      {category.type}
+                    <span className="text-sm font-bold text-gray-900">
+                      {toTitleCase(category.type || "")}
                     </span>
                   </button>
                 ))}

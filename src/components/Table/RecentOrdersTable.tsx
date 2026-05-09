@@ -19,6 +19,7 @@ import {
 import React, { useState } from "react";
 import { PdfViewerModal } from "../dashboard/PdfViewerModal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toTitleCase } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -202,7 +203,9 @@ const RecentOrdersTable = () => {
                       <button
                         onClick={() => {
                           setViewerUrl(order.bookThumbnail ?? null);
-                          setViewerTitle(order.title || "Coloring Book");
+                          setViewerTitle(
+                            toTitleCase(order.title || "Coloring Book"),
+                          );
                         }}
                         className="inline-flex items-center gap-1 p-2 rounded-md text-[#FF8B36] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
                         title="View Book"
@@ -383,7 +386,7 @@ const RecentOrdersTable = () => {
                       Purchased Book
                     </p>
                     <p className="text-sm font-bold text-gray-900 line-clamp-2">
-                      {selectedOrder.title || "Untitled Book"}
+                      {toTitleCase(selectedOrder.title || "Untitled Book")}
                     </p>
                     <p className="text-xs text-gray-500 mt-1 italic">
                       {selectedOrder.deliveryType}

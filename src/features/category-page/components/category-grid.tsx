@@ -16,7 +16,7 @@ import CategoryGridSkeleton from "./category-grid.skeleton";
 import type { CategoryContent } from "@/features/category-page/types";
 import HeaderTitle from "@/components/website/Common/head-title";
 import SubtitleCategory from "@/components/website/Common/SubtitleCategory";
-import { cn } from "@/lib/utils";
+import { cn, toTitleCase } from "@/lib/utils";
 
 // Types
 interface CategoryCardProps {
@@ -101,8 +101,7 @@ const CategoryCard = memo(({ category, index }: CategoryCardProps) => (
 
         {/* Category Title */}
         <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight transform translate-y-2 group-hover:translate-y-0 transition-all duration-500 delay-75">
-          {category.type &&
-            category.type.charAt(0).toUpperCase() + category.type.slice(1)}
+          {category.type && toTitleCase(category.type)}
         </h3>
 
         {/* Description / CTA */}
@@ -302,7 +301,7 @@ export function CategoryGrid() {
 
       <div className="container mx-auto relative space-y-10">
         {/* Header */}
-        <div className="text-center space-y-4 w-3xl mx-auto">
+        <div className="text-center space-y-4 max-w-2xl mx-auto">
           <HeaderTitle title={headerContent.title} />
           <SubtitleCategory subtitle={headerContent.subtitle} />
         </div>
@@ -319,7 +318,7 @@ export function CategoryGrid() {
 
           <div
             ref={containerRef}
-            className="flex gap-6 lg:gap-8 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 py-8 scroll-smooth"
+            className="flex gap-6 lg:gap-8 overflow-x-auto justify-center snap-x snap-mandatory scrollbar-hide -mx-4 px-4 py-8 scroll-smooth"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",

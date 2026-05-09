@@ -88,7 +88,7 @@ export default function StylesPage() {
               <span>{style.badgeText}</span>
             </motion.div>
 
-            <h1 className="text-6xl md:text-8xl font-black text-gray-900 mb-10 tracking-tight leading-[1.05]">
+            <h1 className="text-6xl md:text-7xl font-black text-gray-900 mb-10 tracking-tight leading-[1.05]">
               {style.title.split(" ").slice(0, -2).join(" ")} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#ff8c42] relative inline-block">
                 {style.title.split(" ").slice(-2).join(" ")}
@@ -121,7 +121,7 @@ export default function StylesPage() {
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-gray-500 leading-relaxed max-w-3xl mx-auto font-medium mb-12">
+            <p className="text-lg md:text-xl text-gray-500 leading-relaxed max-w-3xl mx-auto font-medium mb-12">
               {style.subtitle}
             </p>
           </motion.div>
@@ -155,7 +155,7 @@ export default function StylesPage() {
           </div>
 
           <div className="relative z-10 max-w-4xl mx-auto space-y-8">
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tight leading-tight">
+            <h2 className="text-4xl md:text-6xl lg:text-5xl font-black text-white tracking-tight leading-tight">
               Ready to create your masterpiece?
             </h2>
             <p className="text-gray-400 text-xl md:text-2xl font-medium max-w-2xl mx-auto">
@@ -164,7 +164,7 @@ export default function StylesPage() {
             </p>
             <div className="pt-8">
               <Link href="/create-book">
-                <Button className="bg-primary hover:bg-[#ff8c42] text-white h-20 px-16 rounded-3xl font-black text-xl md:text-2xl transition-all shadow-[0_20px_60px_rgba(244,107,49,0.4)] hover:shadow-[0_20px_80px_rgba(244,107,49,0.6)] hover:-translate-y-1 uppercase tracking-widest border-4 border-white/10">
+                <Button className="bg-primary hover:bg-[#ff8c42] text-white h-20 px-16 rounded-3xl font-black text-lg md:text-xl transition-all shadow-[0_20px_60px_rgba(244,107,49,0.4)] hover:shadow-[0_20px_80px_rgba(244,107,49,0.6)] hover:-translate-y-1 uppercase tracking-widest border-4 border-white/10">
                   Get Started Now
                 </Button>
               </Link>
@@ -216,7 +216,7 @@ function StyleCard({
           {String(index + 1).padStart(2, "0")}
         </div>
 
-        <div className="relative aspect-3/4 md:aspect-4/5 lg:aspect-16/11 w-full transform transition-transform duration-700 ease-out">
+        <div className="relative aspect-3/4 md:aspect-video lg:aspect-video w-full md:max-w-md lg:max-w-lg transform transition-transform duration-700 ease-out">
           {/* Shadow Blob */}
           <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[80%] h-[20%] bg-black/20 blur-[60px] opacity-0 group-hover:opacity-60 transition-opacity duration-700" />
 
@@ -233,6 +233,10 @@ function StyleCard({
                 alt={category.title}
                 fill
                 className="object-cover"
+                quality={40}
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
+                placeholder="empty"
               />
             </motion.div>
             <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-700" />
@@ -270,6 +274,9 @@ function StyleCard({
                   alt={`Gallery ${i}`}
                   fill
                   className="object-cover"
+                  quality={25}
+                  loading="lazy"
+                  sizes="80px"
                 />
               </button>
             ))}
@@ -280,7 +287,7 @@ function StyleCard({
       {/* Text/Content Section */}
       <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-8 md:sticky md:top-32">
         <div>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">
+          <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-6 tracking-tight leading-tight">
             {category.title}
           </h2>
           <RichTextRenderer
@@ -288,7 +295,7 @@ function StyleCard({
               category.subtitle ||
               "Transform your photos into this distinctive artistic style. Perfect for creating memorable coloring pages with high-quality lines and details."
             }
-            className="max-w-xl text-gray-500 font-medium [&_.ProseMirror]:max-w-none [&_.ProseMirror]:text-lg md:[&_.ProseMirror]:text-xl [&_.ProseMirror]:leading-relaxed [&_.ProseMirror_p]:my-0 [&_.ProseMirror]:space-y-3 [&_.ProseMirror_strong]:text-gray-900"
+            className="max-w-xl text-gray-500 font-medium leading-relaxed text-lg md:text-2xl"
           />
         </div>
 
@@ -298,11 +305,11 @@ function StyleCard({
             className="w-full sm:w-auto"
           >
             <Button className="w-full sm:w-auto bg-gray-900 hover:bg-primary text-white h-14 px-10 rounded-2xl font-black shadow-xl hover:shadow-primary/30 transition-all duration-300 text-base uppercase tracking-wider group-hover:scale-105">
-              Create with {category.type}
+              Get Started
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
-          <Link
+          {/* <Link
             href={`/category/${category.type}`}
             className="w-full sm:w-auto"
           >
@@ -312,7 +319,7 @@ function StyleCard({
             >
               Details
             </Button>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </motion.div>

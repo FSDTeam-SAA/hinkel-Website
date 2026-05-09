@@ -32,7 +32,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
+import { cn, toTitleCase } from "@/lib/utils";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import type { CategoryContent } from "@/features/category-page/types";
 
@@ -171,7 +171,7 @@ const MobileCategoryItem = memo(
       className="group flex items-center gap-3 p-3 pl-8 rounded-lg hover:bg-primary/5 transition-colors"
     >
       <span className="text-sm font-medium text-gray-700 group-hover:text-primary transition-colors">
-        {category.type?.toUpperCase()}
+        {toTitleCase(category.type || "")}
       </span>
     </Link>
   ),
@@ -224,7 +224,7 @@ const DesktopCategoryDropdown = memo(
             >
               <div className="flex flex-col">
                 <span className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
-                  {category.type?.toUpperCase()}
+                  {toTitleCase(category.type || "")}
                 </span>
               </div>
             </Link>

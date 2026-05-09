@@ -21,6 +21,7 @@ import { useDeleteCategory } from "@/features/dashboard/hooks/useCategory";
 // import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
 import EditCategory from "./EditCategory";
 import { getPlainTextFromRichText } from "@/lib/rich-text";
+import { toTitleCase } from "@/lib/utils";
 
 interface CategoryCardProps {
   category: CategoryContent;
@@ -142,8 +143,8 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
         <div className="absolute top-3 left-3 z-10">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md border border-slate-200 group-hover:border-[#ff7a00]/30 transition-colors shadow-sm">
             <Layers size={10} className="text-[#ff7a00]" />
-            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-700">
-              {category.type}
+            <span className="text-[9px] font-bold tracking-widest text-slate-700">
+              {toTitleCase(category.type || "")}
             </span>
           </div>
         </div>
@@ -153,7 +154,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
       <div className="flex-1 p-4 flex flex-col justify-between relative z-10">
         <div className="space-y-1">
           <CardTitle className="text-sm font-bold text-slate-900 tracking-wide line-clamp-1 group-hover:text-[#ff7a00] transition-colors duration-300">
-            {category.title}
+            {toTitleCase(category.title)}
           </CardTitle>
           {category.subtitle && (
             <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed font-medium">

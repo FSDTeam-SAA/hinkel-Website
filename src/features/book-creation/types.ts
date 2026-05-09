@@ -75,7 +75,6 @@ export interface calculatePriceResponse {
 }
 
 export interface ConfirmPaymentRequest {
-  userId: string;
   pageCount: number;
   deliveryType: DeliveryType;
   orderId?: string;
@@ -87,6 +86,18 @@ export interface ConfirmPaymentResponse {
   success: boolean;
   sessionUrl: string;
   orderId: string;
+}
+
+export interface CheckPaymentStatusRequest {
+  sessionId?: string;
+  orderId: string;
+}
+
+export interface CheckPaymentStatusResponse {
+  success: boolean;
+  message?: string;
+  paymentStatus?: string;
+  orderId?: string;
 }
 
 /**

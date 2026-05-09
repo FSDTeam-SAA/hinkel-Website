@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import FreeGenerationPage from "@/features/book-creation/components/free-generation-page";
 import BookSetupFormatPage from "@/features/book-creation/components/book-setup-format-page";
 import CoverPageTestPage from "@/features/book-creation/components/cover-page-test-page";
@@ -13,8 +15,11 @@ import { BookStore, BookStep } from "../types";
 
 export default function BookCreation() {
   const step = useBookStore((state: BookStore) => state.step);
-  const setStep = useBookStore((state: BookStore) => state.setStep);
   const [hydrated, setHydrated] = useState(false);
+  const { status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Ensure store is hydrated from IndexedDB
@@ -44,6 +49,21 @@ export default function BookCreation() {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (!hydrated || status !== "unauthenticated") {
+      return;
+    }
+
+    useBookStore.getState().resetBook();
+
+    const query = searchParams.toString();
+    const callbackUrl = encodeURIComponent(
+      query ? `${pathname}?${query}` : pathname,
+    );
+
+    router.replace(`/login?callbackUrl=${callbackUrl}`);
+  }, [hydrated, pathname, router, searchParams, status]);
+
   // Handle successful payment return from Stripe
   useEffect(() => {
     if (hydrated) {
@@ -55,21 +75,13 @@ export default function BookCreation() {
         if (sessionId) {
           useBookStore.getState().setStripeSessionId(sessionId);
         }
-        useBookStore.getState().setHasPaid(true);
-        // After initial payment, go to Cover step.
-        // If adding pages (current step is pages/review), stay where we are.
-        const currentStep = useBookStore.getState().step;
-        if (currentStep === "setup" || currentStep === "free-generation") {
-          setStep("cover");
-        }
 
-        // Clear params from URL without refreshing
         window.history.replaceState({}, "", "/create-book");
       }
     }
-  }, [hydrated, setStep]);
+  }, [hydrated]);
 
-  if (!hydrated) {
+  if (!hydrated || status === "loading" || status === "unauthenticated") {
     return (
       <div className="flex flex-col min-h-screen bg-background items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
