@@ -7,20 +7,30 @@ import React, { useState } from "react";
 import { useLogin } from "../hooks/uselogin";
 
 const Login = () => {
-  const { loading, error, handleLogin } = useLogin();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl =
     searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
+  const verified = searchParams.get("verified");
+  const emailFromQuery = searchParams.get("email") || "";
+
+  const { loading, error, handleLogin } = useLogin();
+  const [email, setEmail] = useState(emailFromQuery);
+  const [password, setPassword] = useState("");
+  const router = useRouter();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await handleLogin(email, password);
-    if (res && !res.error) {
-      // Redirect to callback URL (e.g., /create-book) or home
+
+    if (res?.success) {
       router.push(callbackUrl);
+      return;
+    }
+
+    if (res?.verification) {
+      router.push(
+        `/verify-email?email=${encodeURIComponent(res.verification.email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
+      );
     }
   };
 
@@ -50,6 +60,11 @@ const Login = () => {
 
         {/* Form */}
         <form className="space-y-4" onSubmit={onSubmit}>
+          {verified === "1" && (
+            <div className="bg-emerald-50 text-emerald-700 p-3 rounded-md text-sm text-center">
+              Your email has been verified. You can sign in now.
+            </div>
+          )}
           {error && (
             <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm text-center">
               {error}

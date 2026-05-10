@@ -17,42 +17,44 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email and password are required");
         }
 
-        try {
-          const res = await fetch(`${baseUrl}/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
+        const res = await fetch(`${baseUrl}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            JSON.stringify({
+              status: res.status,
+              message: data.message || "Login failed",
+              data: data.data || null,
             }),
-          });
-
-          const data = await res.json();
-
-          if (!res.ok) {
-            throw new Error(data.message || "Login failed");
-          }
-
-          const user = data.data?.user;
-          const accessToken = data.data?.accessToken;
-
-          if (!user || !accessToken) {
-            throw new Error("Invalid response from server");
-          }
-
-          return {
-            id: user._id || user.id,
-            name: user.name,
-            email: user.email,
-            image: user.profileImage,
-            role: user.role,
-            token: accessToken,
-            refreshToken: user.refreshToken,
-          };
-        } catch (error) {
-          console.error("Authorize error:", error);
-          throw new Error("Invalid email or password");
+          );
         }
+
+        const user = data.data?.user;
+        const accessToken = data.data?.accessToken;
+        const refreshToken = data.data?.refreshToken;
+
+        if (!user || !accessToken || !refreshToken) {
+          throw new Error("Invalid response from server");
+        }
+
+        return {
+          id: user._id || user.id,
+          name: user.name,
+          email: user.email,
+          image: user.profileImage,
+          role: user.role,
+          token: accessToken,
+          refreshToken,
+        };
       },
     }),
   ],

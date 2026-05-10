@@ -58,7 +58,7 @@ describe("Login Component", () => {
   });
 
   it("calls handleLogin and redirects on success", async () => {
-    mockHandleLogin.mockResolvedValue({ error: null });
+    mockHandleLogin.mockResolvedValue({ success: true });
     render(<Login />);
 
     fireEvent.change(screen.getByLabelText(/email address/i), {
@@ -88,6 +88,36 @@ describe("Login Component", () => {
 
     render(<Login />);
     expect(screen.getByText("Invalid credentials")).toBeInTheDocument();
+  });
+
+  it("redirects to verify-email when login requires verification", async () => {
+    mockHandleLogin.mockResolvedValue({
+      success: false,
+      message: "Please verify your email before logging in",
+      verification: {
+        verificationRequired: true,
+        email: "test@example.com",
+        maskedEmail: "te***@example.com",
+        expiresInMinutes: 15,
+        resendCooldownSeconds: 60,
+      },
+    });
+
+    render(<Login />);
+
+    fireEvent.change(screen.getByLabelText(/email address/i), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith(
+        expect.stringContaining("/verify-email?email=test%40example.com"),
+      );
+    });
   });
 
   it("disables button while loading", () => {
