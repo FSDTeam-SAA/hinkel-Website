@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { MoveRightIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, toTitleCase } from "@/lib/utils";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import HeroSkeleton from "@/features/category-page/components/hero.skeleton";
 import { memo, useMemo } from "react";
 import { CategoryContent } from "@/features/category-page/api/category.api";
 import { useRouter } from "next/navigation";
+import RichTextRenderer from "@/components/shared/RichTextRenderer";
 
 // Types
 interface HeroProps {
@@ -111,13 +112,13 @@ const HeroContent = memo(
           <Badge
             variant="outline"
             className={cn(
-              "text-base px-4 py-1.5 font-semibold uppercase tracking-wider rounded-full border-2 transition-all duration-300",
+              "text-base px-4 py-1.5 font-semibold tracking-wider rounded-full border-2 transition-all duration-300",
               categoryStyle.bg,
               categoryStyle.text,
               categoryStyle.border,
             )}
           >
-            {type || heroContent?.type || "Explore"}
+            {toTitleCase(type || heroContent?.type || "Explore")}
           </Badge>
         )}
 
@@ -125,9 +126,10 @@ const HeroContent = memo(
           {heroContent?.title || DEFAULT_CONTENT.title}
         </h1>
 
-        <p className="text-base md:text-lg text-gray-600 max-w-2xl leading-relaxed">
-          {heroContent?.subtitle || DEFAULT_CONTENT.subtitle}
-        </p>
+        <RichTextRenderer
+          content={heroContent?.subtitle || DEFAULT_CONTENT.subtitle}
+          className="max-w-2xl text-gray-600 [&_.ProseMirror]:max-w-none [&_.ProseMirror]:text-base md:[&_.ProseMirror]:text-lg [&_.ProseMirror]:leading-relaxed [&_.ProseMirror_p]:my-0 [&_.ProseMirror]:space-y-3 [&_.ProseMirror_strong]:text-gray-900"
+        />
 
         <Button
           size="lg"

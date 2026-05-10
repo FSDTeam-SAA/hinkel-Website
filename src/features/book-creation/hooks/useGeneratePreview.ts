@@ -8,10 +8,19 @@ import { generatePreview as generatePreviewApi } from "../api/generate-preview.a
  */
 export function useGeneratePreview() {
   const mutation = useMutation({
-    mutationFn: async ({ image, type }: { image: string; type?: string }) => {
+    mutationFn: async ({
+      image,
+      type,
+      prompt,
+    }: {
+      image: string;
+      type?: string;
+      prompt?: string;
+    }) => {
       const response = await generatePreviewApi({
         image,
         type: type || "kids",
+        prompt,
       });
 
       console.log("Generate Preview Response:", response);
@@ -32,9 +41,13 @@ export function useGeneratePreview() {
     },
   });
 
-  const generatePreview = async (image: string, type?: string) => {
+  const generatePreview = async (
+    image: string,
+    type?: string,
+    prompt?: string,
+  ) => {
     try {
-      return await mutation.mutateAsync({ image, type });
+      return await mutation.mutateAsync({ image, type, prompt });
     } catch (error) {
       console.error("Generate preview error:", error);
       return null;

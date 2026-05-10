@@ -1,5 +1,10 @@
 import { api } from "@/lib/api";
-import { UploadBookRequest, UploadBookResponse } from "../types";
+import {
+  CheckPaymentStatusRequest,
+  CheckPaymentStatusResponse,
+  UploadBookRequest,
+  UploadBookResponse,
+} from "../types";
 
 export const uploadBook = async (
   data: UploadBookRequest,
@@ -17,5 +22,12 @@ export const uploadBook = async (
       "Content-Type": "multipart/form-data",
     },
   });
+  return response.data;
+};
+
+export const checkPaymentStatus = async (
+  data: CheckPaymentStatusRequest,
+): Promise<CheckPaymentStatusResponse> => {
+  const response = await api.post("/order/check-payment-status", data);
   return response.data;
 };

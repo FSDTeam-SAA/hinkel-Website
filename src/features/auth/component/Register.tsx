@@ -24,9 +24,14 @@ const Register = () => {
       str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     const name = `${capitalize(firstName)} ${capitalize(lastName)}`;
     const res = await handleRegister(name, email, password);
-    if (res && !res.error) {
-      toast.success("Account created successfully!");
-      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+
+    if (res?.status && res.data?.email) {
+      toast.success(
+        res.message || "Account created. Please verify your email.",
+      );
+      router.push(
+        `/verify-email?email=${encodeURIComponent(res.data.email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
+      );
     }
   };
 

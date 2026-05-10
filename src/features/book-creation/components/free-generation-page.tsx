@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import { BookStyleSelector } from "./BookStyleSelector";
 import { AuthPromptModal } from "./auth-prompt-modal";
 import Image from "next/image";
-
-const MAX_FREE_GENERATIONS = 2;
+import { getCategoryPromptForType } from "../utils/prompt";
+import { GENERATION_LIMITS } from "../types";
 
 export default function FreeGenerationPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -55,6 +55,7 @@ export default function FreeGenerationPage() {
 
   const { data: contentData } = useContent({ limit: 12 });
   const categories = contentData?.data || [];
+  const selectedStylePrompt = getCategoryPromptForType(categories, bookType);
 
   const freeGenerationsUsed = generationCounts.cover;
   const canGenerate = isAdmin || canGenerateCover();
@@ -127,13 +128,17 @@ export default function FreeGenerationPage() {
 
     if (!isAdmin && !canGenerateCover()) {
       toast.error(
-        `You've used all ${MAX_FREE_GENERATIONS} free previews. Click "Continue to Book Setup" to proceed!`,
+        `You have used all ${GENERATION_LIMITS.MAX_COVER} free cover tries. Continue to book setup to keep building your book.`,
       );
       setIsModalOpen(false);
       return;
     }
 
-    const previewResult = await generatePreview(pendingImage, bookType);
+    const previewResult = await generatePreview(
+      pendingImage,
+      bookType,
+      selectedStylePrompt,
+    );
 
     if (previewResult) {
       incrementCoverGeneration();
@@ -153,7 +158,7 @@ export default function FreeGenerationPage() {
       toast.success(
         isAdmin
           ? "👑 Admin: Sketch generated!"
-          : `Sketch ${used}/${MAX_FREE_GENERATIONS} generated!`,
+          : `Cover option ${used} of ${GENERATION_LIMITS.MAX_COVER} is ready. Pick the one you like best.`,
       );
 
       setIsModalOpen(false);
@@ -179,8 +184,9 @@ export default function FreeGenerationPage() {
               See Your Photos as Sketches
             </h1>
             <p className="text-lg text-muted-foreground">
-              Generate up to {MAX_FREE_GENERATIONS} free sketch previews — no
-              payment required.
+              Try up to {GENERATION_LIMITS.MAX_COVER} free cover ideas before
+              payment. We&apos;ll help you choose your favorite and then
+              continue to book setup.
             </p>
           </div>
 
@@ -191,25 +197,48 @@ export default function FreeGenerationPage() {
           />
 
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-border">
+            <div className="mb-6 rounded-2xl border border-orange-100 bg-orange-50 p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-orange-900">
+                    You get {GENERATION_LIMITS.MAX_COVER} free tries to find the
+                    perfect cover
+                  </p>
+                  <p className="text-xs sm:text-sm text-orange-700 mt-1">
+                    Upload a photo, review each sketch, and choose the one that
+                    feels right before you pay.
+                  </p>
+                </div>
+                {!isAdmin && (
+                  <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-orange-700 shadow-sm">
+                    {freeGenerationsUsed} of {GENERATION_LIMITS.MAX_COVER} tries
+                    used
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Generation counter header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
               <h2 className="text-xl font-bold text-foreground">
                 {isAdmin ? "Generate Sketches (Admin)" : "Free Sketch Previews"}
               </h2>
               {!isAdmin && (
-                <div className="flex items-center gap-2">
-                  {Array.from({ length: MAX_FREE_GENERATIONS }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-3 h-3 rounded-full transition-all ${
-                        i < freeGenerationsUsed
-                          ? "bg-orange-500"
-                          : "bg-gray-200"
-                      }`}
-                    />
-                  ))}
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  {Array.from({ length: GENERATION_LIMITS.MAX_COVER }).map(
+                    (_, i) => (
+                      <div
+                        key={i}
+                        className={`w-3 h-3 rounded-full transition-all ${
+                          i < freeGenerationsUsed
+                            ? "bg-orange-500"
+                            : "bg-gray-200"
+                        }`}
+                      />
+                    ),
+                  )}
                   <span className="text-sm font-semibold text-gray-500">
-                    {freeGenerationsUsed}/{MAX_FREE_GENERATIONS} used
+                    {freeGenerationsUsed}/{GENERATION_LIMITS.MAX_COVER} used
                   </span>
                 </div>
               )}
@@ -249,8 +278,8 @@ export default function FreeGenerationPage() {
               >
                 <ArrowUpFromLine className="w-5 h-5" />
                 {canGenerate || isAdmin
-                  ? "Upload Photo to Generate Sketch"
-                  : `${MAX_FREE_GENERATIONS}/${MAX_FREE_GENERATIONS} Free Sketches Used — Continue Below`}
+                  ? "Upload Photo for a Cover Try"
+                  : `${GENERATION_LIMITS.MAX_COVER}/${GENERATION_LIMITS.MAX_COVER} Cover Tries Used — Continue Below`}
               </div>
             </label>
 
@@ -258,7 +287,7 @@ export default function FreeGenerationPage() {
             {coverImageVariants.length > 0 && (
               <div className="mt-8">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
-                  Your Generated Sketches — Pick Your Favourite
+                  Your Cover Options — Pick Your Favourite
                 </p>
                 <div
                   className={`grid gap-4 ${
@@ -301,7 +330,7 @@ export default function FreeGenerationPage() {
 
             {/* How-it-works row (only before any generation) */}
             {coverImageVariants.length === 0 && (
-              <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-border">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-border">
                 <div className="text-center">
                   <div className="text-2xl mb-2">📷</div>
                   <p className="text-sm font-medium text-foreground">
@@ -338,7 +367,7 @@ export default function FreeGenerationPage() {
             <button
               onClick={() => setStep("setup")}
               className={cn(
-                "flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-base transition-all h-14",
+                "w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-base transition-all h-14",
                 coverImageVariants.length > 0
                   ? "bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200",

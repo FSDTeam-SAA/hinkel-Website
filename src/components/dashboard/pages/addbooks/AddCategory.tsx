@@ -26,10 +26,18 @@ import { ImagePlus, Type, Layers, Zap, X, Plus } from "lucide-react";
 import Image from "next/image";
 import { useCreateCategory } from "@/features/dashboard/hooks/useCategory";
 import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/dashboard/editor/RichTextEditor";
+import { getPlainTextFromRichText, toRichTextContent } from "@/lib/rich-text";
+import { normalizePrompt } from "@/features/book-creation/utils/prompt";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title is required"),
-  subtitle: z.string().min(2, "Subtitle is required"),
+  subtitle: z
+    .string()
+    .refine(
+      (value) => getPlainTextFromRichText(value).trim().length >= 2,
+      "Subtitle is required",
+    ),
   type: z.string().min(2, "Type is required (e.g., adult, pet)"),
   prompt: z.string().optional(),
   image: z.any().refine((file) => file?.length > 0, "Image is required"),
@@ -48,17 +56,22 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { title: "", subtitle: "", type: "", prompt: "" },
+    defaultValues: {
+      title: "",
+      subtitle: toRichTextContent(""),
+      type: "",
+      prompt: "",
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
+    const normalizedPrompt = normalizePrompt(values.prompt);
+
     formData.append("title", values.title);
     formData.append("subtitle", values.subtitle);
     formData.append("type", values.type);
-    if (values.prompt) {
-      formData.append("prompt", values.prompt);
-    }
+    formData.append("prompt", normalizedPrompt);
     formData.append("image", values.image[0]);
 
     if (values.gallery && values.gallery.length > 0) {
@@ -155,10 +168,10 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-[#0f1117] border-white/10 text-white rounded-[2rem]">
+      <DialogContent className="flex max-h-[92vh] w-[min(96vw,72rem)] flex-col overflow-hidden rounded-[2rem] border-white/10 bg-[#0f1117] p-0 text-white">
         <div className="absolute inset-0 bg-gradient-to-br from-[#ff7a00]/5 via-transparent to-blue-500/5 pointer-events-none" />
 
-        <DialogHeader className="px-8 pt-8 pb-4 relative z-10 border-b border-white/5 space-y-1">
+        <DialogHeader className="relative z-10 space-y-1 border-b border-white/5 px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
           <DialogTitle className="text-2xl font-black uppercase tracking-wider flex items-center gap-3">
             <div className="p-2 rounded-lg bg-[#ff7a00] text-white">
               <Layers size={20} />
@@ -170,9 +183,12 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
           </p>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[80vh] px-8 py-6 relative z-10 custom-scrollbar">
+        <div className="relative z-10 min-h-0 flex-1 overflow-y-auto px-6 py-6 custom-scrollbar sm:px-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex min-h-full flex-col gap-10"
+            >
               {/* Section 1: Core Identity */}
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
@@ -196,7 +212,7 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
                           <Textarea
                             placeholder="e.g. Premium Selection"
                             {...field}
-                            className="h-12 bg-white/5 border-white/10 rounded-xl px-4 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-[#ff7a00] focus-visible:border-[#ff7a00]/50 transition-all font-medium"
+                            className="min-h-[3rem] resize-y bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-[#ff7a00] focus-visible:border-[#ff7a00]/50 transition-all font-medium"
                           />
                         </FormControl>
                         <FormMessage className="text-[10px] text-red-400 font-medium" />
@@ -235,12 +251,19 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
                           Descriptor
                         </label>
                         <FormControl>
-                          <Textarea
-                            placeholder="Brief description of the category..."
-                            {...field}
-                            className="min-h-[40px] max-h-[150px] bg-white/5 border-white/10 rounded-xl px-4 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-[#ff7a00] focus-visible:border-[#ff7a00]/50 transition-all font-medium"
-                          />
+                          <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                            <RichTextEditor
+                              content={field.value}
+                              onChange={(json) => field.onChange(json)}
+                              placeholder="Add the category descriptor. Bold, italic, lists, and links are supported."
+                              className="border-0 bg-transparent"
+                            />
+                          </div>
                         </FormControl>
+                        <p className="px-1 text-[10px] font-medium text-white/35">
+                          This text appears in category collections and detail
+                          pages.
+                        </p>
                         <FormMessage className="text-[10px] text-red-400 font-medium" />
                       </FormItem>
                     )}
@@ -269,7 +292,7 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
                         <textarea
                           {...field}
                           placeholder="Define the generation logic..."
-                          className="w-full min-h-[40px] max-h-[150px] bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/20 focus:ring-1 focus:ring-[#ff7a00] focus:border-[#ff7a00]/50 outline-none transition-all resize-none text-sm font-medium leading-relaxed"
+                          className="w-full min-h-[8rem] resize-y bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/20 focus:ring-1 focus:ring-[#ff7a00] focus:border-[#ff7a00]/50 outline-none transition-all text-sm font-medium leading-relaxed"
                         />
                       </FormControl>
                     </FormItem>
@@ -395,22 +418,24 @@ const AddCategory = ({ trigger }: AddCategoryProps) => {
               </div>
 
               {/* Submission Layer */}
-              <div className="pt-6 border-t border-white/10 flex items-center justify-end gap-4">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="text-white/50 hover:text-white hover:bg-white/5"
-                  onClick={() => setOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isPending}
-                  className="bg-[#ff7a00] hover:bg-[#ff9d42] text-white font-bold uppercase tracking-widest px-8 py-6 rounded-xl"
-                >
-                  {isPending ? "Processing..." : "Create Category"}
-                </Button>
+              <div className="sticky bottom-0 z-20 -mx-6 mt-auto border-t border-white/10 bg-[#0f1117]/95 px-6 pt-6 pb-1 backdrop-blur sm:-mx-8 sm:px-8">
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-white/50 hover:text-white hover:bg-white/5"
+                    onClick={() => setOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    className="bg-[#ff7a00] hover:bg-[#ff9d42] text-white font-bold uppercase tracking-widest px-8 py-6 rounded-xl"
+                  >
+                    {isPending ? "Processing..." : "Create Category"}
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>

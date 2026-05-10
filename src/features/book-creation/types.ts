@@ -5,6 +5,7 @@
 export interface GeneratePreviewRequest {
   image: string; // Base64 encoded image
   type: string;
+  prompt?: string;
 }
 
 export interface GeneratePreviewResponse {
@@ -75,12 +76,13 @@ export interface calculatePriceResponse {
 }
 
 export interface ConfirmPaymentRequest {
-  userId: string;
   pageCount: number;
   deliveryType: DeliveryType;
   orderId?: string;
   bookType?: string;
   couponCode?: string;
+  checkoutIntent?: CheckoutIntent;
+  resumeStep?: BookStep;
 }
 
 export interface ConfirmPaymentResponse {
@@ -88,6 +90,20 @@ export interface ConfirmPaymentResponse {
   sessionUrl: string;
   orderId: string;
 }
+
+export interface CheckPaymentStatusRequest {
+  sessionId?: string;
+  orderId?: string;
+}
+
+export interface CheckPaymentStatusResponse {
+  success: boolean;
+  message?: string;
+  paymentStatus?: string;
+  orderId?: string;
+}
+
+export type CheckoutIntent = "initial_checkout" | "add_pages_checkout";
 
 /**
  * Book Creation Flow Types
@@ -133,6 +149,7 @@ export interface BookState {
   // Step tracking
   step: BookStep;
   returnStep: BookStep | null; // For mid-flow preview navigation
+  isHydrated: boolean;
 
   // Book metadata
   bookTitle: string;
@@ -161,6 +178,8 @@ export interface BookState {
   orderId: string | null;
   stripeSessionId: string | null;
   pendingPageCount: number | null;
+  pendingCheckoutIntent: CheckoutIntent | null;
+  pendingResumeStep: BookStep | null;
 }
 
 /**
@@ -170,6 +189,7 @@ export interface BookActions {
   // Navigation
   setStep: (step: BookStep) => void;
   setReturnStep: (step: BookStep | null) => void;
+  setHydrated: (hydrated: boolean) => void;
 
   // Book setup
   setBookTitle: (title: string) => void;
@@ -213,7 +233,10 @@ export interface BookActions {
   setOrderId: (orderId: string | null) => void;
   setStripeSessionId: (id: string | null) => void;
   setPendingPageCount: (count: number | null) => void;
+  setPendingCheckoutIntent: (intent: CheckoutIntent | null) => void;
+  setPendingResumeStep: (step: BookStep | null) => void;
   setBookType: (type: string) => void;
+  normalizeStep: () => void;
 
   // Reset state
   resetBook: () => void;
@@ -238,7 +261,7 @@ export const FILE_VALIDATION = {
  */
 export const GENERATION_LIMITS = {
   MAX_PER_PAGE: 3,
-  MAX_COVER: 3,
+  MAX_COVER: 2,
 } as const;
 
 /**

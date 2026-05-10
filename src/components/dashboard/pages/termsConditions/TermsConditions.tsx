@@ -59,7 +59,6 @@ const TermsConditions = () => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [termsToDelete, setTermsToDelete] = useState<string | null>(null);
-
   // Check if a policy already exists
   const existingTerms =
     termsData?.data && termsData.data.length > 0 ? termsData.data[0] : null;
@@ -76,11 +75,16 @@ const TermsConditions = () => {
   useEffect(() => {
     if (existingTerms) {
       form.reset({
-        title: existingTerms.title,
-        content: existingTerms.content,
+        title: existingTerms.title || "",
+        content: existingTerms.content || "",
       });
     }
   }, [existingTerms, form]);
+
+  const handleEditorChange = (value: string) => {
+    form.setValue("content", value);
+    form.trigger("content");
+  };
 
   const onSubmit = (data: TermsConditionsSchemaType) => {
     if (isEditMode && existingTerms) {
@@ -255,11 +259,15 @@ const TermsConditions = () => {
                       Terms Content
                     </FormLabel>
                     <span className="text-xs text-slate-400">
-                      Supports rich text formatting
+                      Supports rich text formatting, spacing, and styling
                     </span>
                   </div>
                   <FormControl>
-                    <Editor value={field.value} onChange={field.onChange} />
+                    <Editor
+                      value={field.value}
+                      onChange={handleEditorChange}
+                      placeholder="Write your terms and conditions content here..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

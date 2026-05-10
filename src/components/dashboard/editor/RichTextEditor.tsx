@@ -64,6 +64,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUploadImage } from "@/features/dashboard/hooks/useCms";
 import { toast } from "sonner";
+import { toRichTextContent } from "@/lib/rich-text";
 
 interface RichTextEditorProps {
   content: string;
@@ -117,7 +118,7 @@ const RichTextEditor = ({
     immediatelyRender: false,
     content:
       typeof content === "string" && content
-        ? JSON.parse(content)
+        ? JSON.parse(toRichTextContent(content))
         : content || "",
     onUpdate: ({ editor }) => {
       const json = JSON.stringify(editor.getJSON());
@@ -127,7 +128,7 @@ const RichTextEditor = ({
     editorProps: {
       attributes: {
         class:
-          "prose prose-invert prose-sm sm:prose mx-auto focus:outline-none min-h-[150px] p-4",
+          "editor-prose prose prose-invert prose-sm sm:prose mx-auto focus:outline-none min-h-[150px] p-4",
       },
       handleDrop: (view, event, _slice, moved) => {
         if (!moved && event.dataTransfer?.files?.length) {
@@ -239,6 +240,21 @@ const RichTextEditor = ({
       className={`border border-white/10 rounded-xl overflow-hidden bg-white/5 ${className} `}
     >
       <style>{`
+        .editor-prose ul,
+        .editor-prose ol {
+          margin-block: 1em;
+          padding-left: 1.35em;
+        }
+        .editor-prose li {
+          margin-block: 0.35em;
+          padding-left: 0.2em;
+        }
+        .editor-prose li > p {
+          margin: 0;
+        }
+        .editor-prose li > p + p {
+          margin-top: 0.45em;
+        }
         .prose table {
           border-collapse: collapse;
           table-layout: fixed;

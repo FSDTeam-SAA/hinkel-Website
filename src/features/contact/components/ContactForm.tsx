@@ -224,30 +224,35 @@ const PrivacyPolicyField = memo(() => (
   <FormField
     name="privacyPolicy"
     render={({ field }) => (
-      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-        <FormControl>
-          <Checkbox
-            checked={field.value}
-            onCheckedChange={field.onChange}
-            className="mt-1 border-slate-200 data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
-            aria-label="Accept privacy policy"
-          />
-        </FormControl>
-        <div className="leading-none">
-          <FormLabel className="text-slate-600 font-normal cursor-pointer">
-            Please check the box to confirm you agree to our{" "}
-            <Link
-              href="/privacy-policy"
-              className="underline hover:text-orange-600 transition-colors"
-              target="_blank"
-              rel="noopener noreferrer"
-              prefetch
-            >
-              privacy policy.
-            </Link>
-          </FormLabel>
-          {/* <FormMessage /> */}
+      <FormItem>
+        <div className="flex flex-row items-start space-x-3 space-y-0">
+          <FormControl>
+            <Checkbox
+              checked={field.value}
+              onCheckedChange={(checked) => field.onChange(checked === true)}
+              onBlur={field.onBlur}
+              name={field.name}
+              ref={field.ref}
+              className="mt-1 border-slate-200 data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
+              aria-label="Accept privacy policy"
+            />
+          </FormControl>
+          <div className="leading-none">
+            <FormLabel className="text-slate-600 font-normal cursor-pointer">
+              Please check the box to confirm you agree to our{" "}
+              <Link
+                href="/privacy-policy"
+                className="underline hover:text-orange-600 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+                prefetch
+              >
+                privacy policy.
+              </Link>
+            </FormLabel>
+          </div>
         </div>
+        <FormMessage />
       </FormItem>
     )}
   />

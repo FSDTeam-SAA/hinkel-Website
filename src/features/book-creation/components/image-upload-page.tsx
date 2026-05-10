@@ -6,14 +6,14 @@ import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
 import {
   Upload,
-  X,
   Loader2,
   Wand2,
-  CheckCircle2,
   Eye,
   Plus,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
+  ImagePlus,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
@@ -26,6 +26,8 @@ import { useGeneratePreview } from "../hooks/useGeneratePreview";
 import { generateBookPdf } from "../utils/pdf-generator";
 import { cn } from "@/lib/utils";
 import AddPagesModal from "./AddPagesModal";
+import { useContent } from "@/features/category-page/hooks/use-content";
+import { getCategoryPromptForType } from "../utils/prompt";
 
 export default function ImageUploadPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -38,10 +40,8 @@ export default function ImageUploadPage() {
     pageImages,
     uploadedPageImages,
     addUploadedPageImage,
-    removeUploadedPageImage,
     convertedPageImages,
     addConvertedPageImage,
-    removeConvertedPageImage,
     pageTexts,
     updatePageText,
     incrementPageGeneration,
@@ -61,6 +61,9 @@ export default function ImageUploadPage() {
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const state = useBookStore();
   const { generatePreview, loading: isConverting } = useGeneratePreview();
+  const { data: contentData } = useContent({ limit: 12 });
+  const categories = contentData?.data || [];
+  const selectedStylePrompt = getCategoryPromptForType(categories, bookType);
 
   const steps = ["Setup & Pay", "Cover", "Dedication", "Pages", "Review"];
   const currentStep = 3;
@@ -88,10 +91,9 @@ export default function ImageUploadPage() {
   const totalPages = pageCount + (includeDedicationPage ? 1 : 0);
 
   const handleConvertToLineArt = async (pageNum: number, image: string) => {
-    // Check daily conversion limit (Admins have unlimited)
     if (!isAdmin && !canGeneratePage(pageNum)) {
       toast.error(
-        "Daily conversion limit reached! You can only convert one image for free every 24 hours. Complete your book creation to reset this limit, or try again tomorrow.",
+        `You have already used all ${GENERATION_LIMITS.MAX_PER_PAGE} tries for this page. Please choose the image you like best.`,
       );
       return;
     }
@@ -99,17 +101,15 @@ export default function ImageUploadPage() {
     toast.info("Converting to line art...");
 
     try {
-      const lineArtImage = await generatePreview(image, bookType);
+      const lineArtImage = await generatePreview(
+        image,
+        bookType,
+        selectedStylePrompt,
+      );
 
       if (lineArtImage) {
         // Increment generation count BEFORE adding the image
         incrementPageGeneration(pageNum);
-
-        // Find and remove the original uploaded image
-        const uploadIndex = (uploadedPageImages[pageNum] || []).indexOf(image);
-        if (uploadIndex !== -1) {
-          removeUploadedPageImage(pageNum, uploadIndex);
-        }
 
         addConvertedPageImage(pageNum, lineArtImage);
 
@@ -121,7 +121,10 @@ export default function ImageUploadPage() {
             "👑 Admin: Image converted successfully (Unlimited access)!",
           );
         } else {
-          toast.success("Image converted!");
+          const triesUsed = getPageGenerationCount(pageNum) + 1;
+          toast.success(
+            `Option ${triesUsed} of ${GENERATION_LIMITS.MAX_PER_PAGE} is ready. Compare the results and keep the one you love best.`,
+          );
         }
       } else {
         toast.error("Failed to convert image. Please try again.");
@@ -207,54 +210,6 @@ export default function ImageUploadPage() {
     }
   };
 
-  const handleRemoveUploadedImage = (pageNum: number, index: number) => {
-    const image = uploadedPageImages[pageNum]?.[index];
-    removeUploadedPageImage(pageNum, index);
-
-    // If the removed image was the selected one, clear or select another
-    if (pageImages[pageNum] === image) {
-      const remainingImages =
-        uploadedPageImages[pageNum]?.filter(
-          (_: string, i: number) => i !== index,
-        ) || [];
-      if (remainingImages.length > 0) {
-        updatePageImage(pageNum, remainingImages[0]);
-      } else {
-        // Fallback to conversions if any
-        const conversions = convertedPageImages[pageNum] || [];
-        if (conversions.length > 0) {
-          updatePageImage(pageNum, conversions[0]);
-        } else {
-          updatePageImage(pageNum, "");
-        }
-      }
-    }
-  };
-
-  const handleRemoveConvertedImage = (pageNum: number, index: number) => {
-    const image = convertedPageImages[pageNum]?.[index];
-    removeConvertedPageImage(pageNum, index);
-
-    // If the removed image was the selected one, clear or select another
-    if (pageImages[pageNum] === image) {
-      const remainingConversions =
-        convertedPageImages[pageNum]?.filter(
-          (_: string, i: number) => i !== index,
-        ) || [];
-      if (remainingConversions.length > 0) {
-        updatePageImage(pageNum, remainingConversions[0]);
-      } else {
-        // Check if there are uploaded images to fall back to
-        const uploaded = uploadedPageImages[pageNum] || [];
-        if (uploaded.length > 0) {
-          updatePageImage(pageNum, uploaded[0]);
-        } else {
-          updatePageImage(pageNum, "");
-        }
-      }
-    }
-  };
-
   const handleSelectImage = (pageNum: number, image: string) => {
     updatePageImage(pageNum, image);
   };
@@ -266,9 +221,30 @@ export default function ImageUploadPage() {
   const generationsUsed = getPageGenerationCount(currentPage);
   const hasMaxGenerations = !canGeneratePage(currentPage);
   const maxConversions = GENERATION_LIMITS.MAX_PER_PAGE;
+  const triesLeft = Math.max(0, maxConversions - generationsUsed);
+  const hasGeneratedOptions = currentConvertedImages.length > 0;
 
   // The active image for the current page from the store
   const activeImage = pageImages[currentPage] || null;
+
+  // const pageReady = Boolean(activeImage) && hasGeneratedOptions;
+  // const workflowSteps = [
+  //   {
+  //     title: "Upload a source image",
+  //     description: "Start with a clean photo or illustration for this page.",
+  //     complete: currentUploadedImages.length > 0,
+  //   },
+  //   {
+  //     title: "Generate sketch options",
+  //     description: "Turn the active source into printable sketch variations.",
+  //     complete: currentConvertedImages.length > 0,
+  //   },
+  //   {
+  //     title: "Choose your favorite",
+  //     description: "Keep the best option selected before moving forward.",
+  //     complete: pageReady,
+  //   },
+  // ];
 
   // Check if the currently active image is one that can be converted (i.e., it's an upload)
   const isConvertible =
@@ -300,7 +276,7 @@ export default function ImageUploadPage() {
   // ).some((pageNum) => !pageImages[pageNum]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[linear-gradient(180deg,#fffaf4_0%,#ffffff_32%,#fffdf9_100%)]">
       <StepIndicator
         steps={steps}
         currentStep={currentStep}
@@ -325,240 +301,354 @@ export default function ImageUploadPage() {
         </div>
       )}
 
-      <div className="flex-1 max-w-6xl mx-auto w-full px-4 py-6 md:py-12">
-        <div className="bg-white rounded-2xl shadow-sm p-4 md:p-8 lg:p-12">
-          {/* Page selector */}
-          <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-hide">
-            {Array.from({ length: totalPages }).map((_, index) => {
-              const pageNum = index + 1;
-              const pageImg = pageImages[pageNum];
-              const isPageComplete =
-                (convertedPageImages[pageNum] || []).length >= 3;
+      <div className="mx-auto flex-1 w-full max-w-7xl px-4 py-5 md:px-6 md:py-10 xl:px-8">
+        <div className="overflow-hidden rounded-[32px] border border-stone-200/80 bg-white/95 p-4 shadow-[0_24px_70px_-40px_rgba(15,23,42,0.35)] backdrop-blur-sm md:p-8 lg:p-10">
+          {/* <div className="mb-8 flex flex-col gap-4 md:mb-10 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <span className="inline-flex w-fit items-center rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-orange-700">
+                Page creation
+              </span>
+              <div className="space-y-2">
+                <h1 className="text-2xl font-black tracking-tight text-stone-900 md:text-4xl">
+                  Build each page with more space and less guesswork
+                </h1>
+                <p className="max-w-2xl text-sm leading-7 text-stone-600 md:text-base">
+                  Upload a source image, generate sketch options, and keep the
+                  best version selected. The workspace is streamlined so your
+                  actions and results stay visible on every screen size.
+                </p>
+              </div>
+            </div>
 
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={`relative min-w-[64px] h-[64px] rounded-xl border-2 transition-all overflow-hidden flex items-center justify-center group ${
-                    currentPage === pageNum
-                      ? "border-primary ring-4 ring-primary/10 shadow-lg scale-105"
-                      : pageImg
-                        ? "border-gray-200 hover:border-primary/50"
-                        : "border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50"
-                  }`}
-                >
-                  {pageImg ? (
-                    <>
-                      <Image
-                        src={pageImg}
-                        alt={`Page ${pageNum}`}
-                        fill
-                        className="object-cover transition-transform group-hover:scale-110"
-                      />
-                      <div
-                        className={`absolute inset-0 bg-black/10 transition-opacity ${currentPage === pageNum ? "opacity-0" : "group-hover:opacity-0"}`}
-                      />
+            <div className="grid grid-cols-2 gap-3 sm:w-fit">
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 shadow-sm">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700">
+                  Current page
+                </p>
+                <p className="mt-1 text-2xl font-black text-emerald-950">
+                  {currentPage}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 shadow-sm">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
+                  Tries used
+                </p>
+                <p className="mt-1 text-2xl font-black text-stone-900">
+                  {isAdmin ? "∞" : `${generationsUsed}/${maxConversions}`}
+                </p>
+              </div>
+            </div>
+          </div> */}
+
+          {/* Page selector */}
+          <div className="mb-8 overflow-x-auto rounded-[28px] border border-stone-200 bg-stone-50/80 p-3 pb-4 shadow-inner shadow-stone-100 scrollbar-hide md:mb-10">
+            <div className="mb-3 flex items-center justify-between gap-3 px-1">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">
+                  Pages
+                </p>
+                <p className="text-sm font-semibold text-stone-700">
+                  Jump between pages without losing your selected sketches
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+              {Array.from({ length: totalPages }).map((_, index) => {
+                const pageNum = index + 1;
+                const pageImg = pageImages[pageNum];
+                const isPageComplete =
+                  (convertedPageImages[pageNum] || []).length >= 3;
+
+                return (
+                  <Button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`relative min-w-[64px] h-[64px] rounded-xl border-2 transition-all overflow-hidden flex items-center justify-center group ${
+                      currentPage === pageNum
+                        ? "border-primary ring-4 ring-primary/10 shadow-lg scale-105"
+                        : pageImg
+                          ? "border-gray-200 hover:border-primary/50"
+                          : "border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50"
+                    }`}
+                  >
+                    {pageImg ? (
+                      <>
+                        <Image
+                          src={pageImg}
+                          alt={`Page ${pageNum}`}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-110"
+                        />
+                        <div
+                          className={`absolute inset-0 bg-black/10 transition-opacity ${currentPage === pageNum ? "opacity-0" : "group-hover:opacity-0"}`}
+                        />
+                        <span
+                          className={`absolute bottom-0 right-0 bg-primary/90 text-white text-[10px] px-1.5 py-0.5 rounded-tl-md font-bold transition-transform ${currentPage === pageNum ? "scale-110" : ""}`}
+                        >
+                          {pageNum}
+                        </span>
+                      </>
+                    ) : (
                       <span
-                        className={`absolute bottom-0 right-0 bg-primary/90 text-white text-[10px] px-1.5 py-0.5 rounded-tl-md font-bold transition-transform ${currentPage === pageNum ? "scale-110" : ""}`}
+                        className={`text-sm font-bold ${currentPage === pageNum ? "text-primary" : "text-gray-400"}`}
                       >
                         {pageNum}
                       </span>
-                    </>
-                  ) : (
-                    <span
-                      className={`text-sm font-bold ${currentPage === pageNum ? "text-primary" : "text-gray-400"}`}
-                    >
-                      {pageNum}
-                    </span>
-                  )}
+                    )}
 
-                  {isPageComplete && (
-                    <div className="absolute top-0 right-0 bg-green-500 text-white p-0.5 rounded-bl-md shadow-sm">
-                      <Wand2 className="w-3 h-3" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+                    {isPageComplete && (
+                      <div className="absolute top-0 right-0 bg-green-500 text-white p-0.5 rounded-bl-md shadow-sm">
+                        <Wand2 className="w-3 h-3" />
+                      </div>
+                    )}
+                  </Button>
+                );
+              })}
 
-            {/* Add Extra Pages Button */}
-            <button
-              onClick={() => toast.info("This feature is coming soon.")}
-              className="relative min-w-[64px] h-[64px] rounded-xl border-2 border-dashed border-orange-300 bg-orange-50 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center group"
-              title="Add extra pages"
-            >
-              <Plus className="w-6 h-6 text-orange-600 transition-transform group-hover:scale-125" />
-            </button>
+              {/* Add Extra Pages Button */}
+              <button
+                onClick={() => toast.info("This feature is coming soon.")}
+                className="relative min-w-[64px] h-[64px] rounded-xl border-2 border-dashed border-orange-300 bg-orange-50 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center group"
+                title="Add extra pages"
+              >
+                <Plus className="w-6 h-6 text-orange-600 transition-transform group-hover:scale-125" />
+              </button>
+            </div>
           </div>
 
           {/* Main content grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-8 xl:gap-12 mt-8 md:mt-12">
-            {/* Left Column: Paper Canvas (The actual page editor) */}
-            <div className="space-y-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
-                    Page {currentPage}
-                    {hasMaxGenerations && (
-                      <span className="text-sm font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center gap-1.5 animate-in fade-in zoom-in">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Ready to Print
-                      </span>
-                    )}
-                  </h2>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    onClick={handlePreviewBook}
-                    disabled={isGeneratingPreview}
-                    variant="outline"
-                    className="h-10 px-4 text-sm font-bold border-2 border-primary/30 text-primary hover:bg-primary/5 rounded-xl transition-all flex items-center gap-2"
-                  >
-                    {isGeneratingPreview ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                    {isGeneratingPreview ? "Generating..." : "Preview page"}
-                  </Button>
-
-                  <div
-                    className={cn(
-                      "text-sm font-black rounded-xl px-5 py-2.5 border transition-all flex items-center gap-2",
-                      isAdmin
-                        ? "bg-orange-50 border-orange-200 text-orange-700 shadow-sm"
+          <div className="mt-8 grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,420px)] xl:items-start">
+            {/* Left Column: Page workspace */}
+            <div className="space-y-6 md:space-y-8">
+              <div className="rounded-[28px] border border-stone-200 bg-[linear-gradient(135deg,#fffdf8_0%,#ffffff_48%,#f8fbff_100%)] p-5 shadow-sm md:p-7">
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-orange-600">
+                      Workspace
+                    </p>
+                    {/* <h2 className="flex items-center gap-3 text-2xl font-black text-stone-900 md:text-3xl">
+                      Page {currentPage} editor
+                      {hasMaxGenerations && (
+                        <span className="animate-in zoom-in rounded-full bg-green-100 px-3 py-1 text-sm font-bold text-green-700 fade-in flex items-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4" />
+                          Ready to Print
+                        </span>
+                      )}
+                    </h2> */}
+                    <p className="max-w-2xl text-sm leading-7 text-stone-600">
+                      {isAdmin
+                        ? "Admin mode: you can keep generating as many versions as you need."
                         : hasMaxGenerations
-                          ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
-                          : "bg-gray-50 border-gray-200 text-gray-600",
-                    )}
-                  >
-                    {isAdmin && <span>👑</span>}
-                    {isAdmin
-                      ? "Unlimited"
-                      : `${generationsUsed}/${maxConversions} Sketches Created`}
+                          ? `You have used all ${maxConversions} tries for this page. Review your options below and keep your favorite selected.`
+                          : `You have ${triesLeft} of ${maxConversions} tries left on this page to get the perfect image.`}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <Button
+                      onClick={handlePreviewBook}
+                      disabled={isGeneratingPreview}
+                      variant="outline"
+                      className="h-11 rounded-2xl border-2 border-primary/25 px-4 text-sm font-bold text-primary transition-all hover:bg-primary/5"
+                    >
+                      {isGeneratingPreview ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                      {isGeneratingPreview ? "Generating..." : "Preview page"}
+                    </Button>
+
+                    <div
+                      className={cn(
+                        "flex min-w-[180px] items-center justify-center gap-2 rounded-2xl border px-5 py-3 text-sm font-black transition-all",
+                        isAdmin
+                          ? "bg-orange-50 border-orange-200 text-orange-700 shadow-sm"
+                          : hasMaxGenerations
+                            ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
+                            : "bg-gray-50 border-gray-200 text-gray-600",
+                      )}
+                    >
+                      {isAdmin && <span>👑</span>}
+                      {isAdmin
+                        ? "Unlimited"
+                        : `${generationsUsed}/${maxConversions} Tries Used`}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <p className="text-sm font-bold text-gray-600 mb-2">
-                Upload upto 3 photos, then select which one you like best.
-              </p>
-
-              {/* The "Paper" - Mockup of the A4 page */}
-              <div className="relative bg-white aspect-[1/1.414] rounded-sm shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] border border-gray-100 p-8 flex flex-col items-stretch overflow-hidden group">
-                {/* Visual paper edge effect */}
-                <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-r from-gray-100/50 to-transparent" />
-
-                {/* Top Text Input Area */}
-                <div className="relative mb-6">
-                  <input
-                    type="text"
-                    placeholder="CLICK TO ADD TOP Captions..."
-                    value={pageTexts[currentPage]?.topLine || ""}
-                    onChange={(e) =>
-                      updatePageText(
-                        currentPage,
-                        e.target.value,
-                        pageTexts[currentPage]?.bottomLine || "",
-                      )
-                    }
-                    className="w-full text-center text-lg md:text-2xl font-black placeholder:text-gray-200 text-gray-900 bg-transparent border-b-2 border-dashed border-transparent hover:border-gray-100 focus:border-primary focus:bg-primary/5 transition-all outline-none py-2 md:py-4"
-                  />
-                </div>
-
-                {/* CENTRAL DRAWING AREA (Image Upload/Preview) */}
-                <div
-                  onDragOver={(e) => !hasMaxGenerations && handleDragOver(e)}
-                  onDragLeave={(e) => !hasMaxGenerations && handleDragLeave(e)}
-                  onDrop={(e) =>
-                    !hasMaxGenerations && handleDrop(e, currentPage)
-                  }
-                  className={`relative flex-1 rounded-xl border-2 border-dashed transition-all duration-500 flex items-center justify-center ${
-                    isDragging
-                      ? "border-primary bg-secondary/30 scale-[0.98]"
-                      : activeImage
-                        ? "border-transparent bg-gray-50/30"
-                        : hasMaxGenerations
-                          ? "border-gray-100 bg-gray-50/10 grayscale cursor-not-allowed"
-                          : "border-gray-200 hover:border-primary/30 bg-gray-50/50 cursor-pointer"
-                  }`}
-                  onClick={() =>
-                    !activeImage &&
-                    !hasMaxGenerations &&
-                    fileInputRef.current?.click()
-                  }
-                >
-                  {activeImage ? (
-                    <div className="relative w-full h-full p-4 animate-in fade-in zoom-in duration-500">
-                      <Image
-                        src={activeImage}
-                        alt={`Page ${currentPage} preview`}
-                        fill
-                        className="object-contain"
-                      />
-                      {/* Floating Remove Button inside the canvas for better UX */}
-                      {!isConverting && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (isConvertible) {
-                              const idx =
-                                currentUploadedImages.indexOf(activeImage);
-                              if (idx !== -1)
-                                handleRemoveUploadedImage(currentPage, idx);
-                            } else {
-                              const idx =
-                                currentConvertedImages.indexOf(activeImage);
-                              if (idx !== -1)
-                                handleRemoveConvertedImage(currentPage, idx);
-                            }
-                          }}
-                          className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-red-50 text-red-500 rounded-lg shadow-sm border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center p-12 text-center">
-                      <div
-                        className={`p-6 rounded-full shadow-sm mb-6 ${hasMaxGenerations ? "bg-gray-50" : "bg-white border border-gray-100"}`}
-                      >
-                        {isUploading ? (
-                          <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                        ) : (
-                          <Upload
-                            className={`w-12 h-12 transition-colors ${hasMaxGenerations ? "text-gray-200" : "text-primary"}`}
-                          />
+              {/* <div className="grid gap-3 md:grid-cols-3">
+                {workflowSteps.map((step, index) => (
+                  <div
+                    key={step.title}
+                    className={cn(
+                      "rounded-[24px] border p-4 shadow-sm transition-all",
+                      step.complete
+                        ? "border-emerald-200 bg-emerald-50/80"
+                        : "border-stone-200 bg-white",
+                    )}
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <span
+                        className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-2xl text-sm font-black",
+                          step.complete
+                            ? "bg-emerald-600 text-white"
+                            : "bg-stone-100 text-stone-500",
                         )}
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        {isUploading
-                          ? "Processing..."
-                          : hasMaxGenerations
-                            ? "Page Complete"
-                            : "Add Your Photo"}
-                      </h3>
-                      <p className="text-gray-400 max-w-[280px]">
-                        {hasMaxGenerations
-                          ? "Maximum versions generated for this page."
-                          : "Drop your image here or click to browse"}
-                      </p>
+                      >
+                        {step.complete ? (
+                          <CheckCircle2 className="h-4 w-4" />
+                        ) : (
+                          index + 1
+                        )}
+                      </span>
+                      <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-400">
+                        {step.complete ? "Done" : "Next"}
+                      </span>
                     </div>
-                  )}
+                    <h3 className="text-sm font-bold text-stone-900">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-stone-500">
+                      {step.description}
+                    </p>
+                  </div>
+                ))}
+              </div> */}
 
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/png,image/jpeg"
-                    onChange={(e) => handleImageUpload(e, currentPage)}
-                    className="hidden"
-                  />
+              {/* <div className="flex items-start gap-3 rounded-[24px] border border-blue-100 bg-blue-50/90 px-4 py-4 shadow-sm">
+                <ImagePlus className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />
+                <p className="text-sm font-medium leading-7 text-blue-950">
+                  {hasGeneratedOptions
+                    ? "Your sketch options are safely saved below. Upload another source image only when you want a fresh direction for this page."
+                    : "Upload one source image to begin. As soon as the sketch is ready, this workspace will guide you through the next action."}
+                </p>
+              </div> */}
+
+              <div className="overflow-hidden rounded-[32px] border border-stone-200 bg-white shadow-[0_22px_60px_-38px_rgba(15,23,42,0.32)]">
+                <div className="border-b border-stone-200 bg-stone-50/80 px-5 py-4 sm:px-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-stone-400">
+                        Live page layout
+                      </p>
+                      {/* <p className="mt-1 text-sm font-semibold text-stone-800">
+                        Shorter preview, clearer actions, and room for captions
+                      </p> */}
+                    </div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-500 shadow-sm">
+                      <Sparkles className="h-3.5 w-3.5 text-orange-500" />
+                      {activeImage
+                        ? "Active image selected"
+                        : "Waiting for your first upload"}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Bottom Text Input Area */}
-                <div className="relative mt-6">
+                <div className="relative bg-[linear-gradient(180deg,#ffffff_0%,#fffdfa_100%)] p-4 sm:p-6 lg:p-7">
+                  <div className="absolute left-0 top-0 h-full w-1 bg-linear-to-r from-stone-100/70 to-transparent" />
+
+                  <div className="relative mb-5">
+                    <input
+                      type="text"
+                      placeholder="CLICK TO ADD TOP Captions..."
+                      value={pageTexts[currentPage]?.topLine || ""}
+                      onChange={(e) =>
+                        updatePageText(
+                          currentPage,
+                          e.target.value,
+                          pageTexts[currentPage]?.bottomLine || "",
+                        )
+                      }
+                      className="w-full rounded-2xl border border-transparent bg-transparent px-4 py-3 text-center text-lg font-black text-stone-900 transition-all outline-none placeholder:text-stone-300 hover:border-stone-200 hover:bg-white/90 focus:border-primary focus:bg-primary/5 md:text-2xl"
+                    />
+                  </div>
+
+                  <div
+                    onDragOver={(e) => !hasMaxGenerations && handleDragOver(e)}
+                    onDragLeave={(e) =>
+                      !hasMaxGenerations && handleDragLeave(e)
+                    }
+                    onDrop={(e) =>
+                      !hasMaxGenerations && handleDrop(e, currentPage)
+                    }
+                    className={`relative flex min-h-[260px] items-center justify-center rounded-[28px] border-2 border-dashed transition-all duration-500 sm:min-h-[320px] xl:min-h-[340px] ${
+                      isDragging
+                        ? "scale-[0.99] border-primary bg-secondary/30"
+                        : activeImage
+                          ? "border-stone-200 bg-stone-50/50"
+                          : hasMaxGenerations
+                            ? "cursor-not-allowed border-gray-100 bg-gray-50/20 grayscale"
+                            : "cursor-pointer border-gray-200 bg-gray-50/70 hover:border-primary/30"
+                    }`}
+                    onClick={() =>
+                      !activeImage &&
+                      !hasMaxGenerations &&
+                      fileInputRef.current?.click()
+                    }
+                  >
+                    {activeImage ? (
+                      <div className="relative h-full min-h-[240px] w-full animate-in p-4 duration-500 fade-in zoom-in sm:p-6">
+                        <Image
+                          src={activeImage}
+                          alt={`Page ${currentPage} preview`}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex max-w-sm flex-col items-center justify-center p-8 text-center sm:p-12">
+                        <div
+                          className={`mb-6 rounded-full p-5 shadow-sm ${hasMaxGenerations ? "bg-gray-50" : "border border-gray-100 bg-white"}`}
+                        >
+                          {isUploading ? (
+                            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                          ) : (
+                            <Upload
+                              className={`h-12 w-12 transition-colors ${hasMaxGenerations ? "text-gray-200" : "text-primary"}`}
+                            />
+                          )}
+                        </div>
+                        <h3 className="mb-2 text-xl font-bold text-stone-900">
+                          {isUploading
+                            ? "Processing..."
+                            : hasMaxGenerations
+                              ? "Page Complete"
+                              : "Upload Your First Image"}
+                        </h3>
+                        <p className="leading-7 text-stone-400">
+                          {hasMaxGenerations
+                            ? "You already have the maximum number of sketch options for this page."
+                            : "Drop your image here or click once to browse"}
+                        </p>
+                      </div>
+                    )}
+
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/png,image/jpeg"
+                      onChange={(e) => handleImageUpload(e, currentPage)}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-stone-500">
+                    <span className="rounded-full bg-stone-100 px-3 py-1">
+                      Caption zones enabled
+                    </span>
+                    <span className="rounded-full bg-stone-100 px-3 py-1">
+                      Optimized for touch and drag-drop
+                    </span>
+                    <span className="rounded-full bg-stone-100 px-3 py-1">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                  </div> */}
+                </div>
+
+                <div className="relative border-t border-stone-100 bg-white px-4 py-5 sm:px-6 lg:px-7">
                   <input
                     type="text"
                     placeholder="CLICK TO ADD BOTTOM Captions..."
@@ -570,25 +660,19 @@ export default function ImageUploadPage() {
                         e.target.value,
                       )
                     }
-                    className="w-full text-center text-lg md:text-2xl font-black placeholder:text-gray-200 text-gray-900 bg-transparent border-t-2 border-dashed border-transparent hover:border-gray-100 focus:border-primary focus:bg-primary/5 transition-all outline-none py-2 md:py-4"
+                    className="w-full rounded-2xl border border-transparent bg-transparent px-4 py-3 text-center text-lg font-black text-stone-900 transition-all outline-none placeholder:text-stone-300 hover:border-stone-200 hover:bg-stone-50 focus:border-primary focus:bg-primary/5 md:text-2xl"
                   />
-                </div>
-
-                {/* Page Number Mockup */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-300">
-                  PAGE {currentPage}
                 </div>
               </div>
 
-              {/* Action Buttons for the active image */}
-              {activeImage && isConvertible && (
-                <div className="animate-in slide-in-from-bottom-4 duration-500">
+              <div className="grid gap-3 animate-in duration-500 slide-in-from-bottom-4">
+                {activeImage && isConvertible && (
                   <Button
                     onClick={() =>
                       handleConvertToLineArt(currentPage, activeImage)
                     }
                     disabled={isConverting || hasMaxGenerations}
-                    className="w-full h-16 text-xl font-black rounded-2xl bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 hover:scale-[1.01] active:scale-[0.99] text-white shadow-2xl shadow-purple-500/20 transition-all border-none"
+                    className="h-16 w-full rounded-[24px] border-none bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 text-xl font-black text-white shadow-2xl shadow-purple-500/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
                   >
                     {isConverting ? (
                       <Loader2 className="w-6 h-6 mr-3 animate-spin" />
@@ -596,24 +680,40 @@ export default function ImageUploadPage() {
                       <Wand2 className="w-6 h-6 mr-3" />
                     )}
                     {isConverting
-                      ? "Photo-to-sketch in process!"
-                      : "Photo-to-sketch in Line Art"}
+                      ? "Generating Sketch..."
+                      : "Generate Sketch from This Image"}
                   </Button>
-                </div>
-              )}
+                )}
+
+                {!hasMaxGenerations && hasGeneratedOptions && (
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading || isConverting}
+                    className="h-14 w-full rounded-[24px] border-2 border-primary/20 font-semibold text-primary hover:bg-primary/5"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-5 h-5 mr-2" />
+                    )}
+                    Upload Another Image
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Right Column: Library & Sidebar */}
-            <div className="space-y-10">
+            <div className="space-y-6 xl:sticky xl:top-28">
               {/* Section: Your Conversions */}
-              <div className="bg-gray-50/50 rounded-[32px] p-8 border border-gray-100">
+              <div className="rounded-[32px] border border-gray-100 bg-gray-50/60 p-6 shadow-sm md:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-black flex items-center gap-3">
                     <Wand2 className="w-5 h-5 text-purple-600" />
-                    Converted Photos
+                    All Sketches
                   </h3>
                   <span className="text-xs font-black text-gray-400 bg-white px-3 py-1 rounded-full shadow-xs">
-                    {currentConvertedImages.length}/3
+                    {currentConvertedImages.length}/{maxConversions}
                   </span>
                 </div>
 
@@ -641,15 +741,6 @@ export default function ImageUploadPage() {
                           className="object-cover"
                         />
                         <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveConvertedImage(currentPage, idx);
-                          }}
-                          className="absolute top-2 right-2 bg-white/95 text-red-500 p-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -657,25 +748,17 @@ export default function ImageUploadPage() {
               </div>
 
               {/* Section: Recent Uploads */}
-              <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-xs">
+              <div className="rounded-[32px] border border-gray-100 bg-white p-6 shadow-sm md:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-black flex items-center gap-3">
                     <Upload className="w-5 h-5 text-blue-500" />
-                    GALLERY
+                    Source Images
                   </h3>
-                  {!hasMaxGenerations && (
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="text-primary hover:text-primary/70 transition-colors"
-                    >
-                      <Upload className="w-5 h-5" />
-                    </button>
-                  )}
                 </div>
 
                 {currentUploadedImages.length === 0 ? (
                   <p className="text-xs text-center text-gray-400 py-4 font-bold uppercase tracking-tight">
-                    Your uploaded images will appear here
+                    Your current source image will appear here before sketching
                   </p>
                 ) : (
                   <div className="grid grid-cols-3 gap-3">
@@ -692,18 +775,9 @@ export default function ImageUploadPage() {
                         <Image
                           fill
                           src={img}
-                          alt="Upload"
+                          alt="Source"
                           className="object-cover"
                         />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveUploadedImage(currentPage, idx);
-                          }}
-                          className="absolute top-1 right-1 bg-white/95 text-red-500 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -713,7 +787,7 @@ export default function ImageUploadPage() {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex flex-col-reverse md:flex-row items-center justify-between mt-8 md:mt-16 pt-6 md:pt-10 gap-6 md:gap-0 border-t border-gray-100">
+          <div className="mt-10 flex flex-col-reverse items-center justify-between gap-6 border-t border-gray-100 pt-6 md:mt-16 md:flex-row md:gap-0 md:pt-10">
             {/* Back Button (Step Navigation) */}
             <Button
               variant="outline"
@@ -729,7 +803,7 @@ export default function ImageUploadPage() {
                 variant="ghost"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="h-12 w-12 rounded-xl hover:bg-white hover:shadow-sm disabled:opacity-30 p-0"
+                className="h-12 w-12 rounded-xl bg-primary hover:bg-white hover:shadow-sm disabled:opacity-30 p-0"
               >
                 <ChevronLeft className="w-6 h-6" />
               </Button>
@@ -744,7 +818,7 @@ export default function ImageUploadPage() {
                   setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                 }
                 disabled={currentPage === totalPages}
-                className="h-12 w-12 rounded-xl hover:bg-white hover:shadow-sm disabled:opacity-30 p-0"
+                className="h-12 w-12 rounded-xl bg-primary hover:bg-white hover:shadow-sm disabled:opacity-30 p-0"
               >
                 <ChevronRight className="w-6 h-6" />
               </Button>

@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { indexedDbStorage } from "@/lib/indexed-db-storage";
+import { GENERATION_LIMITS } from "../types";
 import type { BookState, BookStore } from "../types";
+import { resolveAccessibleStep } from "../utils/step-flow";
 
 export type BookStep =
   | "free-generation"
@@ -15,6 +17,7 @@ export type BookStep =
 const initialState: BookState = {
   step: "free-generation",
   returnStep: null,
+  isHydrated: false,
   bookTitle: "",
   pageCount: 20,
   includeDedicationPage: false,
@@ -36,6 +39,8 @@ const initialState: BookState = {
   orderId: null,
   stripeSessionId: null,
   pendingPageCount: null,
+  pendingCheckoutIntent: null,
+  pendingResumeStep: null,
   bookType: "kids",
 };
 
@@ -44,8 +49,12 @@ export const useBookStore = create<BookStore>()(
     (set, get) => ({
       ...initialState,
 
-      setStep: (step) => set({ step }),
+      setStep: (step) =>
+        set((state) => ({
+          step: resolveAccessibleStep(state, step),
+        })),
       setReturnStep: (returnStep) => set({ returnStep }),
+      setHydrated: (isHydrated) => set({ isHydrated }),
       setBookTitle: (bookTitle) => set({ bookTitle }),
       setPageCount: (pageCount) => set({ pageCount }),
       setIncludeDedicationPage: (includeDedicationPage) =>
@@ -139,22 +148,15 @@ export const useBookStore = create<BookStore>()(
         })),
       canGenerateCover: () => {
         const state = get();
-        // After payment: unlimited
-        if (state.hasPaid) return true;
-        // Free tier: 2 generations before payment
-        return state.generationCounts.cover < 2;
+        return state.generationCounts.cover < GENERATION_LIMITS.MAX_COVER;
       },
-      canGeneratePage: () => {
+      canGeneratePage: (pageNum) => {
         const state = get();
-        // If they've paid, they can generate more
-        if (state.hasPaid) return true;
-
-        const today = new Date().toISOString().split("T")[0];
-        if (state.generationCounts.lastGenerationDate === today) {
-          return false; // Already generated once today
-        }
-
-        return true;
+        if (!state.hasPaid) return false;
+        return (
+          (state.generationCounts.pages[pageNum] || 0) <
+          GENERATION_LIMITS.MAX_PER_PAGE
+        );
       },
       getPageGenerationCount: (pageNum) => {
         const state = get();
@@ -166,12 +168,31 @@ export const useBookStore = create<BookStore>()(
       setOrderId: (orderId) => set({ orderId }),
       setStripeSessionId: (stripeSessionId) => set({ stripeSessionId }),
       setPendingPageCount: (pendingPageCount) => set({ pendingPageCount }),
+      setPendingCheckoutIntent: (pendingCheckoutIntent) =>
+        set({ pendingCheckoutIntent }),
+      setPendingResumeStep: (pendingResumeStep) => set({ pendingResumeStep }),
       setBookType: (bookType) => set({ bookType }),
-      resetBook: () => set(initialState),
+      normalizeStep: () =>
+        set((state) => ({
+          step: resolveAccessibleStep(state, state.step),
+        })),
+      resetBook: () =>
+        set((state) => ({
+          ...initialState,
+          isHydrated: state.isHydrated,
+        })),
     }),
     {
       name: "hinklecreek-book-storage",
       storage: createJSONStorage(() => indexedDbStorage),
+      partialize: (state) => {
+        return Object.fromEntries(
+          Object.entries(state).filter(([key]) => key !== "isHydrated"),
+        ) as typeof state;
+      },
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     },
   ),
 );

@@ -11,6 +11,7 @@ export interface User {
 export interface LoginData {
   user: User;
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface LoginResponse {
@@ -32,6 +33,23 @@ export interface RegisterFormData {
   name: string;
   email: string;
   password: string;
+}
+
+export interface VerificationMeta {
+  email: string;
+  maskedEmail: string;
+  expiresInMinutes: number;
+  resendCooldownSeconds: number;
+}
+
+export interface ApiResponse<T> {
+  status: boolean;
+  message: string;
+  data: T;
+}
+
+export interface LoginVerificationRequiredData extends VerificationMeta {
+  verificationRequired: true;
 }
 
 export interface RefreshTokenResponse {

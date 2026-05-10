@@ -15,89 +15,85 @@ export default function StepIndicator({
   onStepClick,
 }: StepIndicatorProps) {
   return (
-    <div className="w-full py-6 md:py-8 px-4 bg-white/50 backdrop-blur-sm sticky top-0 z-20 border-b border-gray-100">
-      <div className="max-w-4xl mx-auto">
-        <div className="relative flex justify-between items-center w-full">
-          {/* Progress Bar Background */}
-          <div className="absolute top-[14px] md:top-5 left-0 w-full h-1 bg-gray-100 rounded-full -z-10" />
+    <div className="sticky top-0 z-20 w-full border-b border-stone-200/70 bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(255,255,255,0.9))] px-3 py-4 backdrop-blur-xl md:px-4 md:py-5">
+      <div className="mx-auto max-w-6xl">
+        <div className="overflow-x-auto pb-1">
+          <div className="relative mx-auto flex min-w-max items-start justify-between gap-3 px-1 sm:gap-4 md:min-w-0">
+            <div className="absolute left-10 right-10 top-5 hidden h-px bg-stone-200 md:block" />
+            <div
+              className="absolute left-10 top-5 hidden h-px bg-gradient-to-r from-orange-400 to-orange-600 transition-all duration-300 ease-out md:block"
+              style={{
+                width: `calc((100% - 5rem) * ${currentStep / (steps.length - 1)})`,
+              }}
+            />
 
-          {/* Active Progress Bar */}
-          <div
-            className="absolute top-[14px] md:top-5 left-0 h-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full -z-10 transition-all duration-300 ease-out"
-            style={{
-              width: `${(currentStep / (steps.length - 1)) * 100}%`,
-            }}
-          />
+            {steps.map((step, index) => {
+              const isCompleted = index < currentStep;
+              const isCurrent = index === currentStep;
+              const isActive = isCompleted || isCurrent;
+              const isClickable = onStepClick && index <= currentStep;
 
-          {steps.map((step, index) => {
-            const isCompleted = index < currentStep;
-            const isCurrent = index === currentStep;
-            const isActive = isCompleted || isCurrent;
-            const isClickable = onStepClick && index <= currentStep;
-
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "flex flex-col items-center group relative",
-                  isClickable && "cursor-pointer",
-                )}
-                onClick={() => {
-                  if (isClickable && onStepClick) {
-                    onStepClick(index);
-                  }
-                }}
-              >
-                {/* Step Circle */}
+              return (
                 <div
+                  key={index}
                   className={cn(
-                    "w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center border-[3px] transition-all duration-300 shadow-sm relative bg-white",
-                    isCompleted
-                      ? "border-orange-500 bg-orange-500 text-white scale-100"
-                      : isCurrent
-                        ? "border-orange-500 text-orange-600 bg-white scale-110 shadow-orange-200 shadow-lg ring-4 ring-orange-100"
-                        : "border-gray-200 text-gray-300 bg-white",
+                    "relative flex min-w-[84px] flex-col items-center gap-2 text-center sm:min-w-[104px] md:min-w-[120px]",
+                    isClickable && "cursor-pointer",
                   )}
+                  onClick={() => {
+                    if (isClickable && onStepClick) {
+                      onStepClick(index);
+                    }
+                  }}
                 >
-                  {isCompleted ? (
-                    <Check className="w-4 h-4 md:w-6 md:h-6" strokeWidth={3} />
-                  ) : (
-                    <span className="text-sm md:text-lg font-black font-mono">
-                      {index + 1}
+                  <div
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-2xl border text-sm font-black shadow-sm transition-all duration-300 md:h-12 md:w-12 md:rounded-full md:text-base",
+                      isCompleted
+                        ? "border-orange-500 bg-orange-500 text-white shadow-orange-200"
+                        : isCurrent
+                          ? "border-orange-500 bg-white text-orange-600 ring-4 ring-orange-100 shadow-lg shadow-orange-100"
+                          : "border-stone-200 bg-white/95 text-stone-400",
+                    )}
+                  >
+                    {isCompleted ? (
+                      <Check
+                        className="h-4 w-4 md:h-5 md:w-5"
+                        strokeWidth={3}
+                      />
+                    ) : (
+                      <span>{index + 1}</span>
+                    )}
+                  </div>
+
+                  <div
+                    className={cn(
+                      "rounded-2xl px-2 py-1.5 transition-all duration-300 md:px-0 md:py-0",
+                      isCurrent &&
+                        "bg-white/90 shadow-sm md:bg-transparent md:shadow-none",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "block text-[9px] font-bold uppercase tracking-[0.22em] md:text-[10px]",
+                        isCurrent ? "text-orange-600" : "text-stone-400",
+                      )}
+                    >
+                      Step {index + 1}
                     </span>
-                  )}
+                    <span
+                      className={cn(
+                        "mt-1 block text-[11px] font-semibold leading-tight md:text-sm",
+                        isActive ? "text-stone-900" : "text-stone-400",
+                      )}
+                    >
+                      {step}
+                    </span>
+                  </div>
                 </div>
-
-                {/* Label */}
-                <div
-                  className={cn(
-                    "absolute top-10 md:top-14 text-center min-w-[80px] transition-all duration-300",
-                    isCurrent
-                      ? "translate-y-0 opacity-100 scale-100"
-                      : "translate-y-1 opacity-100 scale-95",
-                    !isCurrent && "hidden md:block",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "text-[9px] md:text-[10px] font-bold uppercase tracking-wider block",
-                      isCurrent ? "text-orange-600" : "text-gray-400",
-                    )}
-                  >
-                    Step {index + 1}
-                  </span>
-                  <span
-                    className={cn(
-                      "text-[10px] md:text-sm font-bold block mt-0.5 whitespace-nowrap",
-                      isActive ? "text-gray-900" : "text-gray-400",
-                    )}
-                  >
-                    {step}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

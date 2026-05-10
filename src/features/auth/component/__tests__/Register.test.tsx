@@ -52,7 +52,11 @@ describe("Register Component", () => {
   });
 
   it("calls handleRegister and redirects on success", async () => {
-    mockHandleRegister.mockResolvedValue({ error: null });
+    mockHandleRegister.mockResolvedValue({
+      status: true,
+      message: "Registered successfully. Please verify your email.",
+      data: { email: "test@example.com" },
+    });
     render(<Register />);
 
     // Fill out form
@@ -83,10 +87,11 @@ describe("Register Component", () => {
         "password123",
       );
       expect(toast.success).toHaveBeenCalledWith(
-        "Account created successfully!",
+        "Registered successfully. Please verify your email.",
       );
-      // Redirects to /login
-      expect(mockPush).toHaveBeenCalledWith(expect.stringContaining("/login"));
+      expect(mockPush).toHaveBeenCalledWith(
+        expect.stringContaining("/verify-email?email=test%40example.com"),
+      );
     });
   });
 

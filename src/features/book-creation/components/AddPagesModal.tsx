@@ -19,6 +19,7 @@ import { useSession } from "next-auth/react";
 import { Loader2, Plus, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { DeliveryType, OutputFormat } from "../types";
+import { savePaymentContext } from "../utils/payment-context";
 
 interface AddPagesModalProps {
   isOpen: boolean;
@@ -27,8 +28,15 @@ interface AddPagesModalProps {
 
 export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
   const [extraCount, setExtraCount] = useState<number>(1);
-  const { orderId, outputFormat, setPendingPageCount, pageCount } =
-    useBookStore();
+  const {
+    orderId,
+    outputFormat,
+    setPendingPageCount,
+    pageCount,
+    step,
+    setPendingCheckoutIntent,
+    setPendingResumeStep,
+  } = useBookStore();
   const { data: session } = useSession();
 
   // Map output format to API delivery type
@@ -62,7 +70,6 @@ export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
 
     try {
       const response = await confirmPayment({
-        userId: session.user.id,
         pageCount: extraCount,
         deliveryType,
         orderId: orderId,
@@ -70,6 +77,15 @@ export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
 
       if (response.success && response.sessionUrl) {
         setPendingPageCount(pageCount + extraCount);
+        setPendingCheckoutIntent("add_pages_checkout");
+        setPendingResumeStep(step);
+        savePaymentContext({
+          orderId,
+          pageCount: pageCount + extraCount,
+          outputFormat: outputFormat ?? null,
+          checkoutIntent: "add_pages_checkout",
+          resumeStep: step,
+        });
         window.location.href = response.sessionUrl;
       } else {
         toast.error("Failed to initiate payment session");
