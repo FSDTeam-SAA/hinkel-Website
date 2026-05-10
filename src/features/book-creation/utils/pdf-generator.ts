@@ -185,14 +185,9 @@ export const generateBookPdf = async (state: BookState): Promise<Blob> => {
   // Subtitle
   doc.setFont(FONTS.primary, "normal");
   doc.setFontSize(FONT_Sizes.subtitle);
-  doc.text(
-    "PERSONALIZED SKETCH BOOK",
-    p1CenterX,
-    MARGIN_TOP + SPACING.subtitleTop,
-    {
-      align: "center",
-    },
-  );
+  doc.text("", p1CenterX, MARGIN_TOP + SPACING.subtitleTop, {
+    align: "center",
+  });
 
   // Cover Image on Title Page
   if (finalCoverImage) {

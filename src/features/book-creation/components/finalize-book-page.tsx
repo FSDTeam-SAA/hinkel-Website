@@ -157,7 +157,7 @@ export default function FinalizeBookPage() {
 
       <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
         <div className="bg-white rounded-2xl shadow-sm p-5 md:p-12">
-          <h1 className="text-3xl font-bold mb-2">Review Your Book</h1>
+          <h1 className="text-3xl font-bold mb-2">Review Your Book Details</h1>
           <p className="text-gray-600 mb-8">
             Review all details before finalizing your book
           </p>

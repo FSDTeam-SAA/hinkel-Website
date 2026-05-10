@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { indexedDbStorage } from "@/lib/indexed-db-storage";
+import { GENERATION_LIMITS } from "../types";
 import type { BookState, BookStore } from "../types";
 import { resolveAccessibleStep } from "../utils/step-flow";
 
@@ -147,22 +148,15 @@ export const useBookStore = create<BookStore>()(
         })),
       canGenerateCover: () => {
         const state = get();
-        // After payment: unlimited
-        if (state.hasPaid) return true;
-        // Free tier: 2 generations before payment
-        return state.generationCounts.cover < 2;
+        return state.generationCounts.cover < GENERATION_LIMITS.MAX_COVER;
       },
-      canGeneratePage: () => {
+      canGeneratePage: (pageNum) => {
         const state = get();
-        // If they've paid, they can generate more
-        if (state.hasPaid) return true;
-
-        const today = new Date().toISOString().split("T")[0];
-        if (state.generationCounts.lastGenerationDate === today) {
-          return false; // Already generated once today
-        }
-
-        return true;
+        if (!state.hasPaid) return false;
+        return (
+          (state.generationCounts.pages[pageNum] || 0) <
+          GENERATION_LIMITS.MAX_PER_PAGE
+        );
       },
       getPageGenerationCount: (pageNum) => {
         const state = get();

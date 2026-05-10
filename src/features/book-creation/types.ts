@@ -261,7 +261,7 @@ export const FILE_VALIDATION = {
  */
 export const GENERATION_LIMITS = {
   MAX_PER_PAGE: 3,
-  MAX_COVER: 3,
+  MAX_COVER: 2,
 } as const;
 
 /**
