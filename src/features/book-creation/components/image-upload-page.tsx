@@ -604,9 +604,7 @@ export default function ImageUploadPage() {
                     ) : (
                       <Wand2 className="w-6 h-6 mr-3" />
                     )}
-                    {isConverting
-                      ? "Photo-to-sketch in process!"
-                      : "Photo-to-sketch in Line Art"}
+                    {isConverting ? "Convert Your Image" : "Converting..."}
                   </Button>
                 </div>
               )}

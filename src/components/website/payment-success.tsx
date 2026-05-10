@@ -7,6 +7,11 @@ import { useBookStore } from "@/features/book-creation/store/book-store";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { checkPaymentStatus } from "@/features/book-creation/api/order.api";
+import {
+  clearPaymentContext,
+  loadPaymentContext,
+} from "@/features/book-creation/utils/payment-context";
+import { resolvePostPaymentStep } from "@/features/book-creation/utils/step-flow";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -18,8 +23,15 @@ export default function PaymentSuccessPage() {
     pendingPageCount,
     setPageCount,
     setPendingPageCount,
-    step,
     orderId,
+    isHydrated,
+    setOrderId,
+    outputFormat,
+    setOutputFormat,
+    pendingCheckoutIntent,
+    setPendingCheckoutIntent,
+    pendingResumeStep,
+    setPendingResumeStep,
   } = useBookStore();
   const { status } = useSession();
   const [countdown, setCountdown] = useState(3);
@@ -39,11 +51,22 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     const verifyPayment = async () => {
-      if (status !== "authenticated") {
+      if (status !== "authenticated" || !isHydrated) {
         return;
       }
 
-      if (!sessionId || !orderId) {
+      const fallbackContext = loadPaymentContext();
+      const resolvedOrderId = orderId ?? fallbackContext?.orderId ?? null;
+      const resolvedPageCount =
+        pendingPageCount ?? fallbackContext?.pageCount ?? null;
+      const resolvedOutputFormat =
+        outputFormat ?? fallbackContext?.outputFormat ?? null;
+      const resolvedCheckoutIntent =
+        pendingCheckoutIntent ?? fallbackContext?.checkoutIntent ?? null;
+      const resolvedResumeStep =
+        pendingResumeStep ?? fallbackContext?.resumeStep ?? null;
+
+      if (!sessionId || !resolvedOrderId) {
         toast.error("Payment verification data is missing.");
         router.replace("/create-book");
         return;
@@ -51,29 +74,39 @@ export default function PaymentSuccessPage() {
 
       try {
         setIsVerifying(true);
-        const response = await checkPaymentStatus({ sessionId, orderId });
+        const response = await checkPaymentStatus({
+          sessionId,
+          orderId: resolvedOrderId,
+        });
 
         if (!response.success || response.paymentStatus !== "paid") {
           throw new Error(response.message || "Payment could not be verified.");
         }
 
+        setOrderId(resolvedOrderId);
         setHasPaid(true);
         setIsVerified(true);
 
-        if (pendingPageCount) {
-          setPageCount(pendingPageCount);
-          setPendingPageCount(null);
-
-          if (step === "setup") {
-            setStep("cover");
-          } else if (step === "pages") {
-            setStep("pages");
-          } else {
-            setStep(step);
-          }
-        } else {
-          setStep("pages");
+        if (resolvedPageCount) {
+          setPageCount(resolvedPageCount);
         }
+
+        if (resolvedOutputFormat) {
+          setOutputFormat(resolvedOutputFormat);
+        }
+
+        setPendingPageCount(null);
+        setPendingCheckoutIntent(null);
+        setPendingResumeStep(null);
+        clearPaymentContext();
+
+        const nextStep = resolvePostPaymentStep(
+          useBookStore.getState(),
+          resolvedCheckoutIntent,
+          resolvedResumeStep,
+        );
+
+        setStep(nextStep);
       } catch (error) {
         const message =
           error instanceof Error
@@ -89,15 +122,22 @@ export default function PaymentSuccessPage() {
     verifyPayment();
   }, [
     orderId,
+    isHydrated,
     pendingPageCount,
+    outputFormat,
+    pendingCheckoutIntent,
+    pendingResumeStep,
     router,
     sessionId,
     setHasPaid,
+    setOrderId,
+    setOutputFormat,
     setPageCount,
+    setPendingCheckoutIntent,
     setPendingPageCount,
+    setPendingResumeStep,
     setStep,
     status,
-    step,
   ]);
 
   useEffect(() => {
@@ -126,6 +166,14 @@ export default function PaymentSuccessPage() {
   const targetUrl = sessionId
     ? `/create-book?success=true&session_id=${sessionId}`
     : "/create-book";
+
+  if (status === "loading" || !isHydrated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

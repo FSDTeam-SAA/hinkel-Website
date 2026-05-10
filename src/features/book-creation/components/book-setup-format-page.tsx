@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { Ticket, Check, X } from "lucide-react";
 import { validateCoupon } from "@/features/dashboard/api/coupon.api";
 import { Coupon } from "@/features/dashboard/types/coupon.types";
+import { savePaymentContext } from "../utils/payment-context";
 
 export default function BookSetupFormatPage() {
   const setStep = useBookStore((state: BookStore) => state.setStep);
@@ -25,6 +26,12 @@ export default function BookSetupFormatPage() {
     (state: BookStore) => state.setOutputFormat,
   );
   const setOrderId = useBookStore((state: BookStore) => state.setOrderId);
+  const setPendingCheckoutIntent = useBookStore(
+    (state: BookStore) => state.setPendingCheckoutIntent,
+  );
+  const setPendingResumeStep = useBookStore(
+    (state: BookStore) => state.setPendingResumeStep,
+  );
   const { pageCount, outputFormat, bookType, hasPaid } = useBookStore();
   const { data: session } = useSession();
 
@@ -177,6 +184,15 @@ export default function BookSetupFormatPage() {
         setPendingPageCount(selectedPages);
         setOutputFormat(selectedFormat);
         setOrderId(response.orderId);
+        setPendingCheckoutIntent("initial_checkout");
+        setPendingResumeStep("cover");
+        savePaymentContext({
+          orderId: response.orderId,
+          pageCount: selectedPages,
+          outputFormat: selectedFormat,
+          checkoutIntent: "initial_checkout",
+          resumeStep: "cover",
+        });
 
         // Redirect to Stripe
         window.location.href = response.sessionUrl;

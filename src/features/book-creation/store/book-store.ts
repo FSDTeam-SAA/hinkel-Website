@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { indexedDbStorage } from "@/lib/indexed-db-storage";
 import type { BookState, BookStore } from "../types";
+import { resolveAccessibleStep } from "../utils/step-flow";
 
 export type BookStep =
   | "free-generation"
@@ -15,6 +16,7 @@ export type BookStep =
 const initialState: BookState = {
   step: "free-generation",
   returnStep: null,
+  isHydrated: false,
   bookTitle: "",
   pageCount: 20,
   includeDedicationPage: false,
@@ -36,6 +38,8 @@ const initialState: BookState = {
   orderId: null,
   stripeSessionId: null,
   pendingPageCount: null,
+  pendingCheckoutIntent: null,
+  pendingResumeStep: null,
   bookType: "kids",
 };
 
@@ -44,8 +48,12 @@ export const useBookStore = create<BookStore>()(
     (set, get) => ({
       ...initialState,
 
-      setStep: (step) => set({ step }),
+      setStep: (step) =>
+        set((state) => ({
+          step: resolveAccessibleStep(state, step),
+        })),
       setReturnStep: (returnStep) => set({ returnStep }),
+      setHydrated: (isHydrated) => set({ isHydrated }),
       setBookTitle: (bookTitle) => set({ bookTitle }),
       setPageCount: (pageCount) => set({ pageCount }),
       setIncludeDedicationPage: (includeDedicationPage) =>
@@ -166,12 +174,31 @@ export const useBookStore = create<BookStore>()(
       setOrderId: (orderId) => set({ orderId }),
       setStripeSessionId: (stripeSessionId) => set({ stripeSessionId }),
       setPendingPageCount: (pendingPageCount) => set({ pendingPageCount }),
+      setPendingCheckoutIntent: (pendingCheckoutIntent) =>
+        set({ pendingCheckoutIntent }),
+      setPendingResumeStep: (pendingResumeStep) => set({ pendingResumeStep }),
       setBookType: (bookType) => set({ bookType }),
-      resetBook: () => set(initialState),
+      normalizeStep: () =>
+        set((state) => ({
+          step: resolveAccessibleStep(state, state.step),
+        })),
+      resetBook: () =>
+        set((state) => ({
+          ...initialState,
+          isHydrated: state.isHydrated,
+        })),
     }),
     {
       name: "hinklecreek-book-storage",
       storage: createJSONStorage(() => indexedDbStorage),
+      partialize: (state) => {
+        return Object.fromEntries(
+          Object.entries(state).filter(([key]) => key !== "isHydrated"),
+        ) as typeof state;
+      },
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     },
   ),
 );
