@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useAllOrders, Order } from "@/features/dashboard/hooks/useAllOrders";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
 import {
@@ -17,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import React, { useState } from "react";
-import { PdfViewerModal } from "../dashboard/PdfViewerModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toTitleCase } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -70,8 +70,24 @@ const RecentOrdersTable = () => {
   const { updateStatus } = useStatusUpdate();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeUpdatingId, setActiveUpdatingId] = useState<string | null>(null);
-  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
-  const [viewerTitle, setViewerTitle] = useState("");
+
+  const getAdminBookUrl = (order: Order) => {
+    if (order.bookViewUrl) {
+      return `${process.env.NEXT_PUBLIC_API_URL}${order.bookViewUrl}`;
+    }
+
+    return order.bookThumbnail || null;
+  };
+
+  const openBookInNewTab = (order: Order) => {
+    const url = getAdminBookUrl(order);
+
+    if (!url) {
+      return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setActiveUpdatingId(orderId);
@@ -199,22 +215,21 @@ const RecentOrdersTable = () => {
               <td className="py-4 px-4 text-right">
                 <div className="flex items-center justify-end gap-2">
                   {order.hasBook && order.bookThumbnail && (
-                    <div>
-                      <button
-                        onClick={() => {
-                          setViewerUrl(order.bookThumbnail ?? null);
-                          setViewerTitle(
-                            toTitleCase(order.title || "Coloring Book"),
-                          );
-                        }}
+                    <Link
+                      href={order.bookThumbnail || "#"}
+                      target="_blank"
+                      rel="noopener noreferrerx"
+                    >
+                      <Button
+                        variant="outline"
                         className="inline-flex items-center gap-1 p-2 rounded-md text-[#FF8B36] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
                         title="View Book"
-                        aria-label="View book (opens in modal)"
+                        aria-label="View book (opens in new tab)"
                       >
                         <ExternalLink size={16} aria-hidden="true" />
                         <span className="hidden sm:inline">View Book</span>
-                      </button>
-                    </div>
+                      </Button>
+                    </Link>
                   )}
                   <Button
                     onClick={() => setSelectedOrder(order)}
@@ -393,12 +408,7 @@ const RecentOrdersTable = () => {
                     </p>
                     {selectedOrder.hasBook && selectedOrder.bookThumbnail && (
                       <button
-                        onClick={() => {
-                          setViewerUrl(selectedOrder.bookThumbnail ?? null);
-                          setViewerTitle(
-                            selectedOrder.title || "Coloring Book",
-                          );
-                        }}
+                        onClick={() => openBookInNewTab(selectedOrder)}
                         className="mt-2 flex items-center gap-1.5 w-fit px-3 py-1.5 bg-[#FF8B36] text-white rounded-lg text-xs font-bold hover:bg-[#e67a00] transition-colors"
                       >
                         <ExternalLink size={14} />
@@ -434,12 +444,6 @@ const RecentOrdersTable = () => {
           )}
         </DialogContent>
       </Dialog>
-      <PdfViewerModal
-        isOpen={!!viewerUrl}
-        onClose={() => setViewerUrl(null)}
-        pdfUrl={viewerUrl}
-        title={viewerTitle}
-      />
     </div>
   );
 };
