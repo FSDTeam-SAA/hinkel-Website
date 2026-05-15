@@ -22,9 +22,9 @@ import Image from "next/image";
 import { isValidFile, fileToDataURL } from "../utils/file-validation";
 import { toast } from "sonner";
 import { useGeneratePreview } from "../hooks/useGeneratePreview";
-import { generateBookPdf } from "../utils/pdf-generator";
 import { cn } from "@/lib/utils";
 import AddPagesModal from "./AddPagesModal";
+import BookPreviewModal from "./BookPreviewModal";
 import { useContent } from "@/features/category-page/hooks/use-content";
 import { getCategoryPromptForType } from "../utils/prompt";
 
@@ -57,8 +57,7 @@ export default function ImageUploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
-  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
-  const state = useBookStore();
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { generatePreview, loading: isConverting } = useGeneratePreview();
   const { data: contentData } = useContent({ limit: 12 });
   const categories = contentData?.data || [];
@@ -249,24 +248,8 @@ export default function ImageUploadPage() {
   const isConvertible =
     activeImage && currentUploadedImages.includes(activeImage);
 
-  // Handle preview directly with PDF generation
-  const handlePreviewBook = async () => {
-    try {
-      setIsGeneratingPreview(true);
-      toast.success("Generating preview...");
-      const pdfBlob = await generateBookPdf(state);
-      const url = URL.createObjectURL(pdfBlob);
-      // Open in a new tab instead of using the modal, which was causing layout issues
-      window.open(url, "_blank");
-
-      // Clean up the URL after a short delay to ensure it opened
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-    } catch (error) {
-      console.error("Preview failed:", error);
-      toast.error("Failed to generate preview.");
-    } finally {
-      setIsGeneratingPreview(false);
-    }
+  const handlePreviewBook = () => {
+    setIsPreviewOpen(true);
   };
 
   // const isContinueDisabled = Array.from(
@@ -287,15 +270,10 @@ export default function ImageUploadPage() {
         <div className="sticky top-0 z-[500] w-full flex justify-center pt-4 pointer-events-none animate-in slide-in-from-top-full duration-500">
           <Button
             onClick={handlePreviewBook}
-            disabled={isGeneratingPreview}
             className="pointer-events-auto h-12 px-8 text-sm font-black bg-primary hover:bg-primary/90 text-white rounded-full shadow-2xl shadow-primary/40 flex items-center gap-2 border-none transform transition-all hover:scale-105 active:scale-95"
           >
-            {isGeneratingPreview ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Eye className="w-4 h-4" />
-            )}
-            {isGeneratingPreview ? "Generating..." : "Preview book"}
+            <Eye className="w-4 h-4" />
+            Preview book
           </Button>
         </div>
       )}
@@ -446,16 +424,11 @@ export default function ImageUploadPage() {
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <Button
                       onClick={handlePreviewBook}
-                      disabled={isGeneratingPreview}
                       variant="outline"
                       className="h-11 rounded-2xl border-2 border-primary/25 px-4 text-sm font-bold text-primary transition-all hover:bg-primary/5"
                     >
-                      {isGeneratingPreview ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                      {isGeneratingPreview ? "Generating..." : "Preview page"}
+                      <Eye className="w-4 h-4" />
+                      Preview book
                     </Button>
 
                     <div
@@ -840,6 +813,10 @@ export default function ImageUploadPage() {
       <AddPagesModal
         isOpen={isAddPagesOpen}
         onClose={() => setIsAddPagesOpen(false)}
+      />
+      <BookPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
       />
     </div>
   );

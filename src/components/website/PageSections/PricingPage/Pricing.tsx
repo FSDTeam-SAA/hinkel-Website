@@ -35,7 +35,7 @@ const Pricing = () => {
     {
       deliveryType: "digital",
       title: "Digital PDF",
-      subtitle: "Instant download",
+      subtitle: "Delivered by email",
       price: "19",
       currency: "USD",
       pageTiers: [{ pageLimit: 20, price: 19 }],
@@ -51,7 +51,7 @@ const Pricing = () => {
     {
       deliveryType: "print&digital",
       title: "Digital PDF & Printed Book",
-      subtitle: "Delivered & Instant",
+      subtitle: "Email + print delivery",
       price: "49",
       currency: "USD",
       pageTiers: [{ pageLimit: 20, price: 49 }],
@@ -74,11 +74,11 @@ const Pricing = () => {
   const getTierSubtitle = (type: string) => {
     switch (type) {
       case "digital":
-        return "Instant download";
+        return "Delivered by email";
       case "print":
         return "Shipped to you";
       case "print&digital":
-        return "Delivered & Instant";
+        return "Email + print delivery";
       default:
         return "";
     }
@@ -94,7 +94,7 @@ const Pricing = () => {
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Choose the perfect format for your creative masterpiece. From
-            instant digital downloads to professionally printed books.
+            email-delivered digital PDFs to professionally printed books.
           </p>
         </div>
 

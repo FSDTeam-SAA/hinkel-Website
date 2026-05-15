@@ -160,6 +160,21 @@ export type BookStep =
  */
 export type OutputFormat = "pdf" | "printed" | "pdf&printed";
 
+export type PreviewPageType = "cover" | "dedication" | "content";
+
+export interface PreviewPage {
+  id: string;
+  type: PreviewPageType;
+  pageNumber: number;
+  label: string;
+  title?: string;
+  imageSrc?: string | null;
+  dedicationText?: string;
+  topLine?: string;
+  bottomLine?: string;
+  contentPageNumber?: number;
+}
+
 /**
  * Page number to image URL mapping
  */

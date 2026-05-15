@@ -19,8 +19,8 @@ export default function OutputFormatPage() {
   const formats = [
     {
       id: "pdf",
-      title: "Digital PDF Download",
-      description: "Instant download",
+      title: "Digital PDF",
+      description: "Delivered by email",
       icon: Download,
     },
     {
@@ -32,7 +32,7 @@ export default function OutputFormatPage() {
     {
       id: "pdf&printed",
       title: "Digital PDF & Printed Book",
-      description: "Get both versions",
+      description: "Email + print delivery",
       icon: Gift,
     },
   ];
