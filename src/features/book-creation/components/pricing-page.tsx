@@ -39,7 +39,7 @@ export default function PricingPage({ onContinue, onBack }: PricingPageProps) {
     {
       id: "pdf",
       title: "Digital PDF",
-      subtitle: "Instant download",
+      subtitle: "Delivered by email",
       price: "$24.22",
       icon: Download,
     },
@@ -53,7 +53,7 @@ export default function PricingPage({ onContinue, onBack }: PricingPageProps) {
     {
       id: "pdf&printed",
       title: "Digital PDF & Printed Book",
-      subtitle: "Delivered to you",
+      subtitle: "Email + print delivery",
       price: "$24.22",
       icon: Gift,
     },

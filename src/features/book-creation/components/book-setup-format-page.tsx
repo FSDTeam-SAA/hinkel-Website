@@ -102,7 +102,7 @@ export default function BookSetupFormatPage() {
         id: "pdf" as OutputFormat,
         apiType: "digital" as const,
         title: "Digital PDF",
-        subtitle: "Instant download",
+        subtitle: "Delivered by email",
       },
       {
         id: "printed" as OutputFormat,
@@ -114,7 +114,7 @@ export default function BookSetupFormatPage() {
         id: "pdf&printed" as OutputFormat,
         apiType: "print&digital" as const,
         title: "Digital PDF & Printed Book",
-        subtitle: "Delivered & Instant",
+        subtitle: "Email + print delivery",
       },
     ];
   }, []);
@@ -176,6 +176,7 @@ export default function BookSetupFormatPage() {
       const response = await confirmPayment({
         pageCount: selectedPages,
         deliveryType: deliveryTypeMap[selectedFormat],
+        userId: session.user.id,
         bookType: bookType,
         couponCode: appliedCoupon?.codeName,
       });

@@ -1,5 +1,8 @@
 "use client";
-import { useAllOrders } from "@/features/dashboard/hooks/useAllOrders";
+import {
+  useAllOrders,
+  type Order,
+} from "@/features/dashboard/hooks/useAllOrders";
 import { exportOrders } from "@/features/dashboard/api/allOrders.api";
 import Image from "next/image";
 import React from "react";
@@ -20,7 +23,6 @@ import {
 import OrderedBooksSkeleton from "./OrderedBooksSkeleton";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
 import { useArchiveOrder } from "@/features/dashboard/hooks/useArchiveOrder";
-import { PdfViewerModal } from "../../PdfViewerModal";
 import {
   Select,
   SelectContent,
@@ -30,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import RejectReasonDialog from "@/components/dashboard/RejectReasonDialog";
 
 const OrderedBooks = () => {
   const [activeTab, setActiveTab] = React.useState<"active" | "archived">(
@@ -44,8 +47,10 @@ const OrderedBooks = () => {
   const [sortOrder, setSortOrder] = React.useState("desc");
   const [page, setPage] = React.useState(1);
   const limit = 9;
-  const [viewerUrl, setViewerUrl] = React.useState<string | null>(null);
-  const [viewerTitle, setViewerTitle] = React.useState("");
+  const [rejectingOrder, setRejectingOrder] = React.useState<Order | null>(
+    null,
+  );
+  const [rejectionReason, setRejectionReason] = React.useState("");
 
   // Debounce search
   React.useEffect(() => {
@@ -87,13 +92,59 @@ const OrderedBooks = () => {
   const { updateStatus, loading: isUpdating } = useStatusUpdate();
   const { updateArchiveStatus, loading: isArchiving } = useArchiveOrder();
 
+  const getAdminBookUrl = (order: Order) => {
+    if (order.bookViewUrl) {
+      return `${process.env.NEXT_PUBLIC_API_URL}${order.bookViewUrl}`;
+    }
+
+    return order.bookThumbnail || null;
+  };
+
+  const openBookInNewTab = (order: Order) => {
+    const url = getAdminBookUrl(order);
+
+    if (!url) {
+      return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    const selected = orders.find((order) => order._id === orderId) || null;
+
+    if (newStatus === "rejected") {
+      setRejectingOrder(selected);
+      setRejectionReason("");
+      return;
+    }
+
     try {
       await updateStatus(orderId, newStatus);
       toast.success("Delivery status synchronized");
       refetch(); // Refresh the list
     } catch {
       toast.error("Failed to update delivery protocol");
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectingOrder || !rejectionReason.trim()) {
+      return;
+    }
+
+    try {
+      await updateStatus(
+        rejectingOrder._id,
+        "rejected",
+        rejectionReason.trim(),
+      );
+      toast.success("Book rejected successfully");
+      setRejectingOrder(null);
+      setRejectionReason("");
+      refetch();
+    } catch {
+      toast.error("Failed to reject book");
     }
   };
 
@@ -466,10 +517,7 @@ const OrderedBooks = () => {
                           </button>
                           {order.hasBook && order.bookThumbnail && (
                             <button
-                              onClick={() => {
-                                setViewerUrl(order.bookThumbnail || null);
-                                setViewerTitle(order.title || "Coloring Book");
-                              }}
+                              onClick={() => openBookInNewTab(order)}
                               className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-colors"
                             >
                               <ExternalLink
@@ -581,11 +629,19 @@ const OrderedBooks = () => {
           </button>
         </div>
       )}
-      <PdfViewerModal
-        isOpen={!!viewerUrl}
-        onClose={() => setViewerUrl(null)}
-        pdfUrl={viewerUrl}
-        title={viewerTitle}
+      <RejectReasonDialog
+        isOpen={!!rejectingOrder}
+        order={rejectingOrder}
+        reason={rejectionReason}
+        isSubmitting={isUpdating}
+        onReasonChange={setRejectionReason}
+        onClose={() => {
+          if (!isUpdating) {
+            setRejectingOrder(null);
+            setRejectionReason("");
+          }
+        }}
+        onConfirm={handleRejectConfirm}
       />
     </div>
   );

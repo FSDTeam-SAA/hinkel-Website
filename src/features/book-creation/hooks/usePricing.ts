@@ -2,8 +2,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getPrices, getCalculatePrice } from "../api/pricing.api";
-import { calculatePriceRequest } from "../types";
+import {
+  calculateAdjustment,
+  getCalculatePrice,
+  getPrices,
+} from "../api/pricing.api";
+import { CalculateAdjustmentRequest, calculatePriceRequest } from "../types";
 
 export function usePricing() {
   const { data, isLoading, isError, error } = useQuery({
@@ -38,6 +42,34 @@ export function useCalculatePrice(data: calculatePriceRequest) {
     isError,
     error: isError
       ? (error as any)?.message || "An error occurred while calculating price"
+      : null,
+  };
+}
+
+export function useCalculateAdjustment(
+  data: CalculateAdjustmentRequest | null,
+) {
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["calculate-adjustment", data],
+    queryFn: () => calculateAdjustment(data as CalculateAdjustmentRequest),
+    enabled:
+      !!data?.orderId &&
+      !!data?.targetDeliveryType &&
+      Number.isFinite(data?.targetPageCount),
+  });
+
+  return {
+    response,
+    isLoading,
+    isError,
+    error: isError
+      ? (error as any)?.message ||
+        "An error occurred while calculating the adjustment"
       : null,
   };
 }

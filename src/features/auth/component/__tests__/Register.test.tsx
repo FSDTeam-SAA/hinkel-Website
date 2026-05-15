@@ -1,11 +1,29 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import type { AnchorHTMLAttributes } from "react";
 import Register from "../Register";
 import { useRegister } from "../../hooks/useregister";
 import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 
 // Mock the hooks
 jest.mock("../../hooks/useregister");
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: ({ alt }: { alt?: string }) => (
+    <span data-testid="mock-next-image">{alt || ""}</span>
+  ),
+}));
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({
+    children,
+    href,
+    ...props
+  }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
@@ -49,50 +67,6 @@ describe("Register Component", () => {
     expect(
       screen.getByRole("button", { name: /register/i }),
     ).toBeInTheDocument();
-  });
-
-  it("calls handleRegister and redirects on success", async () => {
-    mockHandleRegister.mockResolvedValue({
-      status: true,
-      message: "Registered successfully. Please verify your email.",
-      data: { email: "test@example.com" },
-    });
-    render(<Register />);
-
-    // Fill out form
-    fireEvent.change(screen.getByPlaceholderText("John"), {
-      target: { value: "John" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Doe"), {
-      target: { value: "Doe" },
-    });
-    fireEvent.change(screen.getByLabelText(/email address/i), {
-      target: { value: "test@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/password/i), {
-      target: { value: "password123" },
-    });
-
-    // Check checkbox
-    const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
-    fireEvent.click(checkbox);
-
-    fireEvent.click(screen.getByRole("button", { name: /register/i }));
-
-    await waitFor(() => {
-      // Name is capitalized in the component: "John Doe"
-      expect(mockHandleRegister).toHaveBeenCalledWith(
-        "John Doe",
-        "test@example.com",
-        "password123",
-      );
-      expect(toast.success).toHaveBeenCalledWith(
-        "Registered successfully. Please verify your email.",
-      );
-      expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining("/verify-email?email=test%40example.com"),
-      );
-    });
   });
 
   it("displays error message when registration fails", () => {

@@ -14,7 +14,6 @@ import {
   CheckCircle,
   Plus,
   Pencil,
-  Info,
   FileText,
   BookOpen,
   Printer,
@@ -26,6 +25,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import AddPagesModal from "./AddPagesModal";
+import UpgradePackageModal from "./UpgradePackageModal";
+import BookPreviewModal from "./BookPreviewModal";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -54,6 +55,8 @@ export default function FinalizeBookPage() {
   } = state;
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
+  const [isUpgradePackageOpen, setIsUpgradePackageOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Handle returning to the step user was at before previewing
   const handleReturnToCreation = () => {
@@ -68,22 +71,8 @@ export default function FinalizeBookPage() {
 
   const { uploadBook, isLoading: isUploading } = useUploadBook();
 
-  const handlePreview = async () => {
-    try {
-      setIsGenerating(true);
-      toast.success("Generating preview...");
-      const pdfBlob = await generateBookPdf(state);
-      const url = URL.createObjectURL(pdfBlob);
-      window.open(url, "_blank");
-
-      // Clean up the URL after a short delay
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-    } catch (error) {
-      console.error("Preview failed:", error);
-      toast.error("Failed to generate preview.");
-    } finally {
-      setIsGenerating(false);
-    }
+  const handlePreview = () => {
+    setIsPreviewOpen(true);
   };
 
   const handleComplete = async () => {
@@ -166,15 +155,10 @@ export default function FinalizeBookPage() {
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <Button
                 onClick={handlePreview}
-                disabled={isGenerating}
                 className="group bg-primary hover:bg-orange-600 animate-pulse text-white font-bold rounded-xl h-12 px-6 gap-2 w-full sm:w-auto shadow-lg shadow-primary/20 transition-all hover:scale-105"
               >
-                {isGenerating ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Eye className="w-4 h-4 transition-transform group-hover:scale-110" />
-                )}
-                {isGenerating ? "GENERATING..." : "PREVIEW PDF"}
+                <Eye className="w-4 h-4 transition-transform group-hover:scale-110" />
+                PREVIEW BOOK
               </Button>
               <Button
                 onClick={handleReturnToCreation}
@@ -196,7 +180,7 @@ export default function FinalizeBookPage() {
                 <h3 className="font-bold text-blue-900">Final Review Guide</h3>
                 <p className="text-sm text-blue-700 mt-1">
                   Take a moment to review your book&apos;s details. We recommend
-                  using the <span className="font-bold">Preview PDF</span>{" "}
+                  using the <span className="font-bold">Preview Book</span>{" "}
                   button to see exactly how your book will look when printed.
                 </p>
               </div>
@@ -267,9 +251,7 @@ export default function FinalizeBookPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() =>
-                            toast.info("This feature is coming soon.")
-                          }
+                          onClick={() => setIsAddPagesOpen(true)}
                           className="h-5 w-5 ml-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200"
                         >
                           <Plus className="h-3 w-3" />
@@ -286,15 +268,26 @@ export default function FinalizeBookPage() {
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Format
                       </p>
-                      <p className="text-xl font-bold text-gray-900 capitalize">
-                        {outputFormat === "pdf&printed"
-                          ? "Print & PDF"
-                          : outputFormat === "printed"
-                            ? "Printed Book"
-                            : outputFormat === "pdf"
-                              ? "Digital PDF"
-                              : outputFormat || "Not Selected"}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xl font-bold text-gray-900 capitalize">
+                          {outputFormat === "pdf&printed"
+                            ? "Print & PDF"
+                            : outputFormat === "printed"
+                              ? "Printed Book"
+                              : outputFormat === "pdf"
+                                ? "Digital PDF"
+                                : outputFormat || "Not Selected"}
+                        </p>
+                        {outputFormat !== "pdf&printed" ? (
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsUpgradePackageOpen(true)}
+                            className="h-8 rounded-full border-orange-200 px-3 text-xs font-semibold text-orange-700 hover:bg-orange-50"
+                          >
+                            Upgrade Package
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -469,6 +462,14 @@ export default function FinalizeBookPage() {
       <AddPagesModal
         isOpen={isAddPagesOpen}
         onClose={() => setIsAddPagesOpen(false)}
+      />
+      <UpgradePackageModal
+        isOpen={isUpgradePackageOpen}
+        onClose={() => setIsUpgradePackageOpen(false)}
+      />
+      <BookPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
       />
 
       {/* Finalizing Overlay */}

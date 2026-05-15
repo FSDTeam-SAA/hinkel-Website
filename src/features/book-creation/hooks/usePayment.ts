@@ -1,8 +1,12 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { confirmPayment } from "../api/pricing.api";
-import { ConfirmPaymentRequest, ConfirmPaymentResponse } from "../types";
+import { confirmAdjustmentPayment, confirmPayment } from "../api/pricing.api";
+import {
+  ConfirmAdjustmentPaymentRequest,
+  ConfirmPaymentRequest,
+  ConfirmPaymentResponse,
+} from "../types";
 
 export function useConfirmPayment() {
   const mutation = useMutation<
@@ -15,6 +19,24 @@ export function useConfirmPayment() {
 
   return {
     confirmPayment: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
+  };
+}
+
+export function useConfirmAdjustmentPayment() {
+  const mutation = useMutation<
+    ConfirmPaymentResponse,
+    Error,
+    ConfirmAdjustmentPaymentRequest
+  >({
+    mutationFn: (data: ConfirmAdjustmentPaymentRequest) =>
+      confirmAdjustmentPayment(data),
+  });
+
+  return {
+    confirmAdjustmentPayment: mutation.mutateAsync,
     isLoading: mutation.isPending,
     isError: mutation.isError,
     error: mutation.error,

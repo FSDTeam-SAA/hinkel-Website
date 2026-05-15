@@ -2,6 +2,7 @@ import type {
   BookState,
   BookStep,
   CheckoutIntent,
+  DeliveryType,
   OutputFormat,
 } from "../types";
 
@@ -67,6 +68,10 @@ export function resolvePostPaymentStep(
   checkoutIntent: CheckoutIntent | null,
   resumeStep: BookStep | null,
 ): BookStep {
+  if (checkoutIntent === "package_upgrade_checkout") {
+    return resolveAccessibleStep(state, "review");
+  }
+
   if (checkoutIntent === "add_pages_checkout") {
     const requestedStep = resumeStep === "review" ? "review" : "pages";
     return resolveAccessibleStep(state, requestedStep);
@@ -76,7 +81,7 @@ export function resolvePostPaymentStep(
 }
 
 export function outputFormatFromDeliveryType(
-  deliveryType?: string | null,
+  deliveryType?: DeliveryType | string | null,
 ): OutputFormat | null {
   switch (deliveryType) {
     case "digital":
@@ -85,6 +90,21 @@ export function outputFormatFromDeliveryType(
       return "printed";
     case "print&digital":
       return "pdf&printed";
+    default:
+      return null;
+  }
+}
+
+export function deliveryTypeFromOutputFormat(
+  outputFormat?: OutputFormat | null,
+): DeliveryType | null {
+  switch (outputFormat) {
+    case "pdf":
+      return "digital";
+    case "printed":
+      return "print";
+    case "pdf&printed":
+      return "print&digital";
     default:
       return null;
   }

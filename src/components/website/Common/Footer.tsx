@@ -182,7 +182,7 @@ const Footer = () => {
               className="inline-block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
             >
               <Image
-                src="/images/logo.png"
+                src="/images/new-logo.png"
                 alt="Company Logo"
                 width={250}
                 height={40}
