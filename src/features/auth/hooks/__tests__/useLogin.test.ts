@@ -32,7 +32,7 @@ describe("useLogin Hook", () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
-    expect(loginResult).toEqual({ error: null, ok: true });
+    expect(loginResult).toEqual({ success: true });
     expect(signIn).toHaveBeenCalledWith("credentials", {
       redirect: false,
       email: "test@example.com",

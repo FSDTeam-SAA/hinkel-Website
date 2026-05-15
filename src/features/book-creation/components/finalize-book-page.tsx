@@ -14,7 +14,6 @@ import {
   CheckCircle,
   Plus,
   Pencil,
-  Info,
   FileText,
   BookOpen,
   Printer,
@@ -26,6 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import AddPagesModal from "./AddPagesModal";
+import UpgradePackageModal from "./UpgradePackageModal";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -54,6 +54,7 @@ export default function FinalizeBookPage() {
   } = state;
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
+  const [isUpgradePackageOpen, setIsUpgradePackageOpen] = useState(false);
 
   // Handle returning to the step user was at before previewing
   const handleReturnToCreation = () => {
@@ -267,9 +268,7 @@ export default function FinalizeBookPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() =>
-                            toast.info("This feature is coming soon.")
-                          }
+                          onClick={() => setIsAddPagesOpen(true)}
                           className="h-5 w-5 ml-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200"
                         >
                           <Plus className="h-3 w-3" />
@@ -286,15 +285,26 @@ export default function FinalizeBookPage() {
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Format
                       </p>
-                      <p className="text-xl font-bold text-gray-900 capitalize">
-                        {outputFormat === "pdf&printed"
-                          ? "Print & PDF"
-                          : outputFormat === "printed"
-                            ? "Printed Book"
-                            : outputFormat === "pdf"
-                              ? "Digital PDF"
-                              : outputFormat || "Not Selected"}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xl font-bold text-gray-900 capitalize">
+                          {outputFormat === "pdf&printed"
+                            ? "Print & PDF"
+                            : outputFormat === "printed"
+                              ? "Printed Book"
+                              : outputFormat === "pdf"
+                                ? "Digital PDF"
+                                : outputFormat || "Not Selected"}
+                        </p>
+                        {outputFormat !== "pdf&printed" ? (
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsUpgradePackageOpen(true)}
+                            className="h-8 rounded-full border-orange-200 px-3 text-xs font-semibold text-orange-700 hover:bg-orange-50"
+                          >
+                            Upgrade Package
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -469,6 +479,10 @@ export default function FinalizeBookPage() {
       <AddPagesModal
         isOpen={isAddPagesOpen}
         onClose={() => setIsAddPagesOpen(false)}
+      />
+      <UpgradePackageModal
+        isOpen={isUpgradePackageOpen}
+        onClose={() => setIsUpgradePackageOpen(false)}
       />
 
       {/* Finalizing Overlay */}

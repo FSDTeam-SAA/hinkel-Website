@@ -67,10 +67,10 @@ export interface calculatePriceResponse {
   success: boolean;
   data: {
     pageCount: number;
-    pricePerPage: number;
     deliveryType: DeliveryType;
-    price: number;
+    pageTiers: { pageLimit: number; price: number }[];
     totalPrice: number;
+    totalAmountCents: number;
     currency: string;
   };
 }
@@ -78,17 +78,47 @@ export interface calculatePriceResponse {
 export interface ConfirmPaymentRequest {
   pageCount: number;
   deliveryType: DeliveryType;
-  orderId?: string;
+  userId?: string;
   bookType?: string;
   couponCode?: string;
-  checkoutIntent?: CheckoutIntent;
-  resumeStep?: BookStep;
 }
 
 export interface ConfirmPaymentResponse {
   success: boolean;
   sessionUrl: string;
   orderId: string;
+  totalPageCount?: number;
+  totalAmount?: number;
+}
+
+export interface CalculateAdjustmentRequest {
+  orderId: string;
+  targetDeliveryType: DeliveryType;
+  targetPageCount: number;
+}
+
+export interface AdjustmentQuote {
+  orderId: string;
+  currency: string;
+  currentDeliveryType: DeliveryType;
+  targetDeliveryType: DeliveryType;
+  currentPageCount: number;
+  targetPageCount: number;
+  currentTotalCents: number;
+  targetTotalCents: number;
+  deltaCents: number;
+}
+
+export interface CalculateAdjustmentResponse {
+  success: boolean;
+  data: AdjustmentQuote;
+}
+
+export interface ConfirmAdjustmentPaymentRequest {
+  orderId: string;
+  targetDeliveryType: DeliveryType;
+  targetPageCount: number;
+  checkoutIntent: CheckoutIntent;
 }
 
 export interface CheckPaymentStatusRequest {
@@ -103,7 +133,10 @@ export interface CheckPaymentStatusResponse {
   orderId?: string;
 }
 
-export type CheckoutIntent = "initial_checkout" | "add_pages_checkout";
+export type CheckoutIntent =
+  | "initial_checkout"
+  | "add_pages_checkout"
+  | "package_upgrade_checkout";
 
 /**
  * Book Creation Flow Types

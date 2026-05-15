@@ -99,7 +99,7 @@ const Pricing = () => {
         </div>
 
         <div className="relative">
-          {!isAuthenticated && (
+          {/* {!isAuthenticated && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6 bg-white/30 backdrop-blur-md rounded-3xl border border-white/50 shadow-xl">
               <div className="text-center max-w-md bg-white p-8 rounded-2xl shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-300">
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -130,13 +130,13 @@ const Pricing = () => {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
 
           <div
             className={cn(
               "grid grid-cols-1 md:grid-cols-3 gap-8 transition-all duration-500",
-              !isAuthenticated &&
-                "blur-[6px] grayscale-[0.5] select-none pointer-events-none",
+              // !isAuthenticated &&
+              //   "blur-[6px] grayscale-[0.5] select-none pointer-events-none",
             )}
           >
             {(isAuthenticated ? (prices as PricingTier[]) : dummyPrices).map(

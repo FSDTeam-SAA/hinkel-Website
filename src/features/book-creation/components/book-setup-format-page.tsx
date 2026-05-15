@@ -176,6 +176,7 @@ export default function BookSetupFormatPage() {
       const response = await confirmPayment({
         pageCount: selectedPages,
         deliveryType: deliveryTypeMap[selectedFormat],
+        userId: session.user.id,
         bookType: bookType,
         couponCode: appliedCoupon?.codeName,
       });

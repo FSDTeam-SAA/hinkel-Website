@@ -4,6 +4,76 @@ import { refreshAccessToken } from "@/features/auth/api/refresh-token.api";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
+type LoginPayload = {
+  success?: boolean;
+  status?: boolean;
+  message?: string;
+  data?: {
+    user?: {
+      _id?: string;
+      id?: string;
+      name?: string;
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      role?: string;
+      profileImage?: string | null;
+      refreshToken?: string;
+      image?: string | { url?: string | null } | null;
+    };
+    accessToken?: string;
+    refreshToken?: string;
+  };
+};
+
+type LoginUser = NonNullable<NonNullable<LoginPayload["data"]>["user"]>;
+
+function getCookieValue(cookieHeader: string | null, cookieName: string) {
+  if (!cookieHeader) {
+    return null;
+  }
+
+  const match = cookieHeader.match(
+    new RegExp(`(?:^|(?:,|;)\\s*)${cookieName}=([^;,\\s]+)`),
+  );
+
+  return match?.[1] ?? null;
+}
+
+function getDisplayName(user: LoginUser | undefined) {
+  if (!user) {
+    return "";
+  }
+
+  if (typeof user.name === "string" && user.name.trim()) {
+    return user.name.trim();
+  }
+
+  const firstName = user.firstName?.trim() ?? "";
+  const lastName = user.lastName?.trim() ?? "";
+  return [firstName, lastName].filter(Boolean).join(" ");
+}
+
+function getUserImage(user: LoginUser | undefined) {
+  if (!user) {
+    return "";
+  }
+
+  if (typeof user.profileImage === "string") {
+    return user.profileImage;
+  }
+
+  if (typeof user.image === "string") {
+    return user.image;
+  }
+
+  if (user.image && typeof user.image === "object") {
+    return user.image.url ?? "";
+  }
+
+  return "";
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -26,7 +96,7 @@ export const authOptions: NextAuthOptions = {
           }),
         });
 
-        const data = await res.json();
+        const data = (await res.json()) as LoginPayload;
 
         if (!res.ok) {
           throw new Error(
@@ -39,19 +109,35 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = data.data?.user;
+        const userId = user?._id || user?.id;
         const accessToken = data.data?.accessToken;
-        const refreshToken = data.data?.refreshToken;
+        const refreshToken =
+          data.data?.refreshToken ||
+          user?.refreshToken ||
+          getCookieValue(res.headers.get("set-cookie"), "refreshToken");
 
-        if (!user || !accessToken || !refreshToken) {
-          throw new Error("Invalid response from server");
+        if (!user || !userId || !accessToken || !refreshToken) {
+          throw new Error(
+            JSON.stringify({
+              status: res.status,
+              message:
+                "Login succeeded, but the server response was missing required auth fields.",
+              data: {
+                hasUser: Boolean(user),
+                hasUserId: Boolean(userId),
+                hasAccessToken: Boolean(accessToken),
+                hasRefreshToken: Boolean(refreshToken),
+              },
+            }),
+          );
         }
 
         return {
-          id: user._id || user.id,
-          name: user.name,
-          email: user.email,
-          image: user.profileImage,
-          role: user.role,
+          id: userId,
+          name: getDisplayName(user) || user.email || "User",
+          email: user.email || credentials.email,
+          image: getUserImage(user),
+          role: user.role || "user",
           token: accessToken,
           refreshToken,
         };

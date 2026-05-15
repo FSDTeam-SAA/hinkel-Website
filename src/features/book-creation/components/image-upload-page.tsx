@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  ImagePlus,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useBookStore } from "@/features/book-creation/store/book-store";

@@ -78,6 +78,10 @@ function getAspect(w: number, h: number): AspectClass {
   return "square";
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof globalThis.Error ? error.message : fallback;
+}
+
 /** Read the ftyp box to detect HEIC without relying on MIME type */
 async function sniffHeic(file: File): Promise<boolean> {
   try {
@@ -95,7 +99,7 @@ function loadImg(src: string): Promise<HTMLImageElement> {
   return new Promise((res, rej) => {
     const img = new window.Image();
     img.onload = () => res(img);
-    img.onerror = () => rej(new Error("Could not decode image"));
+    img.onerror = () => rej(new globalThis.Error("Could not decode image"));
     img.src = src;
   });
 }
@@ -316,12 +320,9 @@ function SketchCard({
       transition={{ delay: index * 0.04 }}
       className="group flex flex-col gap-1.5"
     >
-      <button
-        onClick={onSelect}
-        aria-label={`Select sketch ${index + 1}`}
+      <div
         className={`
           relative w-full ${ratioClass} rounded-2xl overflow-hidden border-2 transition-all duration-200
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400
           ${
             isSelected
               ? "border-amber-500 ring-4 ring-amber-500/15 shadow-md shadow-amber-500/10"
@@ -329,6 +330,12 @@ function SketchCard({
           }
         `}
       >
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-label={`Select sketch ${index + 1}`}
+          className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+        />
         <Image
           src={src}
           alt={`Sketch ${index + 1}`}
@@ -342,13 +349,14 @@ function SketchCard({
 
         {/* Zoom btn */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onZoom();
           }}
           aria-label="Zoom in"
           className="
-            absolute top-2 right-2 p-1.5 rounded-lg bg-white/85 backdrop-blur-sm shadow
+            absolute top-2 right-2 z-20 p-1.5 rounded-lg bg-white/85 backdrop-blur-sm shadow
             opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity
           "
         >
@@ -368,7 +376,7 @@ function SketchCard({
             </motion.div>
           )}
         </AnimatePresence>
-      </button>
+      </div>
 
       <p
         className={`text-center text-[11px] font-medium transition-colors ${
@@ -657,6 +665,23 @@ export default function CoverPageTestPage() {
       ? variantMeta[selectedCoverVariantIndex]
       : variantMeta[0];
 
+  useEffect(() => {
+    if (!coverImageVariants.length) {
+      return;
+    }
+
+    if (
+      selectedCoverVariantIndex === null ||
+      selectedCoverVariantIndex >= coverImageVariants.length
+    ) {
+      setSelectedCoverVariant(0);
+    }
+  }, [
+    coverImageVariants.length,
+    selectedCoverVariantIndex,
+    setSelectedCoverVariant,
+  ]);
+
   const canGenerate = isAdmin || canGenerateCover();
   const hasVariants = coverImageVariants.length > 0;
   const loading = processing || generating;
@@ -678,8 +703,7 @@ export default function CoverPageTestPage() {
       setPendingImage(dataUrl);
       setIsModalOpen(true);
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Failed to process image.";
+      const msg = getErrorMessage(err, "Failed to process image.");
       setUploadError(msg);
       toast.error(msg);
     } finally {

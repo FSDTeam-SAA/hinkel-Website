@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBookStore } from "../store/book-store";
-import { useCalculatePrice } from "../hooks/usePricing";
-import { useConfirmPayment } from "../hooks/usePayment";
+import { useCalculateAdjustment } from "../hooks/usePricing";
+import { useConfirmAdjustmentPayment } from "../hooks/usePayment";
 import { useSession } from "next-auth/react";
 import { Loader2, Plus, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { DeliveryType, OutputFormat } from "../types";
 import { savePaymentContext } from "../utils/payment-context";
+import { deliveryTypeFromOutputFormat } from "../utils/step-flow";
 
 interface AddPagesModalProps {
   isOpen: boolean;
@@ -38,24 +38,22 @@ export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
     setPendingResumeStep,
   } = useBookStore();
   const { data: session } = useSession();
+  const deliveryType = deliveryTypeFromOutputFormat(outputFormat) ?? "digital";
+  const targetPageCount = pageCount + extraCount;
 
-  // Map output format to API delivery type
-  const deliveryTypeMap: Record<OutputFormat, DeliveryType> = {
-    pdf: "digital",
-    printed: "print",
-    "pdf&printed": "print&digital",
-  };
+  const { response: adjustmentData, isLoading: isCalculating } =
+    useCalculateAdjustment(
+      orderId
+        ? {
+            orderId,
+            targetDeliveryType: deliveryType,
+            targetPageCount,
+          }
+        : null,
+    );
 
-  const deliveryType = outputFormat ? deliveryTypeMap[outputFormat] : "digital";
-
-  const { response: pricingData, isLoading: isCalculating } = useCalculatePrice(
-    {
-      pageCount: extraCount,
-      deliveryType,
-    },
-  );
-
-  const { confirmPayment, isLoading: isConfirming } = useConfirmPayment();
+  const { confirmAdjustmentPayment, isLoading: isConfirming } =
+    useConfirmAdjustmentPayment();
 
   const handlePay = async () => {
     if (!session?.user?.id) {
@@ -69,19 +67,20 @@ export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
     }
 
     try {
-      const response = await confirmPayment({
-        pageCount: extraCount,
-        deliveryType,
-        orderId: orderId,
+      const response = await confirmAdjustmentPayment({
+        orderId,
+        targetDeliveryType: deliveryType,
+        targetPageCount,
+        checkoutIntent: "add_pages_checkout",
       });
 
       if (response.success && response.sessionUrl) {
-        setPendingPageCount(pageCount + extraCount);
+        setPendingPageCount(targetPageCount);
         setPendingCheckoutIntent("add_pages_checkout");
         setPendingResumeStep(step);
         savePaymentContext({
           orderId,
-          pageCount: pageCount + extraCount,
+          pageCount: targetPageCount,
           outputFormat: outputFormat ?? null,
           checkoutIntent: "add_pages_checkout",
           resumeStep: step,
@@ -134,14 +133,28 @@ export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span className="text-sm">Calculating price...</span>
               </div>
-            ) : pricingData?.success ? (
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 text-sm">
-                  {extraCount} pages @ {pricingData.data.pricePerPage} / page
-                </span>
-                <span className="text-xl font-bold text-orange-600">
-                  ${pricingData.data.totalPrice}
-                </span>
+            ) : adjustmentData?.success ? (
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between items-center text-gray-600">
+                  <span>Current total</span>
+                  <span>
+                    ${(adjustmentData.data.currentTotalCents / 100).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-gray-600">
+                  <span>New total ({targetPageCount} pages)</span>
+                  <span>
+                    ${(adjustmentData.data.targetTotalCents / 100).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-orange-100">
+                  <span className="font-semibold text-gray-800">
+                    Additional amount due
+                  </span>
+                  <span className="text-xl font-bold text-orange-600">
+                    ${(adjustmentData.data.deltaCents / 100).toFixed(2)}
+                  </span>
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-2 text-red-500">
@@ -161,7 +174,9 @@ export default function AddPagesModal({ isOpen, onClose }: AddPagesModalProps) {
           </Button>
           <Button
             onClick={handlePay}
-            disabled={isConfirming || !pricingData?.success || extraCount < 1}
+            disabled={
+              isConfirming || !adjustmentData?.success || extraCount < 1
+            }
             className="bg-orange-500 hover:bg-orange-600 h-12 px-8 rounded-xl font-semibold gap-2 min-w-[140px]"
           >
             {isConfirming ? (
