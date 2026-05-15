@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useAllOrders, Order } from "@/features/dashboard/hooks/useAllOrders";
 import { useStatusUpdate } from "@/features/dashboard/hooks/useStatusUpdate";
 import {
@@ -28,6 +27,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
+import RejectReasonDialog from "@/components/dashboard/RejectReasonDialog";
+import { toast } from "sonner";
 
 const getStatusStyles = (status: string) => {
   const base =
@@ -70,6 +71,8 @@ const RecentOrdersTable = () => {
   const { updateStatus } = useStatusUpdate();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeUpdatingId, setActiveUpdatingId] = useState<string | null>(null);
+  const [rejectingOrder, setRejectingOrder] = useState<Order | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const getAdminBookUrl = (order: Order) => {
     if (order.bookViewUrl) {
@@ -90,12 +93,47 @@ const RecentOrdersTable = () => {
   };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    const selected = orders.find((order) => order._id === orderId) || null;
+
+    if (newStatus === "rejected") {
+      setRejectingOrder(selected);
+      setRejectionReason("");
+      return;
+    }
+
     setActiveUpdatingId(orderId);
     try {
       await updateStatus(orderId, newStatus);
+      toast.success("Delivery status updated");
       refetch();
     } catch (err) {
       console.error("Failed to update status", err);
+      toast.error("Failed to update status");
+    } finally {
+      setActiveUpdatingId(null);
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectingOrder || !rejectionReason.trim()) {
+      return;
+    }
+
+    setActiveUpdatingId(rejectingOrder._id);
+
+    try {
+      await updateStatus(
+        rejectingOrder._id,
+        "rejected",
+        rejectionReason.trim(),
+      );
+      toast.success("Book rejected successfully");
+      setRejectingOrder(null);
+      setRejectionReason("");
+      refetch();
+    } catch (err) {
+      console.error("Failed to reject order", err);
+      toast.error("Failed to reject book");
     } finally {
       setActiveUpdatingId(null);
     }
@@ -196,7 +234,7 @@ const RecentOrdersTable = () => {
                       onValueChange={(value) =>
                         handleStatusChange(order._id, value)
                       }
-                      disabled={activeUpdatingId !== null}
+                      disabled={order.deliveryStatus != "pending"}
                     >
                       <SelectTrigger
                         className={`appearance-none cursor-pointer outline-none border-none w-auto ${getStatusStyles(order.deliveryStatus || "pending")}`}
@@ -215,21 +253,16 @@ const RecentOrdersTable = () => {
               <td className="py-4 px-4 text-right">
                 <div className="flex items-center justify-end gap-2">
                   {order.hasBook && order.bookThumbnail && (
-                    <Link
-                      href={order.bookThumbnail || "#"}
-                      target="_blank"
-                      rel="noopener noreferrerx"
+                    <Button
+                      variant="outline"
+                      onClick={() => openBookInNewTab(order)}
+                      className="inline-flex items-center gap-1 p-2 rounded-md text-[#FF8B36] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
+                      title="View Book"
+                      aria-label="View book (opens in new tab)"
                     >
-                      <Button
-                        variant="outline"
-                        className="inline-flex items-center gap-1 p-2 rounded-md text-[#FF8B36] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
-                        title="View Book"
-                        aria-label="View book (opens in new tab)"
-                      >
-                        <ExternalLink size={16} aria-hidden="true" />
-                        <span className="hidden sm:inline">View Book</span>
-                      </Button>
-                    </Link>
+                      <ExternalLink size={16} aria-hidden="true" />
+                      <span className="hidden sm:inline">View Book</span>
+                    </Button>
                   )}
                   <Button
                     onClick={() => setSelectedOrder(order)}
@@ -444,6 +477,22 @@ const RecentOrdersTable = () => {
           )}
         </DialogContent>
       </Dialog>
+      <RejectReasonDialog
+        isOpen={!!rejectingOrder}
+        order={rejectingOrder}
+        reason={rejectionReason}
+        isSubmitting={
+          !!rejectingOrder && activeUpdatingId === rejectingOrder._id
+        }
+        onReasonChange={setRejectionReason}
+        onClose={() => {
+          if (!activeUpdatingId) {
+            setRejectingOrder(null);
+            setRejectionReason("");
+          }
+        }}
+        onConfirm={handleRejectConfirm}
+      />
     </div>
   );
 };

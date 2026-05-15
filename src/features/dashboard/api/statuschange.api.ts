@@ -2,13 +2,18 @@
 
 import { api } from "@/lib/api";
 
-export async function changeOrderStatus(orderId: string, deliveryStatus: string) {
+export async function changeOrderStatus(
+  orderId: string,
+  deliveryStatus: string,
+  rejectionReason?: string,
+) {
   try {
     const res = await api.patch("/order/update-delivery-status", {
       orderId,
       deliveryStatus,
+      rejectionReason,
     });
-    
+
     return res.data;
   } catch (error) {
     console.error("Error changing order status:", error);

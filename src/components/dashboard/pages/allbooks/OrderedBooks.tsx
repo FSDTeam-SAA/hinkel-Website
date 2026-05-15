@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import RejectReasonDialog from "@/components/dashboard/RejectReasonDialog";
 
 const OrderedBooks = () => {
   const [activeTab, setActiveTab] = React.useState<"active" | "archived">(
@@ -46,6 +47,10 @@ const OrderedBooks = () => {
   const [sortOrder, setSortOrder] = React.useState("desc");
   const [page, setPage] = React.useState(1);
   const limit = 9;
+  const [rejectingOrder, setRejectingOrder] = React.useState<Order | null>(
+    null,
+  );
+  const [rejectionReason, setRejectionReason] = React.useState("");
 
   // Debounce search
   React.useEffect(() => {
@@ -106,12 +111,40 @@ const OrderedBooks = () => {
   };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    const selected = orders.find((order) => order._id === orderId) || null;
+
+    if (newStatus === "rejected") {
+      setRejectingOrder(selected);
+      setRejectionReason("");
+      return;
+    }
+
     try {
       await updateStatus(orderId, newStatus);
       toast.success("Delivery status synchronized");
       refetch(); // Refresh the list
     } catch {
       toast.error("Failed to update delivery protocol");
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectingOrder || !rejectionReason.trim()) {
+      return;
+    }
+
+    try {
+      await updateStatus(
+        rejectingOrder._id,
+        "rejected",
+        rejectionReason.trim(),
+      );
+      toast.success("Book rejected successfully");
+      setRejectingOrder(null);
+      setRejectionReason("");
+      refetch();
+    } catch {
+      toast.error("Failed to reject book");
     }
   };
 
@@ -596,6 +629,20 @@ const OrderedBooks = () => {
           </button>
         </div>
       )}
+      <RejectReasonDialog
+        isOpen={!!rejectingOrder}
+        order={rejectingOrder}
+        reason={rejectionReason}
+        isSubmitting={isUpdating}
+        onReasonChange={setRejectionReason}
+        onClose={() => {
+          if (!isUpdating) {
+            setRejectingOrder(null);
+            setRejectionReason("");
+          }
+        }}
+        onConfirm={handleRejectConfirm}
+      />
     </div>
   );
 };
