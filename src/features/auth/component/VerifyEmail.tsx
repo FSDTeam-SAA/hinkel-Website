@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Mail, RefreshCcw, ShieldCheck } from "lucide-react";
 import { useEmailVerification } from "../hooks/useEmailVerification";
 import { buildAuthPath } from "../lib/auth-routes";
+import { markEmailAsRecentlyVerified } from "../lib/recent-email-verification";
 
 const OTP_LENGTH = 6;
 const DEFAULT_RESEND_SECONDS = 60;
@@ -122,6 +123,10 @@ const VerifyEmail = () => {
 
     const response = await verifyEmail(email, code);
     if (!response) return;
+
+    if (response.data?.isVerified) {
+      markEmailAsRecentlyVerified(email);
+    }
 
     resetCode();
     window.setTimeout(() => {

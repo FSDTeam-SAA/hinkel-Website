@@ -1,6 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { useLogin } from "../uselogin";
 import { signIn } from "next-auth/react";
+import { markEmailAsRecentlyVerified } from "../../lib/recent-email-verification";
 
 jest.mock("next-auth/react", () => ({
   signIn: jest.fn(),
@@ -9,6 +10,7 @@ jest.mock("next-auth/react", () => ({
 describe("useLogin Hook", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.sessionStorage.clear();
   });
 
   it("should initialize with default states", () => {
@@ -64,5 +66,83 @@ describe("useLogin Hook", () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe("Something went wrong");
+  });
+
+  it("retries login once for a recently verified email before surfacing OTP flow", async () => {
+    jest.useFakeTimers();
+    markEmailAsRecentlyVerified("test@example.com");
+
+    (signIn as jest.Mock)
+      .mockResolvedValueOnce({
+        error: JSON.stringify({
+          status: 403,
+          message: "Please verify your email",
+          data: {
+            email: "test@example.com",
+            maskedEmail: "te***@example.com",
+            expiresInMinutes: 15,
+            resendCooldownSeconds: 60,
+            verificationRequired: true,
+          },
+        }),
+      })
+      .mockResolvedValueOnce({ error: null, ok: true });
+
+    const { result } = renderHook(() => useLogin());
+
+    let loginResult;
+    await act(async () => {
+      const loginPromise = result.current.handleLogin(
+        "test@example.com",
+        "password",
+      );
+      await jest.advanceTimersByTimeAsync(900);
+      loginResult = await loginPromise;
+    });
+
+    expect(signIn).toHaveBeenCalledTimes(2);
+    expect(loginResult).toEqual({ success: true });
+    expect(result.current.error).toBeNull();
+    jest.useRealTimers();
+  });
+
+  it("does not retry login for unverified users without a recent verification marker", async () => {
+    (signIn as jest.Mock).mockResolvedValue({
+      error: JSON.stringify({
+        status: 403,
+        message: "Please verify your email",
+        data: {
+          email: "test@example.com",
+          maskedEmail: "te***@example.com",
+          expiresInMinutes: 15,
+          resendCooldownSeconds: 60,
+          verificationRequired: true,
+        },
+      }),
+    });
+
+    const { result } = renderHook(() => useLogin());
+
+    let loginResult;
+    await act(async () => {
+      loginResult = await result.current.handleLogin(
+        "test@example.com",
+        "password",
+      );
+    });
+
+    expect(signIn).toHaveBeenCalledTimes(1);
+    expect(loginResult).toEqual({
+      success: false,
+      message: "Please verify your email",
+      verification: {
+        email: "test@example.com",
+        maskedEmail: "te***@example.com",
+        expiresInMinutes: 15,
+        resendCooldownSeconds: 60,
+        verificationRequired: true,
+      },
+    });
+    expect(result.current.error).toBe("Please verify your email");
   });
 });
