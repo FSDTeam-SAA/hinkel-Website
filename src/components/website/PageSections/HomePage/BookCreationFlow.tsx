@@ -11,8 +11,14 @@ const steps = [
   {
     id: 1,
     title: "Start Your Creative Session",
-    description:
-      "Create a free, temporary profile. At sketchLabs, your memories stay yours. Your account is private and temporary; we permanently clear all data and photos once your book is complete, ensuring your personal moments are never stored long-term.",
+    description: (
+      <>
+        Create a free, temporary profile. At sktch<b>LABS</b>, your memories
+        stay yours. Your account is private and temporary; we permanently clear
+        all data and photos once your book is complete, ensuring your personal
+        moments are never stored long-term.
+      </>
+    ),
     icon: Book,
     color: "bg-blue-100 text-blue-600",
   },
@@ -36,7 +42,7 @@ const steps = [
     id: 4,
     title: "Explore, Review & Publish",
     description:
-      "Choose your favorite versions. For every page, you can generate up to three distinct variations to find the conversion that best captures the spirit of your memory. Once you’ve selected your favorites and flipped through the Review Gallery, hit 'Finalize' to bring your masterpiece to life.",
+      "Choose your favorite photo for each page. You can generate up to three variations of your photos to find the one you like best. Once you’ve selected your favorite, move to the next page until your perfect coloring/sketch book has been created.",
     icon: Wand2,
     color: "bg-amber-100 text-amber-600",
   },
@@ -75,8 +81,8 @@ const BookCreationFlow = () => {
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
-            From Photo to{" "}
-            <span className="text-primary italic">Masterpiece</span>
+            From Photo to
+            <span className="text-primary italic"> Custom Creation</span>
           </h2>
           <p className="text-lg text-gray-600 leading-relaxed">
             Create your personalized coloring book in 5 simple, creative steps.
