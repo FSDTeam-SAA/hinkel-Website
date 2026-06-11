@@ -3,9 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-interface PricingProps {
-  prices: PricingData[];
-}
+import { getPublicPricing } from "@/lib/public-api";
 
 const FALLBACK_PRICES: PricingData[] = [
   {
@@ -34,33 +32,124 @@ const FALLBACK_PRICES: PricingData[] = [
   },
 ];
 
-const Pricing = ({ prices }: PricingProps) => {
-  const tiers = prices.length > 0 ? prices : FALLBACK_PRICES;
+const TIER_CONTENT: Record<
+  PricingData["deliveryType"],
+  {
+    title: string;
+    subtitle: string;
+    features: string[];
+  }
+> = {
+  digital: {
+    title: "Digital PDF",
+    subtitle: "Delivered to your inbox",
+    features: [
+      "Design studio access",
+      "Up to 3 photo conversions per page",
+      "Personalized cover page",
+      "Premium print quality pages",
+      "PDF delivered to your inbox instantly",
+      "Print at home as often as you'd like",
+    ],
+  },
+  print: {
+    title: "Printed Book",
+    subtitle: "Delivered to your door",
+    features: [
+      "Design studio access",
+      "Up to 3 photo conversions per page",
+      "Premium print quality pages",
+      "Delivered to your home within 7-11 business days",
+    ],
+  },
+  "print&digital": {
+    title: "Digital PDF & Printed Book",
+    subtitle: "Delivered to your door and inbox",
+    features: [
+      "All the benefits listed above",
+      "Get your book delivered",
+      "PDF delivered to your inbox for printing",
+      "Adding the PDF adds minimal cost",
+    ],
+  },
+};
 
-  const getTierTitle = (type: string) => {
-    switch (type) {
-      case "digital":
-        return "Digital PDF";
-      case "print":
-        return "Printed Book";
-      case "print&digital":
-        return "Digital PDF & Printed Book";
-      default:
-        return type;
+const DELIVERY_ORDER: PricingData["deliveryType"][] = [
+  "digital",
+  "print",
+  "print&digital",
+];
+
+const Pricing = async () => {
+  const pricingData = await getPublicPricing();
+  const tiersFromApi = pricingData.data || [];
+
+  const normalizeDeliveryType = (
+    type: string,
+  ): PricingData["deliveryType"] | null => {
+    if (type === "both") return "print&digital";
+    if (type === "digital" || type === "print" || type === "print&digital") {
+      return type;
+    }
+    return null;
+  };
+
+  const normalizedApiTiers: PricingData[] = [];
+  const normalizedTierMap = new Map<PricingData["deliveryType"], PricingData>();
+
+  for (const tier of tiersFromApi) {
+    const normalizedType = normalizeDeliveryType(
+      String(
+        (tier as PricingData & { deliveryType?: string }).deliveryType || "",
+      ),
+    );
+    if (!normalizedType) continue;
+
+    const normalizedTier: PricingData = {
+      ...tier,
+      deliveryType: normalizedType,
+    };
+    const existing = normalizedTierMap.get(normalizedType);
+
+    // Prefer an entry that has page tiers populated when duplicates exist.
+    if (!existing || (existing.pageTiers?.length || 0) === 0) {
+      normalizedTierMap.set(normalizedType, normalizedTier);
+    }
+  }
+
+  normalizedApiTiers.push(...normalizedTierMap.values());
+
+  const tiers =
+    normalizedApiTiers.length > 0 ? normalizedApiTiers : FALLBACK_PRICES;
+  tiers.sort(
+    (a, b) =>
+      DELIVERY_ORDER.indexOf(a.deliveryType) -
+      DELIVERY_ORDER.indexOf(b.deliveryType),
+  );
+
+  const formatPrice = (price?: number, currency = "USD") => {
+    if (price === undefined || price === null) return "--";
+
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency,
+        minimumFractionDigits: Number.isInteger(price) ? 0 : 2,
+        maximumFractionDigits: Number.isInteger(price) ? 0 : 2,
+      }).format(price);
+    } catch {
+      return `${currency === "USD" ? "$" : `${currency} `}${price}`;
     }
   };
 
-  const getTierSubtitle = (type: string) => {
-    switch (type) {
-      case "digital":
-        return "Delivered by email";
-      case "print":
-        return "Shipped to you";
-      case "print&digital":
-        return "Email + print delivery";
-      default:
-        return "";
-    }
+  const getTierContent = (type: PricingData["deliveryType"]) => {
+    return (
+      TIER_CONTENT[type] || {
+        title: type,
+        subtitle: "",
+        features: [],
+      }
+    );
   };
 
   return (
@@ -68,12 +157,13 @@ const Pricing = ({ prices }: PricingProps) => {
       <div className="max-w-6xl w-full">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Simple, Transparent{" "}
-            <span className="text-primary italic">Pricing</span>
+            Simple Pricing for{" "}
+            <span className="text-primary italic">Endless Creativity.</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose the perfect format for your creative masterpiece. From
-            email-delivered digital PDFs to professionally printed books.
+            Choose the option that fits your project. Whether it&apos;s a
+            printed coloring or sketchbook, a downloadable PDF, or both,
+            we&apos;ve got you covered
           </p>
         </div>
 
@@ -85,7 +175,8 @@ const Pricing = ({ prices }: PricingProps) => {
           >
             {tiers.map((tier, index: number) => {
               const deliveryType = tier.deliveryType;
-              const isPopular = deliveryType === "print";
+              const isPopular = index === tiers.length - 1;
+              const tierContent = getTierContent(deliveryType);
               const sortedTiers = [...(tier.pageTiers || [])].sort(
                 (a, b) => a.pageLimit - b.pageLimit,
               );
@@ -110,27 +201,26 @@ const Pricing = ({ prices }: PricingProps) => {
 
                   <div className="mb-8">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {getTierTitle(deliveryType)}
+                      {tierContent.title}
                     </h3>
                     <p className="text-gray-500 text-sm">
-                      {getTierSubtitle(deliveryType)}
+                      {tierContent.subtitle}
                     </p>
                   </div>
 
                   <div className="mb-8">
-                    <div className="flex items-baseline gap-1 mb-4">
-                      <span className="text-4xl font-extrabold text-gray-900">
-                        {currency === "USD" ? "$" : ""}
-                        {displayPrice || "--"}
-                      </span>
-                      <span className="text-gray-500 font-medium">
+                    <div className="mb-4">
+                      <span className="block text-gray-500 font-medium mb-1">
                         Starting at
+                      </span>
+                      <span className="text-4xl font-extrabold text-gray-900">
+                        {formatPrice(displayPrice, currency)}
                       </span>
                     </div>
 
                     <div className="space-y-2 pt-4 border-t border-gray-50">
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-                        Page Tiers
+                        # of Pages
                       </p>
                       {sortedTiers?.map((t, i) => (
                         <div
@@ -138,11 +228,10 @@ const Pricing = ({ prices }: PricingProps) => {
                           className="flex justify-between items-center py-1.5"
                         >
                           <span className="text-sm text-gray-600 font-medium">
-                            Up to {t.pageLimit} Pages
+                            {t.pageLimit} Pages
                           </span>
                           <span className="text-sm font-bold text-primary">
-                            {currency === "USD" ? "$" : ""}
-                            {t.price}
+                            {formatPrice(t.price, currency)}
                           </span>
                         </div>
                       ))}
@@ -150,17 +239,7 @@ const Pricing = ({ prices }: PricingProps) => {
                   </div>
 
                   <ul className="space-y-4 mb-8 grow">
-                    {[
-                      "AI-Powered Sketch Generation",
-                      "Personalized Cover Art",
-                      "Community Access",
-                      deliveryType === "digital"
-                        ? "High-Resolution PDF"
-                        : "Premium Print Quality",
-                      deliveryType === "print&digital"
-                        ? "Both Formats Included"
-                        : "Fast Turnaround",
-                    ].map((feature, i) => (
+                    {tierContent.features.map((feature, i) => (
                       <li
                         key={i}
                         className="flex items-center gap-3 text-sm text-gray-600"
@@ -180,7 +259,7 @@ const Pricing = ({ prices }: PricingProps) => {
                           : "bg-gray-100 hover:bg-gray-200 text-gray-900",
                       )}
                     >
-                      Start Designing
+                      Start creating NOW!
                     </Button>
                   </Link>
                 </div>

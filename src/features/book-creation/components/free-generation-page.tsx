@@ -6,6 +6,11 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle2,
+  Camera,
+  CreditCard,
+  PackageCheck,
+  BookOpen,
+  WandSparkles,
 } from "lucide-react";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import { useGeneratePreview } from "@/features/book-creation/hooks/useGeneratePreview";
@@ -59,6 +64,45 @@ export default function FreeGenerationPage() {
 
   const freeGenerationsUsed = generationCounts.cover;
   const canGenerate = isAdmin || canGenerateCover();
+  const hasUnusedTries =
+    (canGenerate || isAdmin) &&
+    coverImageVariants.length > 0 &&
+    coverImageVariants.length < GENERATION_LIMITS.MAX_COVER;
+  const introSteps = [
+    {
+      icon: Camera,
+      title: "Free cover photos",
+      description:
+        "Upload your first two photos for free and select the cover you love most.",
+    },
+    {
+      icon: PackageCheck,
+      title: "Choose delivery",
+      description: "Pick PDF, Print, or PDF + Print as your preferred format.",
+    },
+    {
+      icon: CreditCard,
+      title: "Start creating",
+      description: "Process payment and begin the book creation process.",
+    },
+  ];
+  const previewSteps = [
+    {
+      icon: Camera,
+      title: "Upload Photo",
+      description: "PNG, JPG, or WEBP up to 10MB",
+    },
+    {
+      icon: WandSparkles,
+      title: "Get Sketch",
+      description: "Preview an AI-made cover option",
+    },
+    {
+      icon: BookOpen,
+      title: "Build Book",
+      description: "Choose your favorite, then continue",
+    },
+  ];
 
   const currentTypeFromUrl = searchParams.get("type");
 
@@ -181,13 +225,28 @@ export default function FreeGenerationPage() {
               Try Before You Buy
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              See Your Photos as Sketches
+              Get started creating your custom book
             </h1>
             <p className="text-lg text-muted-foreground">
-              Try up to {GENERATION_LIMITS.MAX_COVER} free cover ideas before
-              payment. We&apos;ll help you choose your favorite and then
-              continue to book setup.
+              Convert your first {GENERATION_LIMITS.MAX_COVER} photos for free,
+              before moving forward in the book creation process
             </p>
+            <div className="mt-6 grid gap-3 text-left sm:grid-cols-3">
+              {introSteps.map(({ icon: Icon, title, description }) => (
+                <div
+                  key={title}
+                  className="group rounded-2xl border border-orange-100 bg-white/85 p-4 shadow-sm shadow-orange-950/5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md"
+                >
+                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-600 ring-1 ring-orange-100 transition-colors group-hover:bg-orange-600 group-hover:text-white">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <p className="text-sm font-bold text-foreground">{title}</p>
+                  <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                    {description}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <BookStyleSelector
@@ -201,12 +260,9 @@ export default function FreeGenerationPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold text-orange-900">
-                    You get {GENERATION_LIMITS.MAX_COVER} free tries to find the
-                    perfect cover
-                  </p>
-                  <p className="text-xs sm:text-sm text-orange-700 mt-1">
-                    Upload a photo, review each sketch, and choose the one that
-                    feels right before you pay.
+                    <b>Cover page: </b>
+                    Upload your first two FREE photos and see them turn into
+                    sketch art!
                   </p>
                 </div>
                 {!isAdmin && (
@@ -278,7 +334,9 @@ export default function FreeGenerationPage() {
               >
                 <ArrowUpFromLine className="w-5 h-5" />
                 {canGenerate || isAdmin
-                  ? "Upload Photo for a Cover Try"
+                  ? hasUnusedTries
+                    ? "Upload 2nd Photo — 1 Free Try Left"
+                    : "Upload Photo for a Cover Try"
                   : `${GENERATION_LIMITS.MAX_COVER}/${GENERATION_LIMITS.MAX_COVER} Cover Tries Used — Continue Below`}
               </div>
             </label>
@@ -287,7 +345,7 @@ export default function FreeGenerationPage() {
             {coverImageVariants.length > 0 && (
               <div className="mt-8">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
-                  Your Cover Options — Pick Your Favourite
+                  YOUR COVER PAGE OPTIONS: SELECT YOUR FAVORITE
                 </p>
                 <div
                   className={`grid gap-4 ${
@@ -328,35 +386,56 @@ export default function FreeGenerationPage() {
               </div>
             )}
 
+            {/* Nudge to use remaining free try */}
+            {hasUnusedTries && (
+              <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-4 flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-orange-900">
+                    You have 1 free try left — upload a second photo to compare
+                    options!
+                  </p>
+                  <p className="text-xs text-orange-700 mt-1">
+                    Try a different photo or angle. Pick the sketch you love
+                    most before continuing.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* How-it-works row (only before any generation) */}
             {coverImageVariants.length === 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-border">
-                <div className="text-center">
-                  <div className="text-2xl mb-2">📷</div>
-                  <p className="text-sm font-medium text-foreground">
-                    Upload Photo
+              <div className="mt-8 border-t border-border pt-8">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                    What happens next
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    PNG, JPG up to 10MB
-                  </p>
+                  <div className="hidden h-px flex-1 bg-gradient-to-r from-orange-100 to-transparent sm:block" />
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl mb-2">✨</div>
-                  <p className="text-sm font-medium text-foreground">
-                    Get Sketch
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    AI-powered conversion
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl mb-2">📕</div>
-                  <p className="text-sm font-medium text-foreground">
-                    Build Book
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Then set up &amp; pay
-                  </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {previewSteps.map(
+                    ({ icon: Icon, title, description }, index) => (
+                      <div
+                        key={title}
+                        className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/70 p-4 text-left transition-all hover:border-orange-200 hover:bg-white hover:shadow-sm"
+                      >
+                        <div className="mb-4 flex items-center justify-between">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-orange-600 shadow-sm ring-1 ring-orange-100">
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-xs font-black text-orange-700">
+                            {index + 1}
+                          </span>
+                        </div>
+                        <p className="text-sm font-bold text-foreground">
+                          {title}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          {description}
+                        </p>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             )}
@@ -368,13 +447,15 @@ export default function FreeGenerationPage() {
               onClick={() => setStep("setup")}
               className={cn(
                 "w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-base transition-all h-14",
-                coverImageVariants.length > 0
+                coverImageVariants.length > 0 && !hasUnusedTries
                   ? "bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20"
-                  : "bg-gray-100 text-gray-500 hover:bg-gray-200",
+                  : coverImageVariants.length > 0
+                    ? "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+                    : "bg-gray-100 text-gray-500 hover:bg-gray-200",
               )}
             >
               <span>
-                {coverImageVariants.length > 0
+                {coverImageVariants.length > 0 && !hasUnusedTries
                   ? "Continue to Book Setup"
                   : "Skip to Book Setup"}
               </span>

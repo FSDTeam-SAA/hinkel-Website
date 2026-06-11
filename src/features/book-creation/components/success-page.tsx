@@ -1,18 +1,23 @@
 "use client";
 
-import { CheckCircle, BookOpenText } from "lucide-react";
-// import { useState } from "react";
+import {
+  ArrowRight,
+  BookOpenText,
+  CheckCircle2,
+  MailCheck,
+  PackageCheck,
+  Printer,
+  Sparkles,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useBookStore } from "@/features/book-creation/store/book-store";
 import type { BookStore } from "@/features/book-creation/types";
-// import { toast } from "sonner";
-
-// import { generateBookPdf } from "../utils/pdf-generator";
 
 export default function SuccessPage() {
   const resetBook = useBookStore((state: BookStore) => state.resetBook);
   const state = useBookStore();
-  const { pageCount, outputFormat } = state;
-  // const [isGenerating, setIsGenerating] = useState(false);
+  const { bookTitle, pageCount, outputFormat } = state;
 
   const deliveryMessage = () => {
     switch (outputFormat) {
@@ -21,110 +26,167 @@ export default function SuccessPage() {
       case "printed":
         return "Your print order has been confirmed. You will receive an email confirmation shortly.";
       case "pdf&printed":
-        return "Your coloring book is ready! You will receive a confirmation email for your print order with the PDF file attached.";
+        return "You will receive a confirmation email for your print order with the PDF file attached.";
       default:
-        return "Your coloring book is ready! You should receive an email confirmation shortly.";
+        return "You should receive an email confirmation shortly.";
     }
   };
+
+  const formatLabel =
+    outputFormat === "pdf"
+      ? "Digital PDF"
+      : outputFormat === "printed"
+        ? "Printed Book"
+        : outputFormat === "pdf&printed"
+          ? "Print & PDF"
+          : "Book Order";
+
+  const nextSteps =
+    outputFormat === "pdf"
+      ? [
+          "Your completed PDF is being prepared for email delivery.",
+          "Check your inbox for the download message shortly.",
+        ]
+      : outputFormat === "printed"
+        ? [
+            "Your print files are queued for production review.",
+            "You will receive delivery updates by email.",
+          ]
+        : [
+            "Your print order is queued for production review.",
+            "Your digital copy will be delivered by email.",
+          ];
 
   const handleCreateAnother = () => {
     resetBook();
   };
 
-  // const handleDownload = async () => {
-  //   try {
-  //     setIsGenerating(true);
-  //     toast.success("Creating your PDF coloring book...");
-
-  //     const pdfBlob = await generateBookPdf(state);
-  //     const url = URL.createObjectURL(pdfBlob);
-  //     const link = document.createElement("a");
-  //     link.href = url;
-  //     link.download = `${state.bookTitle || "My-Coloring-Book"}.pdf`;
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
-  //     URL.revokeObjectURL(url);
-
-  //     toast.success("Download started!");
-  //   } catch (error) {
-  //     console.error("PDF generation failed:", error);
-  //     toast.error("Failed to generate PDF. Please try again.");
-  //   } finally {
-  //     setIsGenerating(false);
-  //   }
-  // };
-
   return (
-    <div className="min-h-screen bg-linear-to-br from-background to-background/80 flex items-center justify-center px-4 py-12">
-      <div className="max-w-2xl w-full text-center">
-        <div className="mb-8 flex justify-center">
-          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-            <CheckCircle className="w-12 h-12 text-white" />
-          </div>
-        </div>
+    <div className="min-h-screen bg-[linear-gradient(180deg,#fffaf4_0%,#ffffff_38%,#f8fbff_100%)] px-4 py-10 md:py-14">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+        <div className="overflow-hidden rounded-[32px] border border-stone-200/80 bg-white shadow-[0_24px_70px_-44px_rgba(15,23,42,0.42)]">
+          <div className="relative p-6 sm:p-8 md:p-10">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
+                <Badge className="mb-5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-50">
+                  Order Complete
+                </Badge>
 
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
-          Success!
-        </h1>
+                <div className="mb-5 flex items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                    <CheckCircle2 className="h-9 w-9" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-black leading-tight text-stone-950 md:text-5xl">
+                      Your book is in motion
+                    </h1>
+                    <p className="mt-2 text-base font-medium text-stone-600 md:text-lg">
+                      {deliveryMessage()}
+                    </p>
+                  </div>
+                </div>
 
-        <p className="text-xl text-muted-foreground mb-12">
-          {outputFormat === "printed"
-            ? "Order Confirmed!"
-            : "Your coloring book is ready!"}
-        </p>
-
-        <div className="bg-white rounded-2xl p-8 md:p-12 shadow-sm border border-border mb-8">
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div className="p-6 bg-blue-50 rounded-lg">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                {pageCount}
+                <div className="rounded-[24px] border border-orange-100 bg-orange-50/70 px-4 py-3 text-sm font-semibold text-orange-800">
+                  {bookTitle || "My Coloring Book"} has been submitted
+                  successfully.
+                </div>
               </div>
-              <p className="text-sm font-medium text-foreground">Total Pages</p>
-            </div>
-            <div className="p-6 bg-pink-50 rounded-lg">
-              <div className="text-2xl mb-2">✓</div>
-              <p className="text-sm font-medium text-foreground">
-                <span className="text-blue-600 font-bold capitalize">
-                  {outputFormat === "pdf"
-                    ? "Digital PDF"
-                    : outputFormat === "printed"
-                      ? "Print Order"
-                      : "PDF & Print"}
-                </span>
-              </p>
-            </div>
-          </div>
 
-          <div className="border-t border-border pt-6">
-            <p className="text-foreground font-medium mb-2">
-              Great job creating your book! We hope you enjoy it.
-            </p>
-            <p className="text-sm text-muted-foreground">{deliveryMessage()}</p>
+              <div className="w-full max-w-sm rounded-[28px] border border-stone-200 bg-[linear-gradient(135deg,#fffdf8_0%,#ffffff_54%,#f7fbff_100%)] p-5 shadow-sm">
+                <div className="mb-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">
+                      Summary
+                    </p>
+                    <h2 className="mt-1 text-xl font-black text-stone-950">
+                      {formatLabel}
+                    </h2>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    {outputFormat === "pdf" ? (
+                      <MailCheck className="h-6 w-6" />
+                    ) : (
+                      <Printer className="h-6 w-6" />
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-stone-200 bg-white p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-stone-400">
+                      Pages
+                    </p>
+                    <p className="mt-2 text-3xl font-black text-stone-950">
+                      {pageCount}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-stone-200 bg-white p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-stone-400">
+                      Status
+                    </p>
+                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Confirmed
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          {/* <button
-            onClick={handleDownload}
-            disabled={isGenerating}
-            className="w-full bg-[#ff8b36] hover:bg-orange-600 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all hover:scale-105 shadow-lg shadow-orange-500/20"
-          >
-            {isGenerating ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
-            ) : (
-              <Download className="w-6 h-6" />
-            )}
-            {isGenerating ? "Generating PDF..." : "Download color book"}
-          </button> */}
+        <div className="grid gap-4 md:grid-cols-[1fr_0.85fr]">
+          <div className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-sm md:p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <PackageCheck className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-black text-stone-950">
+                What happens next
+              </h2>
+            </div>
 
-          <button
-            onClick={handleCreateAnother}
-            className="w-full hover:text-primary hover:bg-muted hover:border hover:border-primary bg-primary text-white cursor-pointer duration-300 font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors"
-          >
-            <BookOpenText className="w-5 h-5" />
-            Create Another Book
-          </button>
+            <div className="space-y-3">
+              {nextSteps.map((step, index) => (
+                <div
+                  key={step}
+                  className="flex items-start gap-3 rounded-2xl border border-stone-100 bg-stone-50/70 p-4"
+                >
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-xs font-black text-primary shadow-sm">
+                    {index + 1}
+                  </div>
+                  <p className="text-sm font-semibold leading-6 text-stone-700">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-sm md:p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-black text-stone-950">
+                Ready for another?
+              </h2>
+            </div>
+
+            <p className="mb-6 text-sm font-medium leading-6 text-stone-600">
+              Start a fresh coloring book with a new cover, pages, and
+              dedication.
+            </p>
+
+            <Button
+              onClick={handleCreateAnother}
+              className="h-14 w-full rounded-2xl bg-primary text-base font-black text-white shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] hover:bg-primary/90"
+            >
+              <BookOpenText className="h-5 w-5" />
+              Create Another Book
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

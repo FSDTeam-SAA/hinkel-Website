@@ -1,6 +1,5 @@
 import Pricing from "@/components/website/PageSections/PricingPage/Pricing";
 import { Metadata } from "next";
-import { getPublicPricing } from "@/lib/public-api";
 
 export const metadata: Metadata = {
   title: "Pricing | Custom Coloring Book Plans",
@@ -18,9 +17,7 @@ export const metadata: Metadata = {
 };
 
 const page = async () => {
-  const pricingData = await getPublicPricing();
-
-  return <Pricing prices={pricingData.data || []} />;
+  return <Pricing />;
 };
 
 export default page;

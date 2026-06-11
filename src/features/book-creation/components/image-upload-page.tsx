@@ -4,6 +4,7 @@ import type React from "react";
 import { useState, useRef } from "react";
 import StepIndicator from "@/components/step-indicator";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Upload,
   Loader2,
@@ -279,7 +280,7 @@ export default function ImageUploadPage() {
       )}
 
       <div className="mx-auto flex-1 w-full max-w-7xl px-4 py-5 md:px-6 md:py-10 xl:px-8">
-        <div className="overflow-hidden rounded-[32px] border border-stone-200/80 bg-white/95 p-4 shadow-[0_24px_70px_-40px_rgba(15,23,42,0.35)] backdrop-blur-sm md:p-8 lg:p-10">
+        <div className="rounded-[32px] border border-stone-200/80 bg-white/95 p-4 shadow-[0_24px_70px_-40px_rgba(15,23,42,0.35)] backdrop-blur-sm md:p-8 lg:p-10">
           {/* <div className="mb-8 flex flex-col gap-4 md:mb-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
               <span className="inline-flex w-fit items-center rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-orange-700">
@@ -345,7 +346,7 @@ export default function ImageUploadPage() {
                         ? "border-primary ring-4 ring-primary/10 shadow-lg scale-105 text-white"
                         : pageImg
                           ? "border-gray-200 hover:border-primary/50"
-                          : "border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50"
+                          : "border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50 hover:text-white"
                     }`}
                   >
                     {pageImg ? (
@@ -367,7 +368,7 @@ export default function ImageUploadPage() {
                       </>
                     ) : (
                       <span
-                        className={`text-sm font-bold ${currentPage === pageNum ? "text-primary" : "text-gray-400"}`}
+                        className={`text-sm font-bold ${currentPage === pageNum ? "text-white" : "text-gray-400"}`}
                       >
                         {pageNum}
                       </span>
@@ -682,7 +683,7 @@ export default function ImageUploadPage() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-black flex items-center gap-3">
                     <Wand2 className="w-5 h-5 text-purple-600" />
-                    All Sketches
+                    All Sketched - Select ONE
                   </h3>
                   <span className="text-xs font-black text-gray-400 bg-white px-3 py-1 rounded-full shadow-xs">
                     {currentConvertedImages.length}/{maxConversions}
@@ -758,9 +759,15 @@ export default function ImageUploadPage() {
             </div>
           </div>
 
+          <p className="mt-8 text-sm font-semibold text-stone-500">
+            Select ONE photo from the &ldquo;All Sketches&rdquo; box and move to
+            the next page.
+          </p>
+
           {/* Navigation buttons */}
-          <div className="mt-10 flex flex-col-reverse items-center justify-between gap-6 border-t border-gray-100 pt-6 md:mt-16 md:flex-row md:gap-0 md:pt-10">
+          <div className="mt-4 flex flex-col-reverse items-center justify-between gap-6 border-t border-gray-100 pt-6 md:mt-6 md:flex-row md:gap-0 md:pt-10">
             {/* Back Button (Step Navigation) */}
+
             <Button
               variant="outline"
               onClick={() => setStep("dedication")}
