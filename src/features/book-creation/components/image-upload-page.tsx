@@ -346,7 +346,7 @@ export default function ImageUploadPage() {
                         ? "border-primary ring-4 ring-primary/10 shadow-lg scale-105 text-white"
                         : pageImg
                           ? "border-gray-200 hover:border-primary/50"
-                          : "border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50"
+                          : "border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50 hover:text-white"
                     }`}
                   >
                     {pageImg ? (
@@ -368,7 +368,7 @@ export default function ImageUploadPage() {
                       </>
                     ) : (
                       <span
-                        className={`text-sm font-bold ${currentPage === pageNum ? "text-primary" : "text-gray-400"}`}
+                        className={`text-sm font-bold ${currentPage === pageNum ? "text-white" : "text-gray-400"}`}
                       >
                         {pageNum}
                       </span>
