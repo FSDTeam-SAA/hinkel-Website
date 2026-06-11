@@ -1,3 +1,5 @@
+import RichTextRenderer from "@/components/shared/RichTextRenderer";
+
 interface AboutusProps {
   title?: string;
   content?: string;
@@ -24,9 +26,9 @@ const Aboutus = ({ title, content }: AboutusProps) => {
           {title}
         </h1>
 
-        <div
-          className="content-prose prose prose-lg max-w-none text-gray-700 leading-relaxed mb-8"
-          dangerouslySetInnerHTML={{ __html: content }}
+        <RichTextRenderer
+          content={content}
+          className="content-prose prose prose-lg max-w-none text-gray-700 leading-relaxed [&_.prose]:max-w-none [&_.prose]:text-gray-700 [&_.prose_h1]:text-gray-700 [&_.prose_h2]:text-gray-700 [&_.prose_h3]:text-gray-700 [&_.prose_a]:text-primary [&_.prose_a]:no-underline hover:[&_.prose_a]:underline [&_.prose_li]:text-gray-700"
         />
       </div>
     </section>

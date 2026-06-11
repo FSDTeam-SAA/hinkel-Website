@@ -29,13 +29,13 @@ function PreviewCanvas({ page }: { page: PreviewPage }) {
 
   return (
     <div className="mx-auto aspect-[8.5/11] w-full max-w-[640px] rounded-[28px] border border-stone-300 bg-white p-6 shadow-[0_30px_90px_-55px_rgba(15,23,42,0.8)]">
-      <div className="flex h-full flex-col rounded-[20px] border-2 border-stone-900 p-4">
+      <div className="flex h-full flex-col rounded-[20px] p-4">
         {page.type === "cover" ? (
           <div className="flex h-full flex-col items-center rounded-[14px] border border-stone-900 px-6 py-8 text-center">
             <h3 className="text-2xl font-black uppercase tracking-[0.12em] text-stone-900 sm:text-3xl">
               {title}
             </h3>
-            <div className="mt-8 flex flex-1 w-full items-center justify-center overflow-hidden rounded-[18px] border border-stone-900 bg-stone-50 p-4">
+            <div className="mt-8 flex flex-1 w-full items-center justify-center overflow-hidden rounded-[18px] bg-stone-50 p-4">
               {page.imageSrc ? (
                 <div className="relative h-full w-full">
                   <Image
