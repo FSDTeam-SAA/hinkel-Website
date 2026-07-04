@@ -1,45 +1,42 @@
 import type { Metadata } from "next";
+import { notFound, permanentRedirect } from "next/navigation";
 import CategoryPageClient from "./CategoryPageClient";
-import { getPublicCmsByType, getPublicContent } from "@/lib/public-api";
+import { getPublicCmsBySlug, getPublicContent } from "@/lib/public-api";
+import {
+  DEFAULT_CATEGORY_SEO,
+  getCategorySeoBySlugOrType,
+  resolveCanonicalCategorySlug,
+} from "@/lib/category-seo";
 
-type CategoryMetadata = {
-  title: string;
-  description: string;
-};
+async function loadCategoryPage(slugParam: string) {
+  const requestedSlug = decodeURIComponent(slugParam).toLowerCase();
+  const canonicalSlug = resolveCanonicalCategorySlug(requestedSlug);
 
-const categoryMeta: Record<string, CategoryMetadata> = {
-  kids: {
-    title: "Custom Kids Coloring Book from Photos",
-    description:
-      "Create a personalized kids coloring book using your own family photos. Bold line art style, printed or digital. A one-of-a-kind gift kids will love.",
-  },
-  pets: {
-    title: "Custom Pet Portrait Sketchbook from Photos",
-    description:
-      "Turn your pet's photo into a beautiful, detailed sketch book. A unique gift for pet lovers — printed or as a PDF download.",
-  },
-  anime: {
-    title: "Custom Anime Coloring Book from Your Photos",
-    description:
-      "Convert your photos into stunning anime-style illustrations and build your own custom coloring book. Perfect gift for anime fans.",
-  },
-  dementia: {
-    title: "Personalized Memory Care Coloring Book from Photos",
-    description:
-      "Create a custom, dementia-friendly coloring book using real family photos. Designed for memory care patients — familiar, soothing, and deeply personal.",
-  },
-  seniors: {
-    title: "Personalized Memory Care Coloring Book for Seniors",
-    description:
-      "Create a custom coloring book for seniors using real family photos. Designed for reminiscence therapy and meaningful engagement.",
-  },
-};
+  const [contentData, cmsData] = await Promise.all([
+    getPublicContent({ slug: canonicalSlug, limit: 20 }),
+    getPublicCmsBySlug(canonicalSlug),
+  ]);
 
-const defaultMeta: CategoryMetadata = {
-  title: "Custom Coloring Book Collection",
-  description:
-    "Explore our unique coloring book collection. Upload your photos and convert them into personalized, printable coloring pages.",
-};
+  const contents = contentData.data || [];
+  const cmsContent = cmsData.data?.data?.contents?.[0];
+  const heroContent = contents[0];
+  const seoContent = getCategorySeoBySlugOrType(
+    canonicalSlug,
+    heroContent?.type ?? cmsContent?.type,
+  );
+  const resolvedSlug =
+    heroContent?.slug || cmsContent?.slug || seoContent?.slug;
+
+  return {
+    requestedSlug,
+    canonicalSlug,
+    resolvedSlug,
+    contents,
+    cmsContent,
+    seoContent,
+    heroContent,
+  };
+}
 
 export async function generateMetadata({
   params,
@@ -47,19 +44,45 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const decoded = decodeURIComponent(slug).toLowerCase();
-  const meta = categoryMeta[decoded] || defaultMeta;
+  const category = await loadCategoryPage(slug);
+  const resolvedSlug = category.resolvedSlug || category.canonicalSlug;
+
+  if (!category.heroContent && !category.cmsContent && !category.seoContent) {
+    return {
+      title: DEFAULT_CATEGORY_SEO.metaTitle,
+      description: DEFAULT_CATEGORY_SEO.metaDescription,
+    };
+  }
+
+  const meta = category.seoContent || {
+    metaTitle: DEFAULT_CATEGORY_SEO.metaTitle,
+    metaDescription: DEFAULT_CATEGORY_SEO.metaDescription,
+    ogDescription: DEFAULT_CATEGORY_SEO.metaDescription,
+  };
+
+  const socialImage =
+    typeof category.heroContent?.image === "string" &&
+    category.heroContent.image
+      ? category.heroContent.image
+      : "/images/new-logo.png";
 
   return {
-    title: meta.title,
-    description: meta.description,
+    title: meta.metaTitle,
+    description: meta.metaDescription,
     alternates: {
-      canonical: `/category/${encodeURIComponent(decoded)}`,
+      canonical: `/category/${resolvedSlug}`,
     },
     openGraph: {
-      url: `/category/${encodeURIComponent(decoded)}`,
-      title: `${meta.title} | sktchLABS`,
-      description: meta.description,
+      url: `/category/${resolvedSlug}`,
+      title: `${meta.metaTitle} | sktchLABS`,
+      description: meta.ogDescription,
+      images: [{ url: socialImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${meta.metaTitle} | sktchLABS`,
+      description: meta.ogDescription,
+      images: [socialImage],
     },
   };
 }
@@ -69,20 +92,26 @@ export default async function CategoryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug: rawSlug } = await params;
-  const slug = decodeURIComponent(rawSlug);
-  const [contentData, cmsData] = await Promise.all([
-    getPublicContent({ type: slug }),
-    getPublicCmsByType(slug),
-  ]);
-  const contents = contentData.data || [];
-  const cmsContent = cmsData.data?.data?.contents?.[0];
+  const { slug } = await params;
+  const category = await loadCategoryPage(slug);
+
+  if (!category.heroContent && !category.cmsContent && !category.seoContent) {
+    notFound();
+  }
+
+  if (
+    category.resolvedSlug &&
+    category.requestedSlug !== category.resolvedSlug
+  ) {
+    permanentRedirect(`/category/${category.resolvedSlug}`);
+  }
 
   return (
     <CategoryPageClient
-      slug={slug}
-      contents={contents}
-      cmsContent={cmsContent}
+      slug={category.resolvedSlug || category.canonicalSlug}
+      contents={category.contents}
+      cmsContent={category.cmsContent}
+      seoContent={category.seoContent}
     />
   );
 }

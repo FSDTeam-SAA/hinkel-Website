@@ -42,7 +42,7 @@ export default function DashboardShell({
           <div className="flex flex-1 items-center justify-center pr-10">
             <Link href="/dashboard">
               <Image
-                src="/images/logo.png"
+                src="/images/new-logo.png"
                 alt="Logo"
                 width={120}
                 height={40}

@@ -35,6 +35,7 @@ import {
 import { cn, toTitleCase } from "@/lib/utils";
 import type { CategoryContent } from "@/features/category-page/types";
 import { buildAuthPath } from "@/features/auth/lib/auth-routes";
+import { buildCategoryHref } from "@/lib/category-seo";
 
 // Types
 interface MenuItem {
@@ -164,7 +165,7 @@ UserProfile.displayName = "UserProfile";
 const MobileCategoryItem = memo(
   ({ category, onNavigate }: MobileCategoryItemProps) => (
     <Link
-      href={`/category/${category.type}`}
+      href={buildCategoryHref(category)}
       onClick={onNavigate}
       className="group flex items-center gap-3 p-3 pl-8 rounded-lg hover:bg-primary/5 transition-colors"
     >
@@ -216,7 +217,7 @@ const DesktopCategoryDropdown = memo(
           {categories.map((category) => (
             <Link
               key={category._id}
-              href={`/category/${category.type}`}
+              href={buildCategoryHref(category)}
               onClick={onClose}
               className="group flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors"
             >

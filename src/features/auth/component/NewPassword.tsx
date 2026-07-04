@@ -6,6 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import { useResetPassword } from "../hooks/useResetPassword";
+import {
+  isStrongPassword,
+  PASSWORD_RULE_TEXT,
+  PASSWORD_RULE_SUMMARY,
+} from "../lib/password-rules";
+import PasswordRequirements from "./PasswordRequirements";
 
 const NewPassword = () => {
   const router = useRouter();
@@ -39,8 +45,8 @@ const NewPassword = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setLocalError("Password must be at least 6 characters");
+    if (!isStrongPassword(newPassword)) {
+      setLocalError(PASSWORD_RULE_TEXT);
       return;
     }
 
@@ -62,7 +68,7 @@ const NewPassword = () => {
         <div className="flex flex-col items-center justify-center gap-2 mb-6">
           <Link href="/">
             <Image
-              src="/images/logo.png"
+              src="/images/new-logo.png"
               alt="sktchLABS"
               width={180}
               height={50}
@@ -77,6 +83,9 @@ const NewPassword = () => {
         </h2>
         <p className="text-center text-gray-500 mb-10 text-lg">
           Set a strong password to secure your account.
+        </p>
+        <p className="text-center text-sm text-gray-500 mb-8">
+          {PASSWORD_RULE_SUMMARY}
         </p>
 
         {/* Form */}
@@ -128,6 +137,8 @@ const NewPassword = () => {
               </button>
             </div>
           </div>
+
+          <PasswordRequirements password={newPassword} />
 
           {/* Errors */}
           {(localError || apiError) && (

@@ -1,14 +1,14 @@
+import { Button } from "@/components/ui/button";
+import HeaderTitle from "./head-title";
+import Link from "next/link";
+import type { PublicFaqData } from "@/features/website-content/api/website-content.api";
+import { getActiveFaqItems } from "@/lib/public-api";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import HeaderTitle from "./head-title";
-import Link from "next/link";
-import type { PublicFaqData } from "@/features/website-content/api/website-content.api";
-import { getActiveFaqItems } from "@/lib/public-api";
 
 interface FAQProps {
   faqData?: PublicFaqData | null;
@@ -20,7 +20,6 @@ export function FAQ({ faqData }: FAQProps) {
   }
 
   const activeItems = getActiveFaqItems(faqData);
-
   const defaultOpenItem = activeItems.find((item) => item.defaultOpen);
   const defaultValue = defaultOpenItem ? defaultOpenItem._id : undefined;
 
@@ -80,6 +79,21 @@ export function FAQ({ faqData }: FAQProps) {
             </AccordionItem>
           ))}
         </Accordion>
+
+        <div className="sr-only" aria-hidden="true">
+          {activeItems.map((faq) => (
+            <div key={`${faq._id}-seo`}>
+              <h3>{faq.question}</h3>
+              {faq.answer.format === "html" ? (
+                <div
+                  dangerouslySetInnerHTML={{ __html: faq.answer.sanitized }}
+                />
+              ) : (
+                <p>{faq.answer.sanitized}</p>
+              )}
+            </div>
+          ))}
+        </div>
 
         {faqData.cta?.enabled && (
           <div className="mt-24 p-12 bg-white rounded-3xl text-center space-y-8">

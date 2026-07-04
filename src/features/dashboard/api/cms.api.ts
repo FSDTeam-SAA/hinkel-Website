@@ -4,19 +4,21 @@ import { api } from "@/lib/api";
 export interface CmsContent {
   _id: string;
   type: string;
+  slug?: string;
   title?: string;
-  richText?: string; // JSON string
+  richText?: string | Record<string, unknown>;
   plainText?: string;
   image?: string;
   isActive?: boolean;
   order?: number;
-  metadata?: string; // JSON string
+  metadata?: string | Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateCmsDto {
   type: string;
+  slug?: string;
   title?: string;
   richText?: string;
   plainText?: string;
@@ -28,6 +30,7 @@ export interface CreateCmsDto {
 
 export interface UpdateCmsDto {
   type?: string;
+  slug?: string;
   title?: string;
   richText?: string;
   plainText?: string;
@@ -51,6 +54,7 @@ export interface CmsQueryParams {
 export const createCmsContentApi = (data: CreateCmsDto) => {
   const formData = new FormData();
   formData.append("type", data.type);
+  if (data.slug) formData.append("slug", data.slug);
   if (data.title) formData.append("title", data.title);
   if (data.richText) formData.append("richText", data.richText);
   if (data.plainText) formData.append("plainText", data.plainText);
@@ -86,6 +90,10 @@ export const getCmsContentByTypeApi = (type: string, page = 1, limit = 10) => {
   return api.get(`/content/cms/type/${type}?page=${page}&limit=${limit}`);
 };
 
+export const getCmsContentBySlugApi = (slug: string, page = 1, limit = 10) => {
+  return api.get(`/content/cms/slug/${slug}?page=${page}&limit=${limit}`);
+};
+
 export const updateCmsContentApi = ({
   id,
   data,
@@ -95,6 +103,7 @@ export const updateCmsContentApi = ({
 }) => {
   const formData = new FormData();
   if (data.type) formData.append("type", data.type);
+  if (data.slug) formData.append("slug", data.slug);
   if (data.title) formData.append("title", data.title);
   if (data.richText) formData.append("richText", data.richText);
   if (data.plainText) formData.append("plainText", data.plainText);

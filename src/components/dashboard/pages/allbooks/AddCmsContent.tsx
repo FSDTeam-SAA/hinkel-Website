@@ -32,9 +32,12 @@ import {
   UpdateCmsDto,
 } from "@/features/dashboard/api/cms.api";
 import RichTextEditor from "../../editor/RichTextEditor";
+import { Input } from "@/components/ui/input";
+import { slugifyCategory } from "@/lib/category-seo";
 
 const formSchema = z.object({
   type: z.string().min(2, "Type is required"),
+  slug: z.string().optional(),
   richText: z.string().optional(), // stored as JSON string
   plainText: z.string().optional(),
 });
@@ -59,7 +62,13 @@ const AddCmsContent = ({ initialData, onSuccess }: AddCmsContentProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: initialData?.type || "",
-      richText: initialData?.richText || "",
+      slug: initialData?.slug || "",
+      richText:
+        typeof initialData?.richText === "string"
+          ? initialData.richText
+          : initialData?.richText
+            ? JSON.stringify(initialData.richText)
+            : "",
       plainText: initialData?.plainText || "",
     },
   });
@@ -69,6 +78,7 @@ const AddCmsContent = ({ initialData, onSuccess }: AddCmsContentProps) => {
       // Prepare update DTO
       const updateData: UpdateCmsDto = {
         type: values.type,
+        slug: slugifyCategory(values.slug || values.type),
         richText: values.richText,
         plainText: values.plainText,
       };
@@ -90,6 +100,7 @@ const AddCmsContent = ({ initialData, onSuccess }: AddCmsContentProps) => {
       // Create
       const createData: CreateCmsDto = {
         type: values.type,
+        slug: slugifyCategory(values.slug || values.type),
         richText: values.richText,
         plainText: values.plainText,
       };
@@ -154,6 +165,29 @@ const AddCmsContent = ({ initialData, onSuccess }: AddCmsContentProps) => {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="slug"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="text-[10px] font-black text-white/50 uppercase tracking-widest px-1">
+                      SEO Slug
+                    </label>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="e.g. pet-coloring-books"
+                        onBlur={(event) =>
+                          field.onChange(slugifyCategory(event.target.value))
+                        }
+                        className="bg-white/5 border-white/10 text-white placeholder:text-white/20"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

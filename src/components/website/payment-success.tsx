@@ -238,7 +238,7 @@ export default function PaymentSuccessPage() {
           </button>
 
           <p className="mt-6 text-xs text-gray-400 uppercase tracking-widest font-bold">
-            Hinkle Creek Studio
+            sketchLABS.com - The AI Book Creator
           </p>
         </div>
       </div>

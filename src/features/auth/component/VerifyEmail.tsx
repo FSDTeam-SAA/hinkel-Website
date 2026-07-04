@@ -160,7 +160,7 @@ const VerifyEmail = () => {
           <div className="flex items-center justify-center gap-2 mb-6">
             <Link href="/">
               <Image
-                src="/images/logo.png"
+                src="/images/new-logo.png"
                 alt="Hinkle"
                 width={140}
                 height={48}
@@ -181,9 +181,11 @@ const VerifyEmail = () => {
             <span className="font-semibold text-[#4f3422]">
               {maskedEmail || "your email"}
             </span>
-            . Look for a message from{" "}
-            <span className="font-semibold text-[#4f3422]">Hinkle</span> and
-            enter the code below to activate your free account.
+            . Look for a message from
+            <span className="font-semibold text-[#4f3422]">
+              sktchlabs.com{" "}
+            </span>{" "}
+            and and enter the code below to activate your free account.
           </p>
         </div>
 
@@ -210,9 +212,9 @@ const VerifyEmail = () => {
                       Check your inbox
                     </p>
                     <p className="mt-1 leading-6">
-                      The code expires in about 15 minutes. If you don&apos;t
-                      see the email, check your spam or promotions folder, then
-                      resend a fresh code below.
+                      Check your inbox The code expires in about 15 minutes. If
+                      you don&apos;t see the email, check your spam or
+                      promotions folder, then resend a fresh code below.
                     </p>
                   </div>
                 </div>

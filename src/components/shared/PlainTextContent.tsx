@@ -1,7 +1,7 @@
 import { getPlainTextFromRichText } from "@/lib/rich-text";
 
 interface PlainTextContentProps {
-  content?: string | null;
+  content?: string | Record<string, unknown> | null;
   className?: string;
 }
 

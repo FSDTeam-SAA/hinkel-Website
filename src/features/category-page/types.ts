@@ -14,6 +14,7 @@ export interface CategoryContent {
   title: string;
   subtitle?: string;
   image: string;
+  slug?: string;
   type?: string;
   prompt?: string;
   isSplit?: boolean;

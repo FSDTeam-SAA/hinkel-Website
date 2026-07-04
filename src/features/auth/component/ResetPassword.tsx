@@ -1,42 +1,44 @@
 // features/auth/component/ResetPassword.tsx
 "use client";
 
-import Image from 'next/image'
-import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
-import { useForgotPassword } from '../hooks/useforgotpassword'
-import Link from 'next/link'
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useForgotPassword } from "../hooks/useforgotpassword";
+import Link from "next/link";
 
 const ResetPassword = () => {
-  const [email, setEmail] = useState('')
-  const { forgotPassword, loading, error, success } = useForgotPassword()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
+  const [email, setEmail] = useState("");
+  const { forgotPassword, loading, error, success } = useForgotPassword();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl =
+    searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
   useEffect(() => {
     if (success) {
-      router.push(`/verify-otp?email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`)
+      router.push(
+        `/verify-otp?email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
+      );
     }
-  }, [success, router, email, callbackUrl])
+  }, [success, router, email, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-    await forgotPassword(email)
-  }
+    e.preventDefault();
+    if (!email) return;
+    await forgotPassword(email);
+  };
   return (
     <div className="min-h-screen flex items-center justify-center  px-4">
       <div className=" max-w-3xl bg-white rounded-xl shadow-md px-10 py-12 relative">
         {/* Go To Website Link */}
 
-
         {/* Logo */}
         <div className="flex justify-center mb-6">
           <Link href="/">
             <Image
-              src="/images/logo.png"
-              alt="sktchLABS"
+              src="/images/new-logo.png"
+              alt="sketch LABS Logo"
               width={160}
               height={40}
               className="object-contain cursor-pointer hover:opacity-80 transition-opacity"
@@ -49,7 +51,8 @@ const ResetPassword = () => {
           Reset Password
         </h2>
         <p className="text-center text-base text-gray-500 mb-8">
-          Enter your email address and we&apos;ll send you a code to reset your password.
+          Enter your email address and we&apos;ll send you a code to reset your
+          password.
         </p>
 
         {/* Form */}
@@ -69,11 +72,11 @@ const ResetPassword = () => {
             />
           </div>
 
-
-
           {/* Error and Success Messages */}
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          {success && <p className="text-green-500 text-sm text-center">{success}</p>}
+          {success && (
+            <p className="text-green-500 text-sm text-center">{success}</p>
+          )}
 
           {/* Button */}
           <button
@@ -81,14 +84,12 @@ const ResetPassword = () => {
             disabled={loading}
             className="w-full mt-4 bg-primary cursor-pointer hover:bg-primary/80 text-white font-semibold py-3 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Sending...' : 'Send Code'}
+            {loading ? "Sending..." : "Send Code"}
           </button>
         </form>
-
-
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ResetPassword
+export default ResetPassword;

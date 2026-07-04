@@ -17,8 +17,8 @@ const AuthCard = ({ title, description, badge, children }: AuthCardProps) => {
           <div className="flex items-center justify-center">
             <Link href="/">
               <Image
-                src="/images/logo.png"
-                alt="Hinkle"
+                src="/images/new-logo.png"
+                alt="sketch LABS Logo"
                 width={140}
                 height={52}
                 className="cursor-pointer transition-opacity hover:opacity-80"
@@ -26,9 +26,9 @@ const AuthCard = ({ title, description, badge, children }: AuthCardProps) => {
             </Link>
           </div>
 
-          {badge ? (
+          {/* {badge ? (
             <div className="mt-6 flex items-center justify-center">{badge}</div>
-          ) : null}
+          ) : null} */}
 
           <h1 className="mt-6 text-center text-3xl font-semibold tracking-tight text-[#8f451c] sm:text-[2rem]">
             {title}

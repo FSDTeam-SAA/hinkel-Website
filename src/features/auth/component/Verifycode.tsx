@@ -90,7 +90,7 @@ const Verifycode = () => {
         <div className="flex justify-center mb-6">
           <Link href="/">
             <Image
-              src="/images/logo.png"
+              src="/images/new-logo.png"
               alt="sktchLABS"
               width={160}
               height={40}
