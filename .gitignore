@@ -13,6 +13,11 @@
 # testing
 /coverage
 
+#environment variables
+.env
+.env.local
+
+
 # next.js
 /.next/
 /out/
@@ -39,4 +44,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /.history
-config.bat
+
