@@ -5,6 +5,7 @@ export interface CategoryData {
   title: string;
   subtitle: string;
   type: string;
+  slug?: string;
   image: string | File;
   gallery?: (string | File)[];
 }

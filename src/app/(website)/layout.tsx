@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     title: "Custom Coloring Books from Your Photos | sktchLABS",
     description:
       "Turn your photos into personalized coloring books and sketchbooks. Choose from Kids, Pets, Anime & Dementia-friendly collections.",
+    images: ["/images/new-logo.png"],
   },
 };
 

@@ -34,16 +34,13 @@ const PasswordInput = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3">
         <label
           htmlFor={inputId}
           className="text-sm font-medium tracking-[0.01em] text-[#4f3422]"
         >
           {label}
         </label>
-        {helperText ? (
-          <span className="text-xs text-[#967663]">{helperText}</span>
-        ) : null}
       </div>
 
       <div className="relative">

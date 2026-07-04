@@ -3,17 +3,26 @@ import { Metadata } from "next";
 import { getPublicContent, getPublicStyles } from "@/lib/public-api";
 
 export const metadata: Metadata = {
-  title: "Coloring Books | Kids, Pets, Anime, Dementia, Seniors",
+  title:
+    "Personalized Coloring Book Collections | Kids, Pets, Anime, Memory Care",
   description:
-    "Explore our unique coloring book styles. Upload your photos and convert them into line art, pet sketches, anime, kids coloring books, dementia and senior memory care coloring pages.",
+    "Explore personalized coloring book collections for kids, pets, anime portraits, and dementia-friendly memory-care gifts made from your own photos.",
   alternates: {
     canonical: "/collections",
   },
   openGraph: {
     url: "/collections",
-    title: "Coloring Books | Kids, Pets, Anime, Dementia, Seniors | sktchLABS",
+    title:
+      "Personalized Coloring Book Collections | Kids, Pets, Anime, Memory Care | sktchLABS",
     description:
-      "Explore our unique coloring book styles. Upload your photos and convert them into line art, pet sketches, anime, kids coloring books, dementia and senior memory care coloring pages.",
+      "Explore personalized coloring book collections for kids, pets, anime portraits, and dementia-friendly memory-care gifts made from your own photos.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title:
+      "Personalized Coloring Book Collections | Kids, Pets, Anime, Memory Care | sktchLABS",
+    description:
+      "Explore personalized coloring book collections for kids, pets, anime portraits, and dementia-friendly memory-care gifts made from your own photos.",
   },
 };
 

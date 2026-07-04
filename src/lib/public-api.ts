@@ -12,6 +12,7 @@ import type { TermConditionResponse } from "@/features/dashboard/types/terms-con
 import type { PublicFaqResponse } from "@/features/website-content/api/website-content.api";
 import type { CmsContent } from "@/features/dashboard/api/cms.api";
 import type { PublicFaqData } from "@/features/website-content/api/website-content.api";
+import { resolveCategorySlug } from "@/lib/category-seo";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const REVALIDATE_SECONDS = 300;
@@ -48,12 +49,17 @@ async function fetchPublicJson<T>(path: string): Promise<T | null> {
 
 export async function getPublicContent(params: {
   type?: string;
+  slug?: string;
   limit?: number;
 }) {
   const query = new URLSearchParams();
 
   if (params.type) {
     query.set("type", params.type);
+  }
+
+  if (params.slug) {
+    query.set("slug", params.slug);
   }
 
   if (params.limit) {
@@ -81,6 +87,16 @@ export async function getPublicCmsByType(type: string) {
     (await fetchPublicJson<{
       data?: { data?: { contents?: CmsContent[] } };
     }>(`/content/cms/type/${encodeURIComponent(type)}?page=1&limit=10`)) ?? {
+      data: { data: { contents: [] } },
+    }
+  );
+}
+
+export async function getPublicCmsBySlug(slug: string) {
+  return (
+    (await fetchPublicJson<{
+      data?: { data?: { contents?: CmsContent[] } };
+    }>(`/content/cms/slug/${encodeURIComponent(slug)}?page=1&limit=10`)) ?? {
       data: { data: { contents: [] } },
     }
   );
@@ -130,6 +146,10 @@ export function getCategoryLinks(contents: CategoryContent[] | undefined) {
   return (
     contents
       ?.filter((item) => item.type?.toLowerCase() !== "home")
+      .map((item) => ({
+        ...item,
+        slug: resolveCategorySlug(item),
+      }))
       .sort((a, b) => (a.type || "").localeCompare(b.type || "")) ?? []
   );
 }

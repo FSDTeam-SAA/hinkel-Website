@@ -22,6 +22,7 @@ import { useDeleteCategory } from "@/features/dashboard/hooks/useCategory";
 import EditCategory from "./EditCategory";
 import { getPlainTextFromRichText } from "@/lib/rich-text";
 import { toTitleCase } from "@/lib/utils";
+import { buildCategoryHref } from "@/lib/category-seo";
 
 interface CategoryCardProps {
   category: CategoryContent;
@@ -62,7 +63,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
   return (
     <Card className="group relative h-full w-full bg-white border border-slate-200 rounded-[1.75rem] overflow-hidden flex flex-col transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:border-[#ff7a00]/30 shadow-sm">
       <Link
-        href={`/category/${category.type}`}
+        href={buildCategoryHref(category)}
         className="absolute inset-0 z-10"
       />
 
