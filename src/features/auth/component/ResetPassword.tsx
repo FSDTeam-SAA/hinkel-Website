@@ -26,7 +26,10 @@ const ResetPassword = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    await forgotPassword(email);
+    const response = await forgotPassword(email);
+    if (!response) {
+      return;
+    }
   };
   return (
     <div className="min-h-screen flex items-center justify-center  px-4">

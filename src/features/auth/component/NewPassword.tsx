@@ -11,13 +11,15 @@ import {
   PASSWORD_RULE_TEXT,
   PASSWORD_RULE_SUMMARY,
 } from "../lib/password-rules";
+import { buildAuthPath } from "../lib/auth-routes";
 import PasswordRequirements from "./PasswordRequirements";
 
 const NewPassword = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
-  // const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
+  const callbackUrl =
+    searchParams.get("callbackUrl") || searchParams.get("returnTo") || "/";
 
   const { handleResetPassword, loading, error: apiError } = useResetPassword();
 
@@ -56,8 +58,12 @@ const NewPassword = () => {
     });
 
     if (res) {
-      // router.push(callbackUrl);
-      router.push("/create-book");
+      router.push(
+        buildAuthPath({
+          callbackUrl,
+          email,
+        }),
+      );
     }
   };
 
