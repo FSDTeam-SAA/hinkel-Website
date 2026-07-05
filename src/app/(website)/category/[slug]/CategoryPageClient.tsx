@@ -1,4 +1,5 @@
 import PlainTextContent from "@/components/shared/PlainTextContent";
+import RichTextRenderer from "@/components/shared/RichTextRenderer";
 import { Hero } from "@/features/category-page/components/hero";
 import type { CategoryContent } from "@/features/category-page/types";
 import type { CmsContent } from "@/features/dashboard/api/cms.api";
@@ -22,8 +23,8 @@ export default function CategoryPageClient({
   const fallbackSeoContent = pageContent
     ? [...pageContent.intro, ...pageContent.benefits].join("\n\n")
     : "";
-  const sectionContent =
-    cmsContent?.plainText || cmsContent?.richText || fallbackSeoContent;
+  const richSectionContent = cmsContent?.richText;
+  const plainSectionContent = cmsContent?.plainText || fallbackSeoContent;
 
   return (
     <div className="min-h-[90vh]">
@@ -32,14 +33,21 @@ export default function CategoryPageClient({
         heroContent={heroContent}
       />
 
-      {sectionContent && (
+      {(richSectionContent || plainSectionContent) && (
         <section className="py-12 md:py-20 bg-secondary">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl">
-              <PlainTextContent
-                content={sectionContent}
-                className="text-base leading-8 text-gray-700"
-              />
+              {richSectionContent ? (
+                <RichTextRenderer
+                  content={richSectionContent}
+                  className="content-prose prose prose-lg max-w-none text-gray-700 leading-relaxed [&_.prose]:max-w-none [&_.prose]:text-gray-700 [&_.prose_h1]:text-gray-700 [&_.prose_h2]:text-gray-700 [&_.prose_h3]:text-gray-700 [&_.prose_a]:text-primary [&_.prose_a]:no-underline hover:[&_.prose_a]:underline [&_.prose_li]:text-gray-700"
+                />
+              ) : (
+                <PlainTextContent
+                  content={plainSectionContent}
+                  className="text-base leading-8 text-gray-700"
+                />
+              )}
             </div>
           </div>
         </section>

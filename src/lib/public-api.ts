@@ -102,6 +102,85 @@ export async function getPublicCmsBySlug(slug: string) {
   );
 }
 
+export function extractCmsContents(
+  response: { data?: unknown } | null | undefined,
+) {
+  const rootData = response?.data;
+
+  if (Array.isArray(rootData)) {
+    return rootData;
+  }
+
+  if (
+    rootData &&
+    typeof rootData === "object" &&
+    !Array.isArray(rootData) &&
+    "_id" in rootData
+  ) {
+    return [rootData as CmsContent];
+  }
+
+  if (
+    rootData &&
+    typeof rootData === "object" &&
+    !Array.isArray(rootData) &&
+    Array.isArray((rootData as { contents?: CmsContent[] }).contents)
+  ) {
+    return (rootData as { contents: CmsContent[] }).contents;
+  }
+
+  if (
+    rootData &&
+    typeof rootData === "object" &&
+    !Array.isArray(rootData) &&
+    (rootData as { content?: unknown }).content &&
+    typeof (rootData as { content?: unknown }).content === "object" &&
+    "_id" in ((rootData as { content: CmsContent }).content as CmsContent)
+  ) {
+    return [(rootData as { content: CmsContent }).content];
+  }
+
+  const nestedData =
+    rootData && typeof rootData === "object" && !Array.isArray(rootData)
+      ? (rootData as { data?: unknown }).data
+      : undefined;
+
+  if (Array.isArray(nestedData)) {
+    return nestedData;
+  }
+
+  if (
+    nestedData &&
+    typeof nestedData === "object" &&
+    !Array.isArray(nestedData) &&
+    "_id" in nestedData
+  ) {
+    return [nestedData as CmsContent];
+  }
+
+  if (
+    nestedData &&
+    typeof nestedData === "object" &&
+    !Array.isArray(nestedData) &&
+    Array.isArray((nestedData as { contents?: CmsContent[] }).contents)
+  ) {
+    return (nestedData as { contents: CmsContent[] }).contents;
+  }
+
+  if (
+    nestedData &&
+    typeof nestedData === "object" &&
+    !Array.isArray(nestedData) &&
+    (nestedData as { content?: unknown }).content &&
+    typeof (nestedData as { content?: unknown }).content === "object" &&
+    "_id" in ((nestedData as { content: CmsContent }).content as CmsContent)
+  ) {
+    return [(nestedData as { content: CmsContent }).content];
+  }
+
+  return [];
+}
+
 export async function getPublicFaq() {
   return (
     (await fetchPublicJson<PublicFaqResponse>("/faqs/pricing")) ?? {
