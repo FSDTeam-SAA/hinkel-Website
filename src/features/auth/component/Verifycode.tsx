@@ -65,24 +65,23 @@ const Verifycode = () => {
     e.preventDefault();
     const code = otp.join("");
     if (code.length === 6 && email) {
-      await verifyCode(code, email);
+      const response = await verifyCode(code, email);
+      if (response) {
+        router.push(
+          `/newpassword?email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
+        );
+      }
     }
   };
 
   const handleResend = async () => {
     if (!email) return;
 
-    await forgotPassword(email);
-    setTimer(60);
-  };
-
-  useEffect(() => {
-    if (success) {
-      router.push(
-        `/newpassword?email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
-      );
+    const response = await forgotPassword(email);
+    if (response) {
+      setTimer(60);
     }
-  }, [success, router, email, callbackUrl]);
+  };
   return (
     <div className="min-h-screen flex items-center justify-center  px-4">
       <div className=" max-w-3xl bg-white rounded-xl shadow-md px-10 py-12 relative">
