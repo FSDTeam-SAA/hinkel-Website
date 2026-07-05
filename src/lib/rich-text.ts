@@ -56,9 +56,17 @@ const collectText = (node: RichTextNode): string => {
   return text;
 };
 
-export const getPlainTextFromRichText = (value?: string | null) => {
+export const getPlainTextFromRichText = (
+  value?: string | Record<string, unknown> | null,
+) => {
   if (!value) {
     return "";
+  }
+
+  if (isRecord(value)) {
+    return collectText(value as RichTextNode)
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
   }
 
   if (!isRichTextJsonString(value)) {

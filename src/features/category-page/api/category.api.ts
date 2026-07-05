@@ -6,6 +6,7 @@ export interface CategoryContent {
   title: string;
   subtitle: string;
   type: string;
+  slug?: string;
   prompt?: string;
   image: string | File;
   gallery?: (string | File)[];

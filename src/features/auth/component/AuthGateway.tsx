@@ -9,7 +9,13 @@ import { useLogin } from "../hooks/uselogin";
 import { useRegister } from "../hooks/useregister";
 import AuthCard from "./AuthCard";
 import PasswordInput from "./PasswordInput";
+import PasswordRequirements from "./PasswordRequirements";
 import { AuthMode, buildAuthPath } from "../lib/auth-routes";
+import {
+  isStrongPassword,
+  PASSWORD_RULE_TEXT,
+  PASSWORD_RULE_SUMMARY,
+} from "../lib/password-rules";
 
 type AuthGatewayProps = {
   initialMode?: AuthMode;
@@ -47,8 +53,7 @@ const modeContent: Record<
 > = {
   login: {
     title: "Welcome back",
-    description:
-      "Sign in once and pick up your orders, saved details, and book projects from any device without losing momentum.",
+    description: "Welcome back! Ready to create something new? Log in below.",
     badge: (
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f59c47]/15 text-[#d96d2d]">
         <LockKeyhole className="h-6 w-6" />
@@ -63,13 +68,12 @@ const modeContent: Record<
     //   "Password visibility toggle for fewer typing mistakes",
     // ],
     cta: "Log In",
-    alternateLabel: "New to sktchlabs.com?",
-    alternateAction: "Create account",
+    alternateLabel: "New here?",
+    alternateAction: "Create an account",
   },
   signup: {
     title: "Create your account",
-    description:
-      "Set up your account in one place, verify your email, and start managing orders with a simpler first-time flow.",
+    description: "Already have an account? Log in here to access your gallery.",
     badge: (
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f59c47]/15 text-[#d96d2d]">
         <UserPlus className="h-6 w-6" />
@@ -85,7 +89,7 @@ const modeContent: Record<
     // ],
     cta: "Create Account",
     alternateLabel: "Already have an account?",
-    alternateAction: "Log in instead",
+    alternateAction: "Log in",
   },
 };
 
@@ -202,8 +206,8 @@ const AuthGateway = ({ initialMode = "login" }: AuthGatewayProps) => {
 
     if (!signupData.password) {
       nextErrors.password = "Password is required.";
-    } else if (signupData.password.length < 6) {
-      nextErrors.password = "Use at least 6 characters.";
+    } else if (!isStrongPassword(signupData.password)) {
+      nextErrors.password = PASSWORD_RULE_TEXT;
     }
 
     if (!signupData.confirmPassword) {
@@ -562,7 +566,7 @@ const AuthGateway = ({ initialMode = "login" }: AuthGatewayProps) => {
                   }}
                   placeholder="Create a password"
                   autoComplete="new-password"
-                  helperText="Use at least 6 characters."
+                  helperText={PASSWORD_RULE_SUMMARY}
                   error={signupErrors.password}
                   required
                 />
@@ -587,6 +591,8 @@ const AuthGateway = ({ initialMode = "login" }: AuthGatewayProps) => {
                   required
                 />
               </div>
+
+              <PasswordRequirements password={signupData.password} />
 
               <div className="rounded-2xl border border-[#f2e3d4] bg-[#fffdfa] px-4 py-4 text-sm text-[#6a5446]">
                 <label
@@ -621,6 +627,11 @@ const AuthGateway = ({ initialMode = "login" }: AuthGatewayProps) => {
                     .
                   </span>
                 </label>
+                <span className="mt-2 block text-xs text-[#6a5446]">
+                  We respect your privacy. Your photos are secure and never
+                  shared. By signing up, you agree to our Terms of Service and
+                  Privacy Policy.
+                </span>
                 {signupErrors.terms ? (
                   <p className="mt-3 text-sm text-red-600">
                     {signupErrors.terms}

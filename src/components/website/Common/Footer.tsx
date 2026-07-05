@@ -15,14 +15,18 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import type { CategoryContent } from "@/features/category-page/types";
+import { buildCategoryHref } from "@/lib/category-seo";
 
 // Extract link data to reduce repetition and improve maintainability
 const FOOTER_LINKS = {
   styles: [
-    { label: "Kids", href: "/category/kids" },
-    { label: "Seniors", href: "/category/seniors" },
-    { label: "Adults", href: "/category/adults" },
-    { label: "Pets", href: "/category/pets" },
+    { label: "Kids", href: "/category/kids-coloring-books" },
+    { label: "Pets", href: "/category/pet-coloring-books" },
+    { label: "Anime", href: "/category/anime-portrait-coloring-books" },
+    {
+      label: "Dementia-Friendly",
+      href: "/category/dementia-friendly-coloring-books",
+    },
   ],
   resources: [
     { label: "Contact", href: "/contact-us" },
@@ -147,7 +151,7 @@ const Footer = ({ categories }: { categories: CategoryContent[] }) => {
     const dynamicLinks: { label: string; href: string }[] = categories.map(
       (c: CategoryContent) => ({
         label: c.type ? c.type.charAt(0).toUpperCase() + c.type.slice(1) : "",
-        href: `/category/${c.type}`,
+        href: buildCategoryHref(c),
       }),
     );
 

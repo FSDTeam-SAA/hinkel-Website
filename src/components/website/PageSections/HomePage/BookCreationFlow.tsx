@@ -85,7 +85,7 @@ const BookCreationFlow = () => {
             <span className="text-primary italic"> Custom Creation</span>
           </h2>
           <p className="text-lg text-gray-600 leading-relaxed">
-            Create your personalized coloring book in 5 simple, creative steps.
+            Create your personalized coloring book in 4 simple, creative steps.
             We&apos;ve made the process as intuitive and fun as coloring itself!
           </p>
         </motion.div>

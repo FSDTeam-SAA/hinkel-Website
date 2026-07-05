@@ -1,7 +1,14 @@
 import type { MetadataRoute } from "next";
+import { CANONICAL_CATEGORY_SLUGS } from "@/lib/category-seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://sktchlabs.com";
+  const collectionPages = CANONICAL_CATEGORY_SLUGS.map((slug) => ({
+    url: `${baseUrl}/category/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
 
   return [
     {
@@ -16,30 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    {
-      url: `${baseUrl}/category/kids`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/category/pets`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/category/anime`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/category/dementia`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
+    ...collectionPages,
     {
       url: `${baseUrl}/about-us`,
       lastModified: new Date(),

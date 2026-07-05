@@ -17,6 +17,7 @@ import type {
 import HeaderTitle from "@/components/website/Common/head-title";
 import SubtitleCategory from "@/components/website/Common/SubtitleCategory";
 import { cn, toTitleCase } from "@/lib/utils";
+import { buildCategoryHref } from "@/lib/category-seo";
 
 // Types
 interface CategoryCardProps {
@@ -61,7 +62,7 @@ const checkIfScrollNeeded = (container: HTMLDivElement | null): boolean => {
 // Subcomponents
 const CategoryCard = memo(({ category, index }: CategoryCardProps) => (
   <Link
-    href={`/category/${category.type}`}
+    href={buildCategoryHref(category)}
     className={cn(CARD_STYLES.base, CARD_STYLES.sizes)}
     prefetch={true}
     style={{

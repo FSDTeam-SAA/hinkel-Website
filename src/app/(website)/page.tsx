@@ -20,6 +20,12 @@ export const metadata: Metadata = {
     description:
       "Turn your photos into personalized coloring books and sketchbooks. Choose from Kids, Pets, Anime & Dementia-friendly collections. Print or digital. Create free account.",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Custom Coloring Books from Your Photos | sktchLABS",
+    description:
+      "Turn your photos into personalized coloring books and sketchbooks. Choose from Kids, Pets, Anime & Dementia-friendly collections. Print or digital. Create free account.",
+  },
 };
 
 export default async function page() {

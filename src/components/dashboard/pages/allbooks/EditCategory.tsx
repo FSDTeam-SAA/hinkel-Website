@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import RichTextEditor from "@/components/dashboard/editor/RichTextEditor";
 import { getPlainTextFromRichText, toRichTextContent } from "@/lib/rich-text";
 import { normalizePrompt } from "@/features/book-creation/utils/prompt";
+import { slugifyCategory } from "@/lib/category-seo";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title is required"),
@@ -33,6 +34,7 @@ const formSchema = z.object({
       "Subtitle is required",
     ),
   type: z.string().min(2, "Type is required"),
+  slug: z.string().optional(),
   prompt: z.string().optional(),
   image: z.any().optional(),
   gallery: z.any().optional(),
@@ -56,6 +58,7 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
       title: category.title || "",
       subtitle: toRichTextContent(category.subtitle || ""),
       type: category.type || "",
+      slug: category.slug || "",
       prompt: category.prompt || "",
     },
   });
@@ -67,6 +70,12 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
     formData.append("title", values.title);
     formData.append("subtitle", values.subtitle);
     formData.append("type", values.type);
+    formData.append(
+      "slug",
+      slugifyCategory(
+        values.slug || category.slug || values.type || values.title,
+      ),
+    );
     formData.append("prompt", normalizedPrompt);
 
     if (values.image && values.image[0]) {
@@ -185,6 +194,40 @@ const EditCategory = ({ category, onSuccess }: EditCategoryProps) => {
                         <Input
                           placeholder="e.g. kids, pets, adults..."
                           {...field}
+                          onChange={(event) => {
+                            field.onChange(event);
+                            if (!form.getValues("slug")) {
+                              form.setValue(
+                                "slug",
+                                slugifyCategory(event.target.value),
+                              );
+                            }
+                          }}
+                          className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-6 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[10px] pt-1" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="group/field relative space-y-2">
+                <label className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2 group-focus-within/field:text-[#ff7a00] transition-colors">
+                  <Layers size={12} /> SEO Slug
+                </label>
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem className="space-y-0">
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. kids-coloring-books"
+                          {...field}
+                          onBlur={(event) =>
+                            field.onChange(slugifyCategory(event.target.value))
+                          }
                           className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-4 py-6 text-white placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-[#ff7a00]/30 focus-visible:border-[#ff7a00]/50 transition-all duration-500 shadow-xl"
                         />
                       </FormControl>
