@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import CategoryPageClient from "./CategoryPageClient";
-import { getPublicCmsBySlug, getPublicContent } from "@/lib/public-api";
+import {
+  extractCmsContents,
+  getPublicCmsBySlug,
+  getPublicCmsByType,
+  getPublicContent,
+} from "@/lib/public-api";
 import {
   DEFAULT_CATEGORY_SEO,
   getCategorySeoBySlugOrType,
@@ -11,21 +16,66 @@ import {
 async function loadCategoryPage(slugParam: string) {
   const requestedSlug = decodeURIComponent(slugParam).toLowerCase();
   const canonicalSlug = resolveCanonicalCategorySlug(requestedSlug);
+  const seoContent = getCategorySeoBySlugOrType(canonicalSlug);
 
-  const [contentData, cmsData] = await Promise.all([
+  const [
+    canonicalContentData,
+    requestedContentData,
+    typedContentData,
+    canonicalCmsData,
+    requestedCmsData,
+    typedCmsData,
+  ] = await Promise.all([
     getPublicContent({ slug: canonicalSlug, limit: 20 }),
+    requestedSlug !== canonicalSlug
+      ? getPublicContent({ slug: requestedSlug, limit: 20 })
+      : Promise.resolve(null),
+    seoContent?.type
+      ? getPublicContent({ type: seoContent.type, limit: 20 })
+      : Promise.resolve(null),
     getPublicCmsBySlug(canonicalSlug),
+    requestedSlug !== canonicalSlug
+      ? getPublicCmsBySlug(requestedSlug)
+      : Promise.resolve(null),
+    seoContent?.type
+      ? getPublicCmsByType(seoContent.type)
+      : Promise.resolve(null),
   ]);
 
-  const contents = contentData.data || [];
-  const cmsContent = cmsData.data?.data?.contents?.[0];
+  const contents = canonicalContentData.data?.length
+    ? canonicalContentData.data
+    : requestedContentData?.data?.length
+      ? requestedContentData.data
+      : typedContentData?.data?.length
+        ? typedContentData.data
+        : [];
   const heroContent = contents[0];
-  const seoContent = getCategorySeoBySlugOrType(
-    canonicalSlug,
+  const resolvedSeoContent =
+    seoContent || getCategorySeoBySlugOrType(undefined, heroContent?.type);
+  const heroType = heroContent?.type;
+  const canonicalCmsContents = extractCmsContents(canonicalCmsData);
+  const requestedCmsContents = extractCmsContents(requestedCmsData);
+  const typedCmsContents = extractCmsContents(typedCmsData);
+  const heroTypeCmsData =
+    canonicalCmsContents.length === 0 &&
+    requestedCmsContents.length === 0 &&
+    typedCmsContents.length === 0 &&
+    heroType &&
+    heroType !== resolvedSeoContent?.type
+      ? await getPublicCmsByType(heroType)
+      : null;
+  const heroTypeCmsContents = extractCmsContents(heroTypeCmsData);
+  const cmsContent =
+    canonicalCmsContents[0] ||
+    requestedCmsContents[0] ||
+    typedCmsContents[0] ||
+    heroTypeCmsContents[0];
+  const finalSeoContent = getCategorySeoBySlugOrType(
+    heroContent?.slug || cmsContent?.slug || requestedSlug || canonicalSlug,
     heroContent?.type ?? cmsContent?.type,
   );
   const resolvedSlug =
-    heroContent?.slug || cmsContent?.slug || seoContent?.slug;
+    heroContent?.slug || cmsContent?.slug || finalSeoContent?.slug;
 
   return {
     requestedSlug,
@@ -33,7 +83,7 @@ async function loadCategoryPage(slugParam: string) {
     resolvedSlug,
     contents,
     cmsContent,
-    seoContent,
+    seoContent: finalSeoContent,
     heroContent,
   };
 }
